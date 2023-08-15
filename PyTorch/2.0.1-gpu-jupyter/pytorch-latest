@@ -1,0 +1,38 @@
+#%Module
+
+conflict tensorflow-latest
+conflict python
+
+proc ModulesHelp {} {
+    puts stderr {PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+    }
+}
+
+module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+
+set-alias python "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/pytorch.sif python"
+set-alias python3 "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/pytorch.sif python3"
+set-alias pip "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/pytorch.sif pip"
+set-alias pip3 "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/pytorch.sif pip3"
+
+if { [ module-info mode load ] } {
+    puts stderr "
+
+Thank you for using PyTorch module (beta)!
+
+If you only need to run the latest PyTorch without much customization, this may be your solution.
+
+1. Run your python code just like how you would normally run with following commands:
+
+python
+python3
+pip
+pip3
+
+2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
+
+3. You may still install modules using pip or pip3. You *MUST* do it on computing node with'--user' enabled.
+
+"
+}
+
