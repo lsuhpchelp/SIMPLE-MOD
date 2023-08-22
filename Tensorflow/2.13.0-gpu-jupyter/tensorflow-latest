@@ -10,10 +10,12 @@ proc ModulesHelp {} {
 
 module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
 
-set-alias python "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/tensorflow.sif python"
-set-alias python3 "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/tensorflow.sif python3"
-set-alias pip "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/tensorflow.sif pip"
-set-alias pip3 "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/tensorflow.sif pip3"
+set SINGULARITY_BASE "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/tensorflow.sif"
+
+set-alias python "$SINGULARITY_BASE python"
+set-alias python3 "$SINGULARITY_BASE python3"
+set-alias pip "$SINGULARITY_BASE pip"
+set-alias pip3 "$SINGULARITY_BASE pip3"
 
 if { [ module-info mode load ] } {
     puts stderr "
