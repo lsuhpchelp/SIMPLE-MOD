@@ -1,0 +1,50 @@
+#%Module
+
+# ---------------------------------------------------------------------
+# Module setup
+# ---------------------------------------------------------------------
+
+# Singularity options
+set SINGULARITY_BIND "-B /work,/project,/usr/local/packages"
+set SINGULARITY_IMAGE "/home/admin/singularity/busco_v5.4.7_cv1.sif"
+
+# A list of commands to overwrite
+set cmds {busco generate_plot.py}
+
+# Overwrite the list of commands
+foreach cmd $cmds {
+    puts "$cmd () {"
+    puts "    singularity exec $SINGULARITY_BIND $SINGULARITY_IMAGE $cmd $@"
+    puts "}"
+}
+
+
+# ---------------------------------------------------------------------
+# Module information
+# ---------------------------------------------------------------------
+
+# For "module disp"
+module-whatis Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.
+module-whatis Available commands: $cmds
+module-version 5.4.7
+
+# For "module help"
+proc ModulesHelp {} {
+    puts stderr {Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.
+    }
+}
+
+# For "module load"
+if { [ module-info mode load ] } {
+    puts stderr "
+
+1. You may use below two commands as normal:
+
+busco
+generate_plot.py
+
+2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
+
+"
+}
+
