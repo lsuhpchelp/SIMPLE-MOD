@@ -5,19 +5,25 @@
 # ---------------------------------------------------------------------
 
 # Singularity options
-set SINGULARITY_BIND "-B /work,/project,/usr/local/packages"
+set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages"
 set SINGULARITY_IMAGE "/home/admin/singularity/busco_v5.4.7_cv1.sif"
 
 # A list of commands to overwrite
 set cmds {busco generate_plot.py}
 
-# Overwrite the list of commands
+# Overwrite the list of commands upon loading
 foreach cmd $cmds {
     puts "$cmd () {"
-    puts "    singularity exec $SINGULARITY_BIND $SINGULARITY_IMAGE $cmd $@"
+    puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
     puts "}"
 }
 
+# Unset commands upon unloading
+if { [ module-info mode unload ] } {
+    foreach cmd $cmds {
+        puts "unset -f $cmd"
+    }
+}
 
 # ---------------------------------------------------------------------
 # Module information

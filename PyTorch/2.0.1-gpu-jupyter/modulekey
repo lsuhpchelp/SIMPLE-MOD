@@ -1,22 +1,50 @@
 #%Module
 
+# ---------------------------------------------------------------------
+# Module setup
+# ---------------------------------------------------------------------
+
+# Conflicts
 conflict tensorflow-latest
 conflict python
 
+# Singularity options
+set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
+set SINGULARITY_IMAGE "/home/admin/singularity/pytorch.sif"
+
+# A list of commands to overwrite
+set cmds {python python3 pip pip3}
+
+# Overwrite the list of commands upon loading
+foreach cmd $cmds {
+    puts "$cmd () {"
+    puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+    puts "}"
+}
+
+# Unset commands upon unloading
+if { [ module-info mode unload ] } {
+    foreach cmd $cmds {
+        puts "unset -f $cmd"
+    }
+}
+
+# ---------------------------------------------------------------------
+# Module information
+# ---------------------------------------------------------------------
+
+# For "module disp"
+module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+module-whatis Available commands: $cmds
+module-version 2.0.1
+
+# For "module help"
 proc ModulesHelp {} {
     puts stderr {PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
     }
 }
 
-module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
-
-set SINGULARITY_BASE "singularity exec -B /work,/project,/usr/local/packages,/usr/local/compilers,/etc/ssh/ssh_known_hosts --nv /home/admin/singularity/pytorch.sif"
-
-set-alias python "$SINGULARITY_BASE python"
-set-alias python3 "$SINGULARITY_BASE python3"
-set-alias pip "$SINGULARITY_BASE pip"
-set-alias pip3 "$SINGULARITY_BASE pip3"
-
+# For "module load"
 if { [ module-info mode load ] } {
     puts stderr "
 
@@ -37,4 +65,3 @@ pip3
 
 "
 }
-
