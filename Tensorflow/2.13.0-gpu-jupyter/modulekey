@@ -54,10 +54,7 @@ If you only need to run the latest Tensorflow without much customization, this m
 
 1. Run your python code just like how you would normally run with following commands:
 
-python
-python3
-pip
-pip3
+$cmds
 
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 

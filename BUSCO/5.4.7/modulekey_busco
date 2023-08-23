@@ -44,10 +44,9 @@ proc ModulesHelp {} {
 if { [ module-info mode load ] } {
     puts stderr "
 
-1. You may use below two commands as normal:
+1. You may use below commands as normal:
 
-busco
-generate_plot.py
+$cmds
 
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 
