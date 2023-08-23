@@ -1,19 +1,27 @@
 #%Module
 
 # ---------------------------------------------------------------------
-# Module setup
+# Module setup (Edit this section for different modules)
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict pytorch-latest
 conflict python
+conflict pytorch
 
 # Singularity options
-set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
 set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow.sif"
+set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
 
 # A list of commands to overwrite
 set cmds {python python3 pip pip3}
+
+# Module information
+module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+module-version 2.13.0
+
+# ---------------------------------------------------------------------
+# Templates (Do not change this section)
+# ---------------------------------------------------------------------
 
 # Overwrite the list of commands upon loading
 foreach cmd $cmds {
@@ -29,28 +37,16 @@ if { [ module-info mode unload ] } {
     }
 }
 
-# ---------------------------------------------------------------------
-# Module information
-# ---------------------------------------------------------------------
-
-# For "module disp"
-module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+# List available commands:
 module-whatis Available commands: $cmds
-module-version 2.13.0
 
-# For "module help"
-proc ModulesHelp {} {
-    puts stderr {Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
-    }
-}
-
-# For "module load"
-if { [ module-info mode load ] } {
+# For "module help" and "module load"
+if { [ module-info mode help ] || [ module-info mode load ]} {
     puts stderr "
 
-Thank you for using Tensorflow module (beta)!
+Thank you for using PyTorch module (beta)!
 
-If you only need to run the latest Tensorflow without much customization, this may be your solution. 
+If you only need to run the latest PyTorch without much customization, this may be your solution.
 
 1. Run your python code just like how you would normally run with following commands:
 
@@ -61,4 +57,6 @@ $cmds
 3. You may still install modules using pip or pip3. You *MUST* do it on computing node with'--user' enabled.
 
 "
+}
+proc ModulesHelp {} {
 }
