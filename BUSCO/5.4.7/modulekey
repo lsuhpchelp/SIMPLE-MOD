@@ -5,18 +5,17 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict python pytorch
-
-# Module information
-module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
-module-version 2.13.0
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow.sif"
-set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
+set SINGULARITY_IMAGE "/home/admin/singularity/busco_v5.4.7_cv1.sif"
+set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages"
+
+# Module information
+module-whatis Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.
+module-version 5.4.7
 
 # List of commands to overwrite
-set cmds {python python3 pip pip3}
+set cmds {busco generate_plot.py}
 
 # Set environment varialbles
 
@@ -44,17 +43,11 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
     puts stderr "
 \[ Help information \]
 
-Thank you for using PyTorch module (beta)!
-
-If you only need to run the latest PyTorch without much customization, this may be your solution.
-
-1. Run your python code just like how you would normally run with following commands:
+1. You may use below commands as normal:
 
 $cmds
 
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
-
-3. You may still install modules using pip or pip3. You *MUST* do it on computing node with'--user' enabled.
 "
 }
 proc ModulesHelp {} {

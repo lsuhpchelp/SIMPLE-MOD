@@ -5,19 +5,21 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict python
-conflict tensorflow
+conflict python tensorflow
+
+# Module information
+module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+module-version 2.0.1
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/pytorch.sif"
 set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
 
-# A list of commands to overwrite
+# List of commands to overwrite
 set cmds {python python3 pip pip3}
 
-# Module information
-module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
-module-version 2.0.1
+# Set environment varialbles
+
 
 # ---------------------------------------------------------------------
 # Templates (Do not change this section)
@@ -37,12 +39,10 @@ if { [ module-info mode unload ] } {
     }
 }
 
-# List available commands:
-module-whatis Available commands: $cmds
-
 # For "module help" and "module load"
-if { [ module-info mode help ] || [ module-info mode load ]} {
+if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mode display ] } {
     puts stderr "
+\[ Help information \]
 
 Thank you for using PyTorch module (beta)!
 
@@ -55,7 +55,6 @@ $cmds
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 
 3. You may still install modules using pip or pip3. You *MUST* do it on computing node with'--user' enabled.
-
 "
 }
 proc ModulesHelp {} {
