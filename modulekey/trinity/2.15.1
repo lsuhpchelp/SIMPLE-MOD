@@ -30,16 +30,26 @@ setenv TRINITY_HOME "singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr
 # ---------------------------------------------------------------------
 
 # Overwrite the list of commands upon loading
-foreach cmd $cmds {
-    puts "$cmd () {"
-    puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
-    puts "}"
+if { [ module-info mode load ] } {
+    foreach cmd $cmds {
+        if { [ module-info shelltype csh ] } {
+            puts "alias $cmd singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+        } elseif { [ module-info shelltype sh ] } {
+            puts "$cmd () {"
+            puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "}"
+        }
+    }
 }
 
 # Unset commands upon unloading
 if { [ module-info mode unload ] } {
     foreach cmd $cmds {
-        puts "unset -f $cmd"
+        if { [ module-info shelltype csh ] } {
+            puts "unalias $cmd"
+        } elseif { [ module-info shelltype sh ] } {
+            puts "unset -f $cmd"
+        }
     }
 }
 
