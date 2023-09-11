@@ -5,24 +5,20 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict trinity bowtie2 samtools jellyfish
+conflict trinity jellyfish
 
 # Module information
-module-whatis Trinity RNA-Seq de novo transcriptome assembly.
-module-version 2.15.1
+module-whatis A fast multi-threaded k-mer counter
+module-version 2.3.0
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/trinity-2.15.1.sif"
 set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages -e"
 
 # List of commands to overwrite
-set cmds {
-Trinity jellyfish ace2sam bowtie bowtie2 bowtie2-build bowtie2-inspect samtools tabix wgsim
-blast2sam.pl bowtie2sam.pl export2sam.pl interpolate_sam.pl novo2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl
-}
+set cmds {jellyfish}
 
 # Set environment varialbles
-setenv TRINITY_HOME "singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/bin"
 
 
 # ---------------------------------------------------------------------

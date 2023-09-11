@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: ezlabgva/busco:v5.4.7_cv1
+From: trinityrnaseq/trinityrnaseq:2.15.1
 
 
 ################################################################################
@@ -7,6 +7,6 @@ From: ezlabgva/busco:v5.4.7_cv1
 ################################################################################
 
 Maintainer      Jason Li
-Version         3.5.0
-Description     AUGUSTUS is a program to find genes and their structures in one or more genomes. (This software is included in BUSCO 5.4.7 container)
+Version         2.3.0
+Description     A fast multi-threaded k-mer counter. (This software is included in Trinity 2.15.1)
 

@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: ezlabgva/busco:v5.4.7_cv1
+From: quay.io/biocontainers/bowtie2:2.5.1--py310h8d7afc0_0
 
 
 ################################################################################
@@ -7,6 +7,6 @@ From: ezlabgva/busco:v5.4.7_cv1
 ################################################################################
 
 Maintainer      Jason Li
-Version         3.5.0
-Description     AUGUSTUS is a program to find genes and their structures in one or more genomes. (This software is included in BUSCO 5.4.7 container)
+Version         2.5.1
+Description     A fast and sensitive gapped read aligner.
 
