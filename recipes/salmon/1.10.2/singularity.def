@@ -1,0 +1,12 @@
+Bootstrap: docker
+From: combinelab/salmon:1.10.2
+
+
+################################################################################
+%labels
+################################################################################
+
+Maintainer      Jason Li
+Version         1.10.2
+Description     Highly-accurate & wicked fast transcript-level quantification from RNA-seq reads using selective alignment.
+
