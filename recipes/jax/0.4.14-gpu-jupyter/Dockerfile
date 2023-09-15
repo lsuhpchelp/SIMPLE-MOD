@@ -1,0 +1,31 @@
+FROM tensorflow/tensorflow:2.13.0-gpu-jupyter
+
+MAINTAINER Jason Li <jasonli3@lsu.edu>
+
+LABEL    software="JAX" \ 
+    base_image="tensorflow/tensorflow:2.13.0-gpu-jupyter" \ 
+    container="JAX" \ 
+    about.summary="JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research." \ 
+    about.home="https://github.com/google/jax" \ 
+    software.version="0.4.14"
+
+RUN apt update
+RUN apt install -y qt5-default
+RUN pip install pyqt5==5.15.9 \
+                jupyterlab==4.0.4 \
+                Cython==3.0.0 \
+                dask==2023.5.0 \
+                numba==0.57.1 \
+                numexpr==2.8.5 \
+                pandas==2.0.3 \
+                regex==2023.6.3 \
+                scikit-image==0.21.0 \
+                scikit-learn==1.3.0 \
+                scikit-learn-intelex==2023.2.1 \
+                scipy==1.10.1 \
+                sympy==1.12 \
+                tqdm==4.65.0
+RUN pip install "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
+RUN apt clean
+RUN pip cache purge
