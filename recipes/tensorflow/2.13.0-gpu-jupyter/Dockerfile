@@ -25,3 +25,6 @@ RUN pip install pyqt5==5.15.9 \
                 scipy==1.10.1 \
                 sympy==1.12 \
                 tqdm==4.65.0
+
+RUN apt clean
+RUN pip cache purge

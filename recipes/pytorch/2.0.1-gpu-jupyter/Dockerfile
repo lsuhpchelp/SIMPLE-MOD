@@ -25,4 +25,7 @@ RUN pip install matplotlib==3.7.2 \
                 scikit-image==0.21.0 \
                 scikit-learn==1.3.0 \
                 scikit-learn-intelex==2023.2.1
+
+RUN apt clean
+RUN pip cache purge
                 
