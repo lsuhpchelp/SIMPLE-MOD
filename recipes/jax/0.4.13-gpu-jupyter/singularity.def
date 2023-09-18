@@ -7,7 +7,7 @@ From: tensorflow/tensorflow:2.13.0-gpu-jupyter
 ################################################################################
 
 Maintainer      Jason Li
-Version         0.4.14
+Version         0.4.13
 CUDA_version    11.8
 CUDNN_version   8
 Description     JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.

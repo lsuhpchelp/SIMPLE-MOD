@@ -7,7 +7,7 @@ LABEL    software="JAX" \
     container="JAX" \ 
     about.summary="JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research." \ 
     about.home="https://github.com/google/jax" \ 
-    software.version="0.4.14"
+    software.version="0.4.13"
 
 RUN apt update
 RUN apt install -y qt5-default
