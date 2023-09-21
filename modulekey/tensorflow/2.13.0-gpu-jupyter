@@ -12,7 +12,7 @@ module-whatis Tensorflow framework for deep learning, with GPU support, QT suppo
 module-version 2.13.0
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow-2.13.0-gpu-jupyter.sif"
 set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
 
 # List of commands to overwrite

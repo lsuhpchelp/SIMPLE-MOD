@@ -12,7 +12,7 @@ module-whatis PyTorch framework for deep learning, with GPU support, QT support,
 module-version 2.0.1
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/pytorch.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/pytorch-2.0.1-gpu-jupyter.sif"
 set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages,/usr/local/compilers --nv"
 
 # List of commands to overwrite
