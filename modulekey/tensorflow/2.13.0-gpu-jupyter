@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict python pytorch
+conflict python pytorch tensorflow jax
 
 # Module information
 module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
@@ -54,9 +54,9 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
     puts stderr "
 \[ Help information \]
 
-Thank you for using PyTorch module (beta)!
+Thank you for using Tensorflow module (beta)!
 
-If you only need to run the latest PyTorch without much customization, this may be your solution.
+If you only need to run the latest Tensorflow without much customization, this may be your solution.
 
 1. Run your python code just like how you would normally run with following commands:
 

@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict python tensorflow
+conflict python tensorflow pytorch jax
 
 # Module information
 module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.

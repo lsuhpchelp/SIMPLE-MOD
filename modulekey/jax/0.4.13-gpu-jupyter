@@ -5,10 +5,10 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict python pytorch
+conflict python pytorch tensorflow jax
 
 # Module information
-module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly us
+module-whatis JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.
 module-version 0.4.13
 
 # Singularity options
