@@ -16,7 +16,7 @@ module-whatis BCFtools is a program for variant calling and manipulating files i
 module-version 1.18
 
 # List of commands to overwrite
-set cmds {bcftools color-chrs.pl guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl}
+set cmds {bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl}
 
 # Set environment varialbles
 
