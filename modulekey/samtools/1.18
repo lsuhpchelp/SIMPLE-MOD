@@ -1,0 +1,68 @@
+#%Module
+
+# ---------------------------------------------------------------------
+# Module setup (Edit this section for different modules)
+# ---------------------------------------------------------------------
+
+# Conflicts
+conflict samtools
+
+# Singularity options
+set SINGULARITY_IMAGE "/home/admin/singularity/samtools-1.18.sif"
+set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages"
+
+# Module information
+module-whatis Tools (written in C using htslib) for manipulating next-generation sequencing data.
+module-version 1.18
+
+# List of commands to overwrite
+set cmds {
+ace2sam maq2sam-long maq2sam-short md5fa md5sum-lite plot-ampliconstats plot-bamstats samtools wgsim
+blast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl
+}
+
+# Set environment varialbles
+
+
+# ---------------------------------------------------------------------
+# Templates (Do not change this section)
+# ---------------------------------------------------------------------
+
+# Overwrite the list of commands upon loading
+if { [ module-info mode load ] } {
+    foreach cmd $cmds {
+        if { [ module-info shelltype csh ] } {
+            puts "alias $cmd singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+        } elseif { [ module-info shelltype sh ] } {
+            puts "$cmd () {"
+            puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "}"
+        }
+    }
+}
+
+# Unset commands upon unloading
+if { [ module-info mode unload ] } {
+    foreach cmd $cmds {
+        if { [ module-info shelltype csh ] } {
+            puts "unalias $cmd"
+        } elseif { [ module-info shelltype sh ] } {
+            puts "unset -f $cmd"
+        }
+    }
+}
+
+# For "module help" and "module load"
+if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mode display ] } {
+    puts stderr "
+\[ Help information \]
+
+1. You may use below commands as normal:
+
+$cmds
+
+2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
+"
+}
+proc ModulesHelp {} {
+}
