@@ -5,6 +5,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
+conflict augustus
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/busco_v5.4.7_cv1.sif"

@@ -1,0 +1,22 @@
+Bootstrap: docker
+From: staphb/bcftools:1.18
+
+
+################################################################################
+%labels
+################################################################################
+
+Maintainer      Jason Li
+Version         1.18
+Description     BCFtools is a program for variant calling and manipulating files in the Variant Call Format (VCF) and its binary counterpart BCF.
+
+################################################################################
+%post
+################################################################################
+apt update
+apt install -y pip
+ln -s /usr/bin/python3 /usr/bin/python
+pip install matplotlib gffutils 
+
+apt clean
+pip cache purge

@@ -5,18 +5,18 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict jellyfish
-
-# Module information
-module-whatis A fast multi-threaded k-mer counter
-module-version 2.3.0
+conflict bcftools
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/trinity-2.15.1.sif"
-set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages -e"
+set SINGULARITY_IMAGE "/home/admin/singularity/bcftools-1.18.sif"
+set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages"
+
+# Module information
+module-whatis BCFtools is a program for variant calling and manipulating files in the Variant Call Format (VCF) and its binary counterpart BCF.
+module-version 1.18
 
 # List of commands to overwrite
-set cmds {jellyfish}
+set cmds {bcftools color-chrs.pl guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl}
 
 # Set environment varialbles
 
