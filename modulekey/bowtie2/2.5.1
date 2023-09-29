@@ -36,7 +36,7 @@ if { [ module-info mode load ] } {
             puts "$cmd () {"
             puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
-			puts "export -f $cmd"
+            puts "export -f $cmd"
         }
     }
 }
