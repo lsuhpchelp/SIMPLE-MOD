@@ -7,13 +7,14 @@
 # Conflicts
 conflict bcftools
 
-# Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/bcftools-1.18.sif"
-set SINGULARITY_FLAGS "-B /work,/project,/usr/local/packages"
-
 # Module information
 module-whatis BCFtools is a program for variant calling and manipulating files in the Variant Call Format (VCF) and its binary counterpart BCF.
 module-version 1.18
+
+# Singularity options
+set SINGULARITY_IMAGE "/home/admin/singularity/bcftools-1.18.sif"
+set SINGULARITY_BINDPATHS ""
+set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl}
@@ -29,10 +30,10 @@ set cmds {bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcf
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
         if { [ module-info shelltype csh ] } {
-            puts "alias $cmd singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+            puts "alias $cmd singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
         } elseif { [ module-info shelltype sh ] } {
             puts "$cmd () {"
-            puts "    singularity exec $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "    singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
             puts "export -f $cmd"
         }
