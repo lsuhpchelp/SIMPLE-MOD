@@ -12,7 +12,7 @@ module-whatis AUGUSTUS is a program to find genes and their structures in one or
 module-version 3.5.0
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/busco_v5.4.7_cv1.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/busco-5.4.7.sif"
 set SINGULARITY_BINDPATHS ""
 set SINGULARITY_FLAGS ""
 
