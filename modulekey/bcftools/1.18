@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict bcftools
+conflict bcftools 
 
 # Module information
 module-whatis BCFtools is a program for variant calling and manipulating files in the Variant Call Format (VCF) and its binary counterpart BCF.
@@ -17,7 +17,9 @@ set SINGULARITY_BINDPATHS ""
 set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
-set cmds {bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl}
+set cmds {
+bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl
+}
 
 # Set environment varialbles
 
@@ -57,9 +59,7 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 \[ Help information \]
 
 1. You may use below commands as normal:
-
 $cmds
-
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 "
 }

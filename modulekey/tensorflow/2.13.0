@@ -5,19 +5,21 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict python tensorflow pytorch jax
+conflict tensorflow python pytorch jax
 
 # Module information
-module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
-module-version 2.0.1
+module-whatis Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
+module-version 2.13.0
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/pytorch-2.0.1-gpu-jupyter.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow-2.13.0.sif"
 set SINGULARITY_BINDPATHS ""
 set SINGULARITY_FLAGS "--nv"
 
 # List of commands to overwrite
-set cmds {python python3 pip pip3}
+set cmds {
+python python3 pip pip3
+}
 
 # Set environment varialbles
 
@@ -56,17 +58,9 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
     puts stderr "
 \[ Help information \]
 
-Thank you for using PyTorch module (beta)!
-
-If you only need to run the latest PyTorch without much customization, this may be your solution.
-
-1. Run your python code just like how you would normally run with following commands:
-
+1. You may use below commands as normal:
 $cmds
-
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
-
-3. You may still install modules using pip or pip3. You *MUST* do it on computing node with'--user' enabled.
 "
 }
 proc ModulesHelp {} {

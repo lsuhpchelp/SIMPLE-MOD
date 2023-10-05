@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict jellyfish
+conflict jellyfish 
 
 # Module information
 module-whatis A fast multi-threaded k-mer counter
@@ -17,7 +17,9 @@ set SINGULARITY_BINDPATHS ""
 set SINGULARITY_FLAGS "-e"
 
 # List of commands to overwrite
-set cmds {jellyfish}
+set cmds {
+jellyfish
+}
 
 # Set environment varialbles
 
@@ -57,9 +59,7 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 \[ Help information \]
 
 1. You may use below commands as normal:
-
 $cmds
-
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 "
 }

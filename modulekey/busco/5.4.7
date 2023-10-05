@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-
+conflict busco 
 
 # Module information
 module-whatis Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.
@@ -17,7 +17,9 @@ set SINGULARITY_BINDPATHS ""
 set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
-set cmds {busco generate_plot.py}
+set cmds {
+busco generate_plot.py
+}
 
 # Set environment varialbles
 
@@ -57,9 +59,7 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 \[ Help information \]
 
 1. You may use below commands as normal:
-
 $cmds
-
 2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 "
 }
