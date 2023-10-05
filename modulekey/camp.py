@@ -2,6 +2,7 @@
 # Containerized App Modulekey Producer (CAMP)
 # Developer: Jason Li (jasonli3@lsu.edu)
 # Version: 1.0
+# Dependency: PyQt5
 # =====================================================================
 
 
