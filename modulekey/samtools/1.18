@@ -6,7 +6,7 @@
 # =====================================================================
 
 # ---------------------------------------------------------------------
-# Module setup (Edit this section for different modules)
+# Software specific information
 # ---------------------------------------------------------------------
 
 # Conflicts
@@ -31,7 +31,7 @@ blast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl no
 
 
 # ---------------------------------------------------------------------
-# Templates (Do not change this section)
+# Module key setup template
 # ---------------------------------------------------------------------
 
 # Overwrite the list of commands upon loading
