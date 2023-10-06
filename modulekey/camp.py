@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         
         # Conflicts
         self.conflictText = QLineEdit(self)
-        self.conflictText.setPlaceholderText("(Seperate by space. Do not add itself.)")
+        self.conflictText.setPlaceholderText("(Seperate by space. Itself will be added by default.)")
         pal = self.conflictText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.conflictText.setPalette(pal)
@@ -125,11 +125,9 @@ class MainWindow(QMainWindow):
         # Combine module edit layout
         self.moduleEditLayout = QFormLayout()
         self.moduleEditLayout.addRow("Conflicts", self.conflictText)
-        #self.moduleEditLayout.addRow("", QLabel("(Seperate by space. Itself will be added by default.)"))
         self.moduleEditLayout.addRow("Software description", self.whatisText)
         self.moduleEditLayout.addRow("Singularity image path", self.singularityImageText)
         self.moduleEditLayout.addRow("Singularity binding paths", self.singularityBindText)
-        #self.moduleEditLayout.addRow("", QLabel("(Bound by default: /home,/work,/project,/usr/local/packages,/ddnA,/var/scratch,/tmp)"))
         self.moduleEditLayout.addRow("Singularity flags", self.singularityFlagsText)
         self.moduleEditLayout.addRow("Commands to replace", self.cmdsText)
         self.moduleEditLayout.addRow("Set up environmental variable", self.envsTable)
