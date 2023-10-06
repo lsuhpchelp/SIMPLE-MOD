@@ -43,7 +43,7 @@ if { [ module-info mode load ] } {
             puts "$cmd () {"
             puts "    singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
-            puts "export -f $cmd"
+            #puts "export -f $cmd"
         }
     }
 }
