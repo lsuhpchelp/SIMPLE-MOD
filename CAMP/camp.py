@@ -416,7 +416,7 @@ class MainWindow(QMainWindow):
                 json.dump(db, fw, indent=4)
             
             # Create folder if not exist
-            pathModKey = f"{self.nameDrop.currentText()}/{self.versionDrop.currentText()}"
+            pathModKey = f"../modulekey/{self.nameDrop.currentText()}/{self.versionDrop.currentText()}"
             dir = os.path.dirname(pathModKey)
             if not os.path.exists(dir):
                 os.makedirs(dir)
@@ -449,17 +449,17 @@ class MainWindow(QMainWindow):
             for modName in db.keys():
             
                 # First remove all module keys with this name (of different versions)
-                for f in os.listdir(modName):
-                    try:
-                        os.remove(f"{modName}/{f}")
-                    except Exception as e:
-                        print(f'Error occurred while deleting file {f}. Error: {e}')
+                #for f in os.listdir(modName):
+                #    try:
+                #        os.remove(f"../modulekey/{modName}/{f}")
+                #    except Exception as e:
+                #        print(f'Error occurred while deleting file {f}. Error: {e}')
                 
                 # Then export all module keys
                 for modVersion in db[modName].keys():
                 
                     # Create folder if not exist
-                    pathModKey = f"{modName}/{modVersion}"
+                    pathModKey = f"../modulekey/{modName}/{modVersion}"
                     dir = os.path.dirname(pathModKey)
                     if not os.path.exists(dir):
                         os.makedirs(dir)
