@@ -129,7 +129,7 @@
             "singularity_image": "/home/admin/singularity/blast-2.14.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
-            "cmds": "blastn blastn.REAL blastp blastp.REAL blastx blastx.REAL tblastn tblastn.REAL tblastx tblastx.REAL\nblast_formatter blast_formatter_vdb blast_vdb_cmd blastdb_aliastool blastdb_path blastdbcheck blastdbcmd blastn_vdb  convert2blastmask datatool deltablast dustmasker makeblastdb makembindex makeprofiledb project_tree_builder psiblast rpsblast rpstblastn run_with_lock segmasker tblastn_vdb test_pcre windowmasker\nlegacy_blast.pl update_blastdb.pl cleanup-blastdb-volumes.py windowmasker_2.2.22_adapter.py get_species_taxids.sh",
+            "cmds": "blastn blastp blastx tblastn tblastx\nblast_formatter blast_formatter_vdb blast_vdb_cmd blastdb_aliastool blastdb_path blastdbcheck blastdbcmd blastn_vdb  convert2blastmask datatool deltablast dustmasker makeblastdb makembindex makeprofiledb project_tree_builder psiblast rpsblast rpstblastn run_with_lock segmasker tblastn_vdb test_pcre windowmasker\nlegacy_blast.pl update_blastdb.pl cleanup-blastdb-volumes.py windowmasker_2.2.22_adapter.py get_species_taxids.sh",
             "envs": {}
         }
     }
