@@ -132,5 +132,16 @@
             "cmds": "blastn blastp blastx tblastn tblastx\nblast_formatter blast_formatter_vdb blast_vdb_cmd blastdb_aliastool blastdb_path blastdbcheck blastdbcmd blastn_vdb  convert2blastmask datatool deltablast dustmasker makeblastdb makembindex makeprofiledb project_tree_builder psiblast rpsblast rpstblastn run_with_lock segmasker tblastn_vdb test_pcre windowmasker\nlegacy_blast.pl update_blastdb.pl cleanup-blastdb-volumes.py windowmasker_2.2.22_adapter.py get_species_taxids.sh",
             "envs": {}
         }
+    },
+    "snakemake": {
+        "7.32.4": {
+            "conflict": "",
+            "module_whatis": "The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.",
+            "singularity_image": "/home/admin/singularity/snakemake-7.32.4.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "snakemake",
+            "envs": {}
+        }
     }
 }

@@ -1,0 +1,11 @@
+Bootstrap: docker
+From: snakemake/snakemake:v7.32.4
+
+
+################################################################################
+%labels
+################################################################################
+
+Maintainer      Jason Li
+Version         7.32.4
+Description     The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.
