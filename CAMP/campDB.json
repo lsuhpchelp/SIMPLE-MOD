@@ -154,5 +154,16 @@
             "cmds": "hisat2 hisat2-align-l hisat2-align-s hisat2-build hisat2-build-l hisat2-build-s hisat2-inspect hisat2-inspect-l hisat2-inspect-s\nhisat2_extract_exons.py hisat2_extract_snps_haplotypes_UCSC.py hisat2_extract_snps_haplotypes_VCF.py hisat2_extract_splice_sites.py hisat2_read_statistics.py hisat2_simulate_reads.py",
             "envs": {}
         }
+    },
+    "gatk": {
+        "4.4.0.0": {
+            "conflict": "",
+            "module_whatis": "It is a collection of command-line tools for analyzing high-throughput sequencing data with a primary focus on variant discovery.",
+            "singularity_image": "/home/admin/singularity/gatk-4.4.0.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "gatk",
+            "envs": {}
+        }
     }
 }
