@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------------
         # Menu bar
+        #--------------------------------------------------------
         
         # Menu
         menubar = self.menuBar()
@@ -75,6 +76,7 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------------
         # Block1: Choose / create module
+        #--------------------------------------------------------
         
         # Header
         self.blk1Label = QLabel('Module List')
@@ -106,6 +108,7 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------------
         # Block2: Module details
+        #--------------------------------------------------------
         
         # Header
         self.blk2Label = QLabel('Module Details')
@@ -167,6 +170,7 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------------
         # Block3: Confirmation buttons
+        #--------------------------------------------------------
         
         # Add / edit buttons
         self.saveBtn = QPushButton("\nSave to data file\n", self)
