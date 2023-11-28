@@ -11,10 +11,7 @@ from string import Template
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, 
                              QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, 
-                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog)
-
-with open("campDB.json") as f:
-    db = json.load(f)
+                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QAction, QFileDialog)
 
 currentModule = {
     "conflict":                 "",
@@ -25,6 +22,7 @@ currentModule = {
     "cmds":                     "",
     "envs":                     {  }
 }
+db = {}
 
 # Main window
 class MainWindow(QMainWindow):
@@ -38,8 +36,42 @@ class MainWindow(QMainWindow):
         """
         
         super().__init__()
+        
+        #--------------------------------------------------------
+        # Menu bar
+        
+        # Menu
+        menubar = self.menuBar()
+        
+        # Menu 1
+        menuFile = menubar.addMenu('\n File ')
+        
+        newDBAct = QAction('New Database', self)
+        newDBAct.triggered.connect(self.newDB)
+        newDBAct.setShortcut("Ctrl+N")
+        menuFile.addAction(newDBAct)
+        
+        openDBAct = QAction('Open Database', self)
+        openDBAct.triggered.connect(self.openDBDialog)
+        openDBAct.setShortcut("Ctrl+O")
+        menuFile.addAction(openDBAct)
+        
+        saveDBAct = QAction('Save Database', self)
+        saveDBAct.triggered.connect(self.saveDBDialog)
+        saveDBAct.setShortcut("Ctrl+S")
+        menuFile.addAction(saveDBAct)
+        
+        menuFile.addSeparator()
+        
+        exitAct = QAction('Exit', self)
+        exitAct.triggered.connect(self.saveDBDialog)
+        exitAct.setShortcut("Ctrl+X")
+        menuFile.addAction(exitAct)
 
-        # Create widgets
+        
+        # Menu 2
+        menuHelp = menubar.addMenu(' Help ')
+
         
         #--------------------------------------------------------
         # Block1: Choose / create module
@@ -137,7 +169,7 @@ class MainWindow(QMainWindow):
         # Block3: Confirmation buttons
         
         # Add / edit buttons
-        self.saveBtn = QPushButton("\nSaveto data file\n", self)
+        self.saveBtn = QPushButton("\nSave to data file\n", self)
         self.saveBtn.clicked.connect(self.saveToFile)
         self.genBtn = QPushButton("\nGenerate current module key\n", self)
         self.genBtn.clicked.connect(self.genModKey)
@@ -152,6 +184,7 @@ class MainWindow(QMainWindow):
 
         # Create main layout
         self.mainLayout = QVBoxLayout()
+        self.mainLayout.addWidget(QLabel("", self))
         self.mainLayout.addWidget(self.blk1Label)
         self.mainLayout.addLayout(self.moduleChooseLayout)
         self.mainLayout.addWidget(QLabel("", self))
@@ -168,6 +201,92 @@ class MainWindow(QMainWindow):
         # Set main window properties
         self.setWindowTitle("Containerized App Modulekey Producer (CAMP) v1.0")
         self.setGeometry(100, 100, 750, 700)
+    
+    
+    #============================================================
+    # Menu methods
+    #============================================================
+    
+    def newDB(self):
+        """
+        Create a new empty database.
+        """
+        
+        # Reset database to empty
+        global db, currentModule
+        db = {}
+        currentModule = {
+            "conflict":                 "",
+            "module_whatis":            "",
+            "singularity_image":        "",
+            "singularity_bindpaths":    "",
+            "singularity_flags":        "",
+            "cmds":                     "",
+            "envs":                     {  }
+        }
+        
+        # Update current form
+        self.dropNameUpdateFromDB()
+        self.dropVersionUpdateFromDB()
+    
+    def openDBDialog(self):
+        """
+        Select and open database file.
+        """
+        
+        global db
+        
+        # Pick a database file to open
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', filter="Text Files (*.json)")
+        if fname:
+        
+            # Read to "db" dictionary
+            with open(fname) as f:
+                db = json.load(f)
+                
+            # Update currrent form
+            self.dropNameUpdateFromDB()
+            self.dropVersionUpdateFromDB()
+
+    def saveDBDialog(self):
+        """
+        Select and save database file.
+        """
+        
+        global db
+        
+        # At least one module (current) must exist, or return error:
+        if (self.nameDrop.currentText() and self.nameDrop.currentText()):
+        
+            # Pick a database file to save
+            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', filter="Text Files (*.json)")
+            if fname:
+        
+                # Add ".json" extension of not already added
+                if (fname.split(".")[-1] != "json"):
+                    fname += ".json"
+                
+                # Set currentModule to the values in the fields
+                self.modSaveToDB()
+            
+                # Save changes
+                db[self.nameDrop.currentText()][self.versionDrop.currentText()] = currentModule
+                with open(fname, "w") as fw:
+                    json.dump(db, fw, indent=4)
+                
+        else:
+        
+            QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
+
+    def selectModKeyPath(self):
+        """
+        Select path to export module keys.
+        """
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory')
+
+        if directory:
+            print("Selected directory:", directory)
+
 
     #============================================================
     # Dropdown menu methods
@@ -185,8 +304,10 @@ class MainWindow(QMainWindow):
         Update module version dropdown menu.
         """
         self.versionDrop.clear()
-        self.versionDrop.addItems(sorted(db[self.nameDrop.currentText()].keys()))
+        if (self.nameDrop.currentText()) :
+            self.versionDrop.addItems(sorted(db[self.nameDrop.currentText()].keys()))
         self.modUpdateFromDB()
+
 
     #============================================================
     # Module form methods
@@ -198,7 +319,30 @@ class MainWindow(QMainWindow):
         """
     
         global currentModule
-        currentModule = db[self.nameDrop.currentText()][self.versionDrop.currentText()]
+        
+        # If a non-empty module is selected, update currentModule from database and enable all fields;
+        # If not, meaning nothing is selected, disable all fields
+        if (self.nameDrop.currentText() and self.versionDrop.currentText()) :
+            currentModule = db[self.nameDrop.currentText()][self.versionDrop.currentText()]
+            self.conflictText.setEnabled(True)
+            self.whatisText.setEnabled(True)
+            self.singularityImageText.setEnabled(True)
+            self.singularityBindText.setEnabled(True)
+            self.singularityFlagsText.setEnabled(True)
+            self.cmdsText.setEnabled(True)
+            self.envsTable.setEnabled(True)
+            self.envsAddBtn.setEnabled(True)
+            self.envsDelBtn.setEnabled(True)
+        else:
+            self.conflictText.setEnabled(False)
+            self.whatisText.setEnabled(False)
+            self.singularityImageText.setEnabled(False)
+            self.singularityBindText.setEnabled(False)
+            self.singularityFlagsText.setEnabled(False)
+            self.cmdsText.setEnabled(False)
+            self.envsTable.setEnabled(False)
+            self.envsAddBtn.setEnabled(False)
+            self.envsDelBtn.setEnabled(False)
     
         # Set all values from currentModule dict
         self.conflictText.setText(currentModule["conflict"])
@@ -371,6 +515,7 @@ class MainWindow(QMainWindow):
             if self.envsTable.item(row,0) and self.envsTable.item(row,1):
                 currentModule["envs"][self.envsTable.item(row,0).text()] = self.envsTable.item(row,1).text()
 
+
     #============================================================
     # Execution buttons methods
     #============================================================
@@ -505,10 +650,11 @@ class MainWindow(QMainWindow):
             envs = envsStr
         )
 
+
     #============================================================
     # Misc
     #============================================================
-        
+
     def resizeEnvsColumns(self):
         self.envsTable.setColumnWidth(0, int(0.28*self.envsTable.width()))
         self.envsTable.setColumnWidth(1, int(0.68*self.envsTable.width()))
