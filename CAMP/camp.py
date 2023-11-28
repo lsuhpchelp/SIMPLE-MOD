@@ -37,41 +37,43 @@ class MainWindow(QMainWindow):
         
         super().__init__()
         
+        self.flagDBChanged = False
+        
         #--------------------------------------------------------
         # Menu bar
         #--------------------------------------------------------
         
         # Menu
-        menubar = self.menuBar()
+        self.menubar = self.menuBar()
         
         # Menu 1
-        menuFile = menubar.addMenu('\n File ')
+        self.fileMenu = self.menubar.addMenu('\n File ')
         
-        newDBAct = QAction('New Database', self)
-        newDBAct.triggered.connect(self.newDB)
-        newDBAct.setShortcut("Ctrl+N")
-        menuFile.addAction(newDBAct)
+        self.newDBAct = QAction('New Database', self)
+        self.newDBAct.triggered.connect(self.newDB)
+        self.newDBAct.setShortcut("Ctrl+N")
+        self.fileMenu.addAction(self.newDBAct)
         
-        openDBAct = QAction('Open Database', self)
-        openDBAct.triggered.connect(self.openDBDialog)
-        openDBAct.setShortcut("Ctrl+O")
-        menuFile.addAction(openDBAct)
+        self.openDBAct = QAction('Open Database', self)
+        self.openDBAct.triggered.connect(self.openDBDialog)
+        self.openDBAct.setShortcut("Ctrl+O")
+        self.fileMenu.addAction(self.openDBAct)
         
-        saveDBAct = QAction('Save Database', self)
-        saveDBAct.triggered.connect(self.saveDBDialog)
-        saveDBAct.setShortcut("Ctrl+S")
-        menuFile.addAction(saveDBAct)
+        self.saveDBAct = QAction('Save Database', self)
+        self.saveDBAct.triggered.connect(self.saveDBDialog)
+        self.saveDBAct.setShortcut("Ctrl+S")
+        self.fileMenu.addAction(self.saveDBAct)
         
-        menuFile.addSeparator()
+        self.fileMenu.addSeparator()
         
-        exitAct = QAction('Exit', self)
-        exitAct.triggered.connect(self.saveDBDialog)
-        exitAct.setShortcut("Ctrl+X")
-        menuFile.addAction(exitAct)
+        self.exitAct = QAction('Exit', self)
+        self.exitAct.triggered.connect(self.exitProgram)
+        self.exitAct.setShortcut("Ctrl+Q")
+        self.fileMenu.addAction(self.exitAct)
 
         
         # Menu 2
-        menuHelp = menubar.addMenu(' Help ')
+        self.helpMenu = self.menubar.addMenu(' Help ')
 
         
         #--------------------------------------------------------
@@ -216,6 +218,9 @@ class MainWindow(QMainWindow):
         Create a new empty database.
         """
         
+        # Check any unsaved changes
+        if (self.stayForUnsavedChanges()): return
+        
         # Reset database to empty
         global db, currentModule
         db = {}
@@ -232,11 +237,17 @@ class MainWindow(QMainWindow):
         # Update current form
         self.dropNameUpdateFromDB()
         self.dropVersionUpdateFromDB()
+        
+        # Mark database as unchanged
+        self.flagDBChanged = False
     
     def openDBDialog(self):
         """
         Select and open database file.
         """
+        
+        # Check any unsaved changes
+        if (self.stayForUnsavedChanges()): return
         
         global db
         
@@ -251,6 +262,9 @@ class MainWindow(QMainWindow):
             # Update currrent form
             self.dropNameUpdateFromDB()
             self.dropVersionUpdateFromDB()
+        
+        # Mark database as unchanged
+        self.flagDBChanged = False
 
     def saveDBDialog(self):
         """
@@ -281,6 +295,20 @@ class MainWindow(QMainWindow):
         else:
         
             QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
+        
+        # Mark database as unchanged
+        self.flagDBChanged = False
+    
+    def exitProgram(self):
+        """
+        Exit CAMP.
+        """
+        
+        # Check any unsaved changes
+        if (self.stayForUnsavedChanges()): return
+        
+        # Exit
+        QApplication.instance().quit()
 
     def selectModKeyPath(self):
         """
@@ -337,6 +365,7 @@ class MainWindow(QMainWindow):
             self.envsTable.setEnabled(True)
             self.envsAddBtn.setEnabled(True)
             self.envsDelBtn.setEnabled(True)
+            self.delBtn.setEnabled(True)
         else:
             self.conflictText.setEnabled(False)
             self.whatisText.setEnabled(False)
@@ -347,6 +376,7 @@ class MainWindow(QMainWindow):
             self.envsTable.setEnabled(False)
             self.envsAddBtn.setEnabled(False)
             self.envsDelBtn.setEnabled(False)
+            self.delBtn.setEnabled(False)
     
         # Set all values from currentModule dict
         self.conflictText.setText(currentModule["conflict"])
@@ -432,6 +462,9 @@ class MainWindow(QMainWindow):
             self.dropVersionUpdateFromDB()
             self.versionDrop.setCurrentText(newModDial.modVersionText.text())
             self.modUpdateFromDB()
+            
+        # Set flagDBChanged to True
+        self.flagDBChanged = True
 
     def delMod(self):
         """
@@ -463,6 +496,9 @@ class MainWindow(QMainWindow):
                 self.dropNameUpdateFromDB()
                 self.dropVersionUpdateFromDB()
             
+        # Set flagDBChanged to True
+        self.flagDBChanged = True
+            
 
     #============================================================
     # Environment variable table related methods
@@ -485,6 +521,22 @@ class MainWindow(QMainWindow):
         items = self.envsTable.selectedItems()
         for item in items:
             self.envsTable.removeRow(item.row())
+     
+    def envsTableToDict(self):
+        """
+        Convert environmental variable table to dictionary and return.
+        """
+    
+        # Clear the current data in currentModule
+        ret = {}
+        
+        # Save current values in the table to dictionary
+        for row in range(self.envsTable.rowCount()):
+            if self.envsTable.item(row,0) and self.envsTable.item(row,1):
+                ret[self.envsTable.item(row,0).text()] = self.envsTable.item(row,1).text()
+        
+        # Returm
+        return(ret)
      
     def envsUpdateFromDB(self):
         """
@@ -511,13 +563,8 @@ class MainWindow(QMainWindow):
         Save environmental variable table to database ("currentModule" dictionary)
         """
     
-        # Clear the current data in currentModule
-        currentModule["envs"] = {}
-        
         # Save current values in the table to dictionary
-        for row in range(self.envsTable.rowCount()):
-            if self.envsTable.item(row,0) and self.envsTable.item(row,1):
-                currentModule["envs"][self.envsTable.item(row,0).text()] = self.envsTable.item(row,1).text()
+        currentModule["envs"] = self.envsTableToDict()
 
 
     #============================================================
@@ -666,12 +713,46 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         self.resizeEnvsColumns()
         super().resizeEvent(event)
+        
+    def isDBChanged(self):
+        """
+        Check if the database is changed (added / deleted module keys)
+        """
+        return(self.flagDBChanged)
     
-    def checkUnsavedChanges(self):
+    def isModKeyChanged(self):
+        """
+        Check if the current form (module key) changed from currentModule
+        """
+        
+        if (currentModule["conflict"] != self.conflictText.text() or \
+            currentModule["module_whatis"] != self.whatisText.text() or \
+            currentModule["singularity_image"] != self.singularityImageText.text() or \
+            currentModule["singularity_bindpaths"] != self.singularityBindText.text() or \
+            currentModule["singularity_flags"] != self.singularityFlagsText.text() or \
+            currentModule["cmds"] != self.cmdsText.toPlainText() or \
+            currentModule["envs"] != self.envsTableToDict() ):
+            return(True)
+        else:
+            return(False)
+    
+    def stayForUnsavedChanges(self):
         """
         Check current form against currentModule dictionary to see if there is any unsaved changes
         """
-        pass
+        
+        # Only pop a confirmation if there is unsaved changes
+        if (self.isDBChanged() or self.isModKeyChanged()):
+            
+            # Ask the user whether to continue
+            reply = QMessageBox.question(self, 'Confirmation', 
+                                     "You have unsaved changes! Doing so will disgard all unsaved changes. Continue?", 
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                return(False)
+            else:
+                return(True)
         
 # New module dialog
 class NewModuleDialog(QDialog):
