@@ -84,14 +84,14 @@ class MainWindow(QMainWindow):
         self.blk1Label = QLabel('Module List')
         self.blk1Label.setStyleSheet('QLabel { font-size: 16px; font-weight: bold; }')
         
-        # Module name
+        # Module name dropdown menu
         self.nameDrop = QComboBox(self)
-        self.dropNameUpdateFromDB()
-        self.nameDrop.textActivated.connect(self.dropVersionUpdateFromDB)
+        self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
+        self.nameDropUpdateFromDB()
         
-        # Module version
+        # Module version dropdown menu
         self.versionDrop = QComboBox(self)
-        self.versionDrop.textActivated.connect(self.modUpdateFromDB)
+        self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
         
         # Add / Delete buttons
         self.addBtn = QPushButton("Add a new module", self)
@@ -235,8 +235,8 @@ class MainWindow(QMainWindow):
         }
         
         # Update current form
-        self.dropNameUpdateFromDB()
-        self.dropVersionUpdateFromDB()
+        self.nameDropUpdateFromDB()
+        self.versionDropUpdateFromDB()
         
         # Mark database as unchanged
         self.flagDBChanged = False
@@ -260,8 +260,8 @@ class MainWindow(QMainWindow):
                 db = json.load(f)
                 
             # Update currrent form
-            self.dropNameUpdateFromDB()
-            self.dropVersionUpdateFromDB()
+            self.nameDropUpdateFromDB()
+            self.versionDropUpdateFromDB()
         
         # Mark database as unchanged
         self.flagDBChanged = False
@@ -324,21 +324,82 @@ class MainWindow(QMainWindow):
     # Dropdown menu methods
     #============================================================
 
-    def dropNameUpdateFromDB(self):
+    def nameDropUpdateFromDB(self):
         """
         Update module name dropdown menu.
         """
+        self.nameDrop.currentTextChanged.disconnect()
         self.nameDrop.clear()
         self.nameDrop.addItems(sorted(db.keys()))
+        self.nameDropCurrentText = self.nameDrop.currentText()
+        self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
 
-    def dropVersionUpdateFromDB(self):
+    def nameDropSetCurrentText(self, text):
+        """
+        Set (silently) current text for name dropdown menu.
+        """
+        self.nameDrop.currentTextChanged.disconnect()
+        self.nameDrop.setCurrentText(text)
+        self.nameDropCurrentText = text
+        self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
+        
+    def nameDropChanged(self, text):
+        """
+        When selected module name is changed.
+        """
+        
+        # Check any unsaved changes in the current module form
+        if (self.stayForUnsavedModChanges()): 
+        
+            # If choose to stay for unsaved changes, revert all
+            self.nameDrop.currentTextChanged.disconnect()
+            self.nameDrop.setCurrentText(self.nameDropCurrentText)
+            self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
+            
+        else:
+        
+            # Otherwise continue, update version dropdown menu
+            self.nameDropCurrentText = text
+            self.versionDropUpdateFromDB()
+
+    def versionDropUpdateFromDB(self):
         """
         Update module version dropdown menu.
         """
+        self.versionDrop.currentTextChanged.disconnect()
         self.versionDrop.clear()
         if (self.nameDrop.currentText()) :
             self.versionDrop.addItems(sorted(db[self.nameDrop.currentText()].keys()))
         self.modUpdateFromDB()
+        self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
+
+    def versionDropSetCurrentText(self, text):
+        """
+        Set (silently) current text for version dropdown menu.
+        """
+        self.versionDrop.currentTextChanged.disconnect()
+        self.versionDrop.setCurrentText(text)
+        self.versionDrop = text
+        self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
+        
+    def versionDropChanged(self, text):
+        """
+        When selected module version is changed.
+        """
+        
+        # Check any unsaved changes
+        if (self.stayForUnsavedModChanges()): 
+        
+            # If choose to stay for unsaved changes, revert all
+            self.versionDrop.currentTextChanged.disconnect()
+            self.versionDrop.setCurrentText(self.versionDropCurrentText)
+            self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
+            
+        else:
+        
+            # Otherwise continue, update module form to current selected module
+            self.versionDropCurrentText = text
+            self.modUpdateFromDB()
 
 
     #============================================================
@@ -410,6 +471,9 @@ class MainWindow(QMainWindow):
         """
         Add a module.
         """
+        
+        # Check any unsaved changes
+        if (self.stayForUnsavedModChanges()): return
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -457,14 +521,14 @@ class MainWindow(QMainWindow):
                 }
                 
             # Update dropdown menu
-            self.dropNameUpdateFromDB()
+            self.nameDropUpdateFromDB()
             self.nameDrop.setCurrentText(newModDial.modNameText.text())
-            self.dropVersionUpdateFromDB()
+            self.versionDropUpdateFromDB()
             self.versionDrop.setCurrentText(newModDial.modVersionText.text())
             self.modUpdateFromDB()
             
-        # Set flagDBChanged to True
-        self.flagDBChanged = True
+            # Mark database as changed
+            self.flagDBChanged = True
 
     def delMod(self):
         """
@@ -485,7 +549,7 @@ class MainWindow(QMainWindow):
                 del db[self.nameDrop.currentText()][self.versionDrop.currentText()]
                 
                 # Select next available version
-                self.dropVersionUpdateFromDB()
+                self.versionDropUpdateFromDB()
                 
             else:
                 
@@ -493,11 +557,11 @@ class MainWindow(QMainWindow):
                 del db[self.nameDrop.currentText()]
                 
                 # Update the name dropdown menu
-                self.dropNameUpdateFromDB()
-                self.dropVersionUpdateFromDB()
+                self.nameDropUpdateFromDB()
+                self.versionDropUpdateFromDB()
             
-        # Set flagDBChanged to True
-        self.flagDBChanged = True
+            # Mark database as changed
+            self.flagDBChanged = True
             
 
     #============================================================
@@ -716,13 +780,13 @@ class MainWindow(QMainWindow):
         
     def isDBChanged(self):
         """
-        Check if the database is changed (added / deleted module keys)
+        Check if the database is changed (added / deleted module keys) from creation (new or open)
         """
         return(self.flagDBChanged)
     
     def isModKeyChanged(self):
         """
-        Check if the current form (module key) changed from currentModule
+        Check if the current form (module key) is changed from currentModule
         """
         
         if (currentModule["conflict"] != self.conflictText.text() or \
@@ -738,7 +802,7 @@ class MainWindow(QMainWindow):
     
     def stayForUnsavedChanges(self):
         """
-        Check current form against currentModule dictionary to see if there is any unsaved changes
+        Check if either the database or the current form is changed.
         """
         
         # Only pop a confirmation if there is unsaved changes
@@ -746,12 +810,28 @@ class MainWindow(QMainWindow):
             
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
-                                     "You have unsaved changes! Doing so will disgard all unsaved changes. Continue?", 
+                                     "You have unsaved changes! Doing so will disgard all unsaved changes. Are you sure to continue?", 
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             
-            if reply == QMessageBox.Yes:
-                return(False)
-            else:
+            # Only return True if there is unsaved change and choose to remain on the page
+            if reply == QMessageBox.No:
+                return(True)
+    
+    def stayForUnsavedModChanges(self):
+        """
+        Check only if the current form is changed.
+        """
+        
+        # Only pop a confirmation if there is unsaved changes
+        if (self.isModKeyChanged()):
+            
+            # Ask the user whether to continue
+            reply = QMessageBox.question(self, 'Confirmation', 
+                                     "You have unsaved changes in the form below! Doing so will disgard all unsaved changes. Are you sure to continue?", 
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            
+            # Only return True if there is unsaved change and choose to remain on the page
+            if reply == QMessageBox.No:
                 return(True)
         
 # New module dialog
@@ -844,5 +924,5 @@ if __name__ == "__main__":
     mainWindow = MainWindow()
     mainWindow.show()
     mainWindow.resizeEnvsColumns()
-    mainWindow.dropVersionUpdateFromDB()
+    mainWindow.modUpdateFromDB()
     sys.exit(app.exec_())
