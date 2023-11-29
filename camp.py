@@ -67,8 +67,8 @@ class MainWindow(QMainWindow):
         self.fileMenu.addSeparator()
         
         self.exitAct = QAction('Exit', self)
-        self.exitAct.triggered.connect(self.exitProgram)
-        self.exitAct.setShortcut("Ctrl+Q")
+        self.exitAct.triggered.connect(self.close)
+        self.exitAct.setShortcut("Alt+F4")
         self.fileMenu.addAction(self.exitAct)
 
         
@@ -126,8 +126,13 @@ class MainWindow(QMainWindow):
         # What-is
         self.whatisText = QLineEdit(self)
         
-        # Singularity image path
+        # Singularity image path (editable text field and file picker button)
         self.singularityImageText = QLineEdit(self)
+        self.singularityImagePickerBtn = QPushButton("Browse", self)
+        self.singularityImagePickerBtn.clicked.connect(self.pickSingularityImageFile)
+        self.singularityImageLayout = QHBoxLayout()
+        self.singularityImageLayout.addWidget(self.singularityImageText)
+        self.singularityImageLayout.addWidget(self.singularityImagePickerBtn)
         
         # Singularity binding path
         self.singularityBindText = QLineEdit(self)
@@ -163,7 +168,7 @@ class MainWindow(QMainWindow):
         self.moduleEditLayout = QFormLayout()
         self.moduleEditLayout.addRow("Conflicts", self.conflictText)
         self.moduleEditLayout.addRow("Software description", self.whatisText)
-        self.moduleEditLayout.addRow("Singularity image path", self.singularityImageText)
+        self.moduleEditLayout.addRow("Singularity image path", self.singularityImageLayout)
         self.moduleEditLayout.addRow("Singularity binding paths", self.singularityBindText)
         self.moduleEditLayout.addRow("Singularity flags", self.singularityFlagsText)
         self.moduleEditLayout.addRow("Commands to replace", self.cmdsText)
@@ -298,17 +303,6 @@ class MainWindow(QMainWindow):
         
         # Mark database as unchanged
         self.flagDBChanged = False
-    
-    def exitProgram(self):
-        """
-        Exit CAMP.
-        """
-        
-        # Check any unsaved changes
-        if (self.stayForUnsavedChanges()): return
-        
-        # Exit
-        QApplication.instance().quit()
 
     def selectModKeyPath(self):
         """
@@ -420,6 +414,7 @@ class MainWindow(QMainWindow):
             self.conflictText.setEnabled(True)
             self.whatisText.setEnabled(True)
             self.singularityImageText.setEnabled(True)
+            self.singularityImagePickerBtn.setEnabled(True)
             self.singularityBindText.setEnabled(True)
             self.singularityFlagsText.setEnabled(True)
             self.cmdsText.setEnabled(True)
@@ -431,6 +426,7 @@ class MainWindow(QMainWindow):
             self.conflictText.setEnabled(False)
             self.whatisText.setEnabled(False)
             self.singularityImageText.setEnabled(False)
+            self.singularityImagePickerBtn.setEnabled(False)
             self.singularityBindText.setEnabled(False)
             self.singularityFlagsText.setEnabled(False)
             self.cmdsText.setEnabled(False)
@@ -462,7 +458,18 @@ class MainWindow(QMainWindow):
         currentModule["singularity_flags"] = self.singularityFlagsText.text()
         currentModule["cmds"] = self.cmdsText.toPlainText()
         self.envsSaveToDB()
-
+        
+    def pickSingularityImageFile(self):
+        """
+        Pick Singularity image file in file browser.
+        """
+        
+        # Pick a database file to open
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Singularity image file', filter="Singularity Image (*.sif *.img)")
+        if fname:
+            self.singularityImageText.setText(fname)
+            
+    
     #============================================================
     # Add / Delete module
     #============================================================
@@ -769,6 +776,14 @@ class MainWindow(QMainWindow):
     #============================================================
     # Misc
     #============================================================
+    
+    def closeEvent(self, event):
+        """
+        Exit CAMP.
+        """
+        # Check any unsaved changes
+        if (self.stayForUnsavedChanges()): 
+            event.ignore()
 
     def resizeEnvsColumns(self):
         self.envsTable.setColumnWidth(0, int(0.28*self.envsTable.width()))
