@@ -20,7 +20,8 @@ currentModule = {
     "singularity_bindpaths":    "",
     "singularity_flags":        "",
     "cmds":                     "",
-    "envs":                     {  }
+    "envs":                     {  },
+    "template":                 "template/template.tcl"
 }
 db = {}
 
@@ -74,6 +75,11 @@ class MainWindow(QMainWindow):
         
         # Menu 2
         self.helpMenu = self.menubar.addMenu(' Help ')
+        
+        self.aboutAct = QAction('About', self)
+        #self.aboutAct.triggered.connect(self.aboutDialog)
+        self.aboutAct.setShortcut("F1")
+        self.helpMenu.addAction(self.aboutAct)
 
         
         #--------------------------------------------------------
@@ -146,7 +152,7 @@ class MainWindow(QMainWindow):
         
         # Commands to replace
         self.cmdsText = QTextEdit(self)
-        self.cmdsText.setPlaceholderText("Seperate by space or new line")
+        self.cmdsText.setPlaceholderText("(Seperate by space or new line)")
         pal = self.cmdsText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.cmdsText.setPalette(pal)
@@ -164,6 +170,14 @@ class MainWindow(QMainWindow):
         self.envsBtnLayout.addWidget(self.envsAddBtn)
         self.envsBtnLayout.addWidget(self.envsDelBtn)
         
+        # Template file path (editable text field and file picker button)
+        self.templateText = QLineEdit(self)
+        self.templatePickerBtn = QPushButton("Browse", self)
+        self.templatePickerBtn.clicked.connect(self.pickTemplate)
+        self.templateLayout = QHBoxLayout()
+        self.templateLayout.addWidget(self.templateText)
+        self.templateLayout.addWidget(self.templatePickerBtn)
+        
         # Combine module edit layout
         self.moduleEditLayout = QFormLayout()
         self.moduleEditLayout.addRow("Conflicts", self.conflictText)
@@ -174,28 +188,28 @@ class MainWindow(QMainWindow):
         self.moduleEditLayout.addRow("Commands to replace", self.cmdsText)
         self.moduleEditLayout.addRow("Set up environmental variable", self.envsTable)
         self.moduleEditLayout.addRow("", self.envsBtnLayout)
+        self.moduleEditLayout.addRow("Module key template", self.templateLayout)
         
         #--------------------------------------------------------
         # Block3: Confirmation buttons
         #--------------------------------------------------------
         
         # Add / edit buttons
-        self.saveBtn = QPushButton("\nSave to data file\n", self)
-        self.saveBtn.clicked.connect(self.saveToFile)
         self.genBtn = QPushButton("\nGenerate current module key\n", self)
         self.genBtn.clicked.connect(self.genModKey)
-        self.exportBtn = QPushButton("\nGenerate all keys from data file\n", self)
+        self.exportBtn = QPushButton("\nGenerate all module keys from data file\n", self)
         self.exportBtn.clicked.connect(self.genAllModKeys)
         self.confirmationBtnsLayout = QHBoxLayout()
-        self.confirmationBtnsLayout.addWidget(self.saveBtn)
         self.confirmationBtnsLayout.addWidget(self.genBtn)
         self.confirmationBtnsLayout.addWidget(self.exportBtn)
             
         #--------------------------------------------------------
+        # Combine all to create main window
+        #--------------------------------------------------------
 
         # Create main layout
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.addWidget(QLabel("", self))
+        #self.mainLayout.addWidget(QLabel("", self))
         self.mainLayout.addWidget(self.blk1Label)
         self.mainLayout.addLayout(self.moduleChooseLayout)
         self.mainLayout.addWidget(QLabel("", self))
@@ -211,7 +225,7 @@ class MainWindow(QMainWindow):
 
         # Set main window properties
         self.setWindowTitle("Containerized App Modulekey Producer (CAMP) v1.0")
-        self.setGeometry(100, 100, 750, 700)
+        self.setGeometry(100, 100, 750, 750)
     
     
     #============================================================
@@ -236,7 +250,8 @@ class MainWindow(QMainWindow):
             "singularity_bindpaths":    "",
             "singularity_flags":        "",
             "cmds":                     "",
-            "envs":                     {  }
+            "envs":                     {  },
+            "template":                 "template/template.tcl"
         }
         
         # Update current form
@@ -268,8 +283,8 @@ class MainWindow(QMainWindow):
             self.nameDropUpdateFromDB()
             self.versionDropUpdateFromDB()
         
-        # Mark database as unchanged
-        self.flagDBChanged = False
+            # Mark database as unchanged
+            self.flagDBChanged = False
 
     def saveDBDialog(self):
         """
@@ -296,13 +311,13 @@ class MainWindow(QMainWindow):
                 db[self.nameDrop.currentText()][self.versionDrop.currentText()] = currentModule
                 with open(fname, "w") as fw:
                     json.dump(db, fw, indent=4)
+        
+                # Mark database as unchanged
+                self.flagDBChanged = False
                 
         else:
         
             QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
-        
-        # Mark database as unchanged
-        self.flagDBChanged = False
 
     def selectModKeyPath(self):
         """
@@ -411,29 +426,9 @@ class MainWindow(QMainWindow):
         # If not, meaning nothing is selected, disable all fields
         if (self.nameDrop.currentText() and self.versionDrop.currentText()) :
             currentModule = db[self.nameDrop.currentText()][self.versionDrop.currentText()]
-            self.conflictText.setEnabled(True)
-            self.whatisText.setEnabled(True)
-            self.singularityImageText.setEnabled(True)
-            self.singularityImagePickerBtn.setEnabled(True)
-            self.singularityBindText.setEnabled(True)
-            self.singularityFlagsText.setEnabled(True)
-            self.cmdsText.setEnabled(True)
-            self.envsTable.setEnabled(True)
-            self.envsAddBtn.setEnabled(True)
-            self.envsDelBtn.setEnabled(True)
-            self.delBtn.setEnabled(True)
+            self.enableForm(True)
         else:
-            self.conflictText.setEnabled(False)
-            self.whatisText.setEnabled(False)
-            self.singularityImageText.setEnabled(False)
-            self.singularityImagePickerBtn.setEnabled(False)
-            self.singularityBindText.setEnabled(False)
-            self.singularityFlagsText.setEnabled(False)
-            self.cmdsText.setEnabled(False)
-            self.envsTable.setEnabled(False)
-            self.envsAddBtn.setEnabled(False)
-            self.envsDelBtn.setEnabled(False)
-            self.delBtn.setEnabled(False)
+            self.enableForm(False)
     
         # Set all values from currentModule dict
         self.conflictText.setText(currentModule["conflict"])
@@ -442,15 +437,15 @@ class MainWindow(QMainWindow):
         self.singularityBindText.setText(currentModule["singularity_bindpaths"])
         self.singularityFlagsText.setText(currentModule["singularity_flags"])
         self.cmdsText.setText(currentModule["cmds"])
-        
-        # Update environmental variables table separately
         self.envsUpdateFromDB()
+        self.templateText.setText(currentModule["template"])
      
     def modSaveToDB(self):
         """
         Save module form to database ("currentModule" dictionary)
         """
         
+        # Save all values to currentModule dict
         currentModule["conflict"] = self.conflictText.text()
         currentModule["module_whatis"] = self.whatisText.text()
         currentModule["singularity_image"] = self.singularityImageText.text()
@@ -458,6 +453,7 @@ class MainWindow(QMainWindow):
         currentModule["singularity_flags"] = self.singularityFlagsText.text()
         currentModule["cmds"] = self.cmdsText.toPlainText()
         self.envsSaveToDB()
+        currentModule["template"] = self.templateText.text()
         
     def pickSingularityImageFile(self):
         """
@@ -465,9 +461,19 @@ class MainWindow(QMainWindow):
         """
         
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open Singularity image file', filter="Singularity Image (*.sif *.img)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Singularity Image File', filter="Singularity Image (*.sif *.img)")
         if fname:
             self.singularityImageText.setText(fname)
+        
+    def pickTemplate(self):
+        """
+        Pick template file in file browser.
+        """
+        
+        # Pick a database file to open
+        fname, _ = QFileDialog.getOpenFileName(self, 'Choose a Module Key Template File', filter="All files (*)")
+        if fname:
+            self.templateText.setText(fname)
             
     
     #============================================================
@@ -509,7 +515,8 @@ class MainWindow(QMainWindow):
                         "singularity_bindpaths":    "",
                         "singularity_flags":        "",
                         "cmds":                     "",
-                        "envs":                     {  }
+                        "envs":                     {  },
+                        "template":                 "template/template.tcl"
                     }
                     
             else:
@@ -523,7 +530,8 @@ class MainWindow(QMainWindow):
                         "singularity_bindpaths":    "",
                         "singularity_flags":        "",
                         "cmds":                     "",
-                        "envs":                     {  }
+                        "envs":                     {  },
+                        "template":                 "template/template.tcl"
                     }
                 }
                 
@@ -756,7 +764,7 @@ class MainWindow(QMainWindow):
             envsStr += f"setenv {key} \"{value}\"\n"
         
         # Set up module key template
-        with open("campTmp.tcl") as f:
+        with open(dictModule["template"]) as f:
             tmpModKey = Template(f.read())
         
         # Return formatted module key string based on the template
@@ -792,6 +800,24 @@ class MainWindow(QMainWindow):
     def resizeEvent(self, event):
         self.resizeEnvsColumns()
         super().resizeEvent(event)
+    
+    def enableForm(self, isEnabled):
+        """
+        Enable/Disable current module form.
+        """
+        self.conflictText.setEnabled(isEnabled)
+        self.whatisText.setEnabled(isEnabled)
+        self.singularityImageText.setEnabled(isEnabled)
+        self.singularityImagePickerBtn.setEnabled(isEnabled)
+        self.singularityBindText.setEnabled(isEnabled)
+        self.singularityFlagsText.setEnabled(isEnabled)
+        self.cmdsText.setEnabled(isEnabled)
+        self.envsTable.setEnabled(isEnabled)
+        self.envsAddBtn.setEnabled(isEnabled)
+        self.envsDelBtn.setEnabled(isEnabled)
+        self.templateText.setEnabled(isEnabled)
+        self.templatePickerBtn.setEnabled(isEnabled)
+        self.delBtn.setEnabled(isEnabled)
         
     def isDBChanged(self):
         """
@@ -810,7 +836,8 @@ class MainWindow(QMainWindow):
             currentModule["singularity_bindpaths"] != self.singularityBindText.text() or \
             currentModule["singularity_flags"] != self.singularityFlagsText.text() or \
             currentModule["cmds"] != self.cmdsText.toPlainText() or \
-            currentModule["envs"] != self.envsTableToDict() ):
+            currentModule["envs"] != self.envsTableToDict() or \
+            currentModule["template"] != self.templateText.text() ):
             return(True)
         else:
             return(False)

@@ -7,7 +7,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "aln2wig augustus bam2hints bam2wig compileSpliceCands etraining fastBlockSearch filterBam getSeq homGeneMapping joingenes prepareAlign utrrnaseq\naugustify.py bamToWig.py cleanup-blastdb-volumes.py edirect.py executeTestCGP.py extractAnno.py findRepetitiveProtSeqs.py fix_in_frame_stop_codon_genes.py generate_plot.py getAnnoFastaFromJoingenes.py run_sepp.py run_upp.py split_sequences.py stringtie2fa.py sumlabels.py sumtrees.py windowmasker_2.2.22_adapter.py\naa2nonred.pl add_name_to_gff3.pl augustus2browser.pl augustus2gbrowse.pl autoAug.pl autoAugPred.pl autoAugTrain.pl bedgraph2wig.pl blast2sam.pl blat2gbrowse.pl blat2hints.pl block2prfl.pl bowtie2sam.pl cegma2gff.pl checkParamArchive.pl cleanDOSfasta.pl clusterAndSplitGenes.pl compare_masking.pl computeFlankingRegion.pl createAugustusJoblist.pl del_from_prfl.pl evalCGP.pl eval_dualdecomp.pl eval_multi_gtf.pl exonerate2hints.pl exoniphyDb2hints.pl export2sam.pl extractTranscriptEnds.pl fasta-sanitize.pl filter-ppx.pl filterGenes.pl filterGenesIn.pl filterGenesIn_mRNAname.pl filterGenesOut_mRNAname.pl filterInFrameStopCodons.pl filterMaf.pl filterPSL.pl filterShrimp.pl filterSpliceHints.pl findGffNamesInFasta.pl fix_joingenes_gtf.pl gbSmallDNA2gff.pl gbrowseold2gff3.pl getAnnoFasta.pl getLinesMatching.pl get_loci_from_gb.pl gff2gbSmallDNA.pl gffGetmRNA.pl gp2othergp.pl gtf2aa.pl gtf2bed.pl gtf2gff.pl gth2gtf.pl hal2maf_split.pl interpolate_sam.pl joinPeptides.pl join_aug_pred.pl join_mult_hints.pl legacy_blast.pl maf2conswig.pl makeMatchLists.pl makeUtrTrainingSet.pl maskNregions.pl merge_masking.pl moveParameters.pl msa2prfl.pl new_species.pl novo2sam.pl opt_init_and_term_probs.pl optimize_augustus.pl parseSim4Output.pl partition_gtf2gb.pl pasapolyA2hints.pl peptides2alternatives.pl peptides2hints.pl phastconsDB2hints.pl polyA2hints.pl prints2prfl.pl psl2sam.pl pslMap.pl randomSplit.pl rename_species.pl retroDB2hints.pl rmRedundantHints.pl runAllSim4.pl sam2vcf.pl samMap.pl samtools.pl scipiogff2gff.pl seq_cache_populate.pl setStopCodonFreqs.pl simpleFastaHeaders.pl simplifyFastaHeaders.pl soap2sam.pl splitMfasta.pl split_wiggle.pl summarizeACGTcontent.pl transMap2hints.pl uniquePeptides.pl update_blastdb.pl utrgff2gbrowse.pl weedMaf.pl wgsim_eval.pl wig2hints.pl wigchoose.pl writeResultsPage.pl yaml2gff.1.4.pl zoom2sam.pl",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "trinity": {
@@ -20,7 +21,8 @@
             "cmds": "Trinity jellyfish ace2sam bowtie bowtie2 bowtie2-build bowtie2-inspect samtools tabix wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl interpolate_sam.pl novo2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
             "envs": {
                 "TRINITY_HOME": "singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/bin"
-            }
+            },
+            "template": "template/template.tcl"
         }
     },
     "bcftools": {
@@ -31,7 +33,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "bowtie2": {
@@ -42,7 +45,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "bowtie2 bowtie2-build bowtie2-inspect",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "busco": {
@@ -53,7 +57,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "busco generate_plot.py",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "jax": {
@@ -64,7 +69,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "python python3 pip pip3",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "jellyfish": {
@@ -75,7 +81,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "-e",
             "cmds": "jellyfish",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "pytorch": {
@@ -86,7 +93,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "python python3 pip pip3 torchrun",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "salmon": {
@@ -97,7 +105,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "salmon",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "samtools": {
@@ -108,7 +117,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "ace2sam maq2sam-long maq2sam-short md5fa md5sum-lite plot-ampliconstats plot-bamstats samtools wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "tensorflow": {
@@ -119,7 +129,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "python python3 pip pip3",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "blast": {
@@ -130,7 +141,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "blastn blastp blastx tblastn tblastx\nblast_formatter blast_formatter_vdb blast_vdb_cmd blastdb_aliastool blastdb_path blastdbcheck blastdbcmd blastn_vdb  convert2blastmask datatool deltablast dustmasker makeblastdb makembindex makeprofiledb project_tree_builder psiblast rpsblast rpstblastn run_with_lock segmasker tblastn_vdb test_pcre windowmasker\nlegacy_blast.pl update_blastdb.pl cleanup-blastdb-volumes.py windowmasker_2.2.22_adapter.py get_species_taxids.sh",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "snakemake": {
@@ -141,7 +153,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "snakemake",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "hisat2": {
@@ -152,7 +165,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "hisat2 hisat2-align-l hisat2-align-s hisat2-build hisat2-build-l hisat2-build-s hisat2-inspect hisat2-inspect-l hisat2-inspect-s\nhisat2_extract_exons.py hisat2_extract_snps_haplotypes_UCSC.py hisat2_extract_snps_haplotypes_VCF.py hisat2_extract_splice_sites.py hisat2_read_statistics.py hisat2_simulate_reads.py",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     },
     "gatk": {
@@ -163,7 +177,8 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "gatk",
-            "envs": {}
+            "envs": {},
+            "template": "template/template.tcl"
         }
     }
 }
