@@ -13,18 +13,6 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
                              QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, 
                              QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QAction, QFileDialog)
 
-currentModule = {
-    "conflict":                 "",
-    "module_whatis":            "",
-    "singularity_image":        "",
-    "singularity_bindpaths":    "",
-    "singularity_flags":        "",
-    "cmds":                     "",
-    "envs":                     {  },
-    "template":                 "template/template.tcl"
-}
-db = {}
-
 # Main window
 class MainWindow(QMainWindow):
 
@@ -38,7 +26,22 @@ class MainWindow(QMainWindow):
         
         super().__init__()
         
-        self.flagDBChanged = False
+        # Attributes to be reused
+        self.title = "Containerized App Modulekey Producer (CAMP)"
+                                            # Window title
+        self.flagDBChanged = False          # Whether the database is changed from creation or opening
+        self.dbFilePath = ""                # Path to database file (empty if it's new)
+        self.db = {}                        # Loaded database dictionary (empty if it's new)
+        self.currentModule = {              # Current opened module
+            "conflict":                 "",
+            "module_whatis":            "",
+            "singularity_image":        "",
+            "singularity_bindpaths":    "",
+            "singularity_flags":        "",
+            "cmds":                     "",
+            "envs":                     {  },
+            "template":                 "template/template.tcl"
+}
         
         #--------------------------------------------------------
         # Menu bar
@@ -56,14 +59,19 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.newDBAct)
         
         self.openDBAct = QAction('Open Database', self)
-        self.openDBAct.triggered.connect(self.openDBDialog)
+        self.openDBAct.triggered.connect(self.openDB)
         self.openDBAct.setShortcut("Ctrl+O")
         self.fileMenu.addAction(self.openDBAct)
         
         self.saveDBAct = QAction('Save Database', self)
-        self.saveDBAct.triggered.connect(self.saveDBDialog)
+        self.saveDBAct.triggered.connect(self.saveDB)
         self.saveDBAct.setShortcut("Ctrl+S")
         self.fileMenu.addAction(self.saveDBAct)
+        
+        self.saveDBAsAct = QAction('Save Database As ...', self)
+        self.saveDBAsAct.triggered.connect(self.saveDBAs)
+        self.saveDBAsAct.setShortcut("Ctrl+Alt+S")
+        self.fileMenu.addAction(self.saveDBAsAct)
         
         self.fileMenu.addSeparator()
         
@@ -224,7 +232,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         # Set main window properties
-        self.setWindowTitle("Containerized App Modulekey Producer (CAMP) v1.0")
+        self.setWindowTitle(self.title)
         self.setGeometry(100, 100, 750, 750)
     
     
@@ -241,9 +249,9 @@ class MainWindow(QMainWindow):
         if (self.stayForUnsavedChanges()): return
         
         # Reset database to empty
-        global db, currentModule
-        db = {}
-        currentModule = {
+        self.dbFilePath = ""
+        self.db = {}
+        self.currentModule = {
             "conflict":                 "",
             "module_whatis":            "",
             "singularity_image":        "",
@@ -261,7 +269,7 @@ class MainWindow(QMainWindow):
         # Mark database as unchanged
         self.flagDBChanged = False
     
-    def openDBDialog(self):
+    def openDB(self):
         """
         Select and open database file.
         """
@@ -269,35 +277,83 @@ class MainWindow(QMainWindow):
         # Check any unsaved changes
         if (self.stayForUnsavedChanges()): return
         
-        global db
-        
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', filter="Text Files (*.json)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', "database/", filter="Text Files (*.json)")
         if fname:
         
             # Read to "db" dictionary
+            self.dbFilePath = fname
             with open(fname) as f:
-                db = json.load(f)
+                self.db = json.load(f)
                 
             # Update currrent form
             self.nameDropUpdateFromDB()
             self.versionDropUpdateFromDB()
-        
+            
             # Mark database as unchanged
             self.flagDBChanged = False
 
-    def saveDBDialog(self):
+    def saveDB(self):
         """
-        Select and save database file.
+        Save database to file. 
+            1. No prompt if a database is already selected (dbFilePath is not empty)
+            2. Prompt to select file if a database is not selected (dbFilePath is empty)
         """
         
-        global db
+        # At least one module (current) must exist, or return error:
+        if (self.nameDrop.currentText() and self.nameDrop.currentText()):
+            
+            # If dbFilePaht is not empty, save with no prompt
+            # If dbFilePaht is empty, ask to pick a file
+            if (self.dbFilePath):
+                
+                # Set currentModule to the values in the fields
+                self.modSaveToDB()
+            
+                # Save changes
+                self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
+                with open(self.dbFilePath, "w") as fw:
+                    json.dump(self.db, fw, indent=4)
+        
+                # Mark database as unchanged
+                self.flagDBChanged = False
+            
+            else:
+            
+                # Pick a database file to save
+                fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', "database/", filter="Text Files (*.json)")
+                if fname:
+        
+                    # Add ".json" extension of not already added
+                    if (fname.split(".")[-1] != "json"):
+                        fname += ".json"
+                
+                    # Set currentModule to the values in the fields
+                    self.modSaveToDB()
+            
+                    # Save changes
+                    self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
+                    self.dbFilePath = fname
+                    with open(fname, "w") as fw:
+                        json.dump(self.db, fw, indent=4)
+        
+                    # Mark database as unchanged
+                    self.flagDBChanged = False
+                
+        else:
+        
+            QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
+
+    def saveDBAs(self):
+        """
+        Save database to file, but always select a file regardless if a file is already selected (i.e., "Save As" function)
+        """
         
         # At least one module (current) must exist, or return error:
         if (self.nameDrop.currentText() and self.nameDrop.currentText()):
         
             # Pick a database file to save
-            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', filter="Text Files (*.json)")
+            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database As...', "database/", filter="Text Files (*.json)")
             if fname:
         
                 # Add ".json" extension of not already added
@@ -308,9 +364,10 @@ class MainWindow(QMainWindow):
                 self.modSaveToDB()
             
                 # Save changes
-                db[self.nameDrop.currentText()][self.versionDrop.currentText()] = currentModule
+                self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
+                self.dbFilePath = fname
                 with open(fname, "w") as fw:
-                    json.dump(db, fw, indent=4)
+                    json.dump(self.db, fw, indent=4)
         
                 # Mark database as unchanged
                 self.flagDBChanged = False
@@ -339,7 +396,7 @@ class MainWindow(QMainWindow):
         """
         self.nameDrop.currentTextChanged.disconnect()
         self.nameDrop.clear()
-        self.nameDrop.addItems(sorted(db.keys()))
+        self.nameDrop.addItems(sorted(self.db.keys()))
         self.nameDropCurrentText = self.nameDrop.currentText()
         self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
 
@@ -378,7 +435,7 @@ class MainWindow(QMainWindow):
         self.versionDrop.currentTextChanged.disconnect()
         self.versionDrop.clear()
         if (self.nameDrop.currentText()) :
-            self.versionDrop.addItems(sorted(db[self.nameDrop.currentText()].keys()))
+            self.versionDrop.addItems(sorted(self.db[self.nameDrop.currentText()].keys()))
         self.modUpdateFromDB()
         self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
 
@@ -388,7 +445,7 @@ class MainWindow(QMainWindow):
         """
         self.versionDrop.currentTextChanged.disconnect()
         self.versionDrop.setCurrentText(text)
-        self.versionDrop = text
+        self.versionDropCurrentText = text
         self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
         
     def versionDropChanged(self, text):
@@ -420,25 +477,25 @@ class MainWindow(QMainWindow):
         Update module form from database ("currentModule" dictionary)
         """
     
-        global currentModule
+        #global currentModule
         
         # If a non-empty module is selected, update currentModule from database and enable all fields;
         # If not, meaning nothing is selected, disable all fields
         if (self.nameDrop.currentText() and self.versionDrop.currentText()) :
-            currentModule = db[self.nameDrop.currentText()][self.versionDrop.currentText()]
+            self.currentModule = self.db[self.nameDrop.currentText()][self.versionDrop.currentText()]
             self.enableForm(True)
         else:
             self.enableForm(False)
     
         # Set all values from currentModule dict
-        self.conflictText.setText(currentModule["conflict"])
-        self.whatisText.setText(currentModule["module_whatis"])
-        self.singularityImageText.setText(currentModule["singularity_image"])
-        self.singularityBindText.setText(currentModule["singularity_bindpaths"])
-        self.singularityFlagsText.setText(currentModule["singularity_flags"])
-        self.cmdsText.setText(currentModule["cmds"])
+        self.conflictText.setText(self.currentModule["conflict"])
+        self.whatisText.setText(self.currentModule["module_whatis"])
+        self.singularityImageText.setText(self.currentModule["singularity_image"])
+        self.singularityBindText.setText(self.currentModule["singularity_bindpaths"])
+        self.singularityFlagsText.setText(self.currentModule["singularity_flags"])
+        self.cmdsText.setText(self.currentModule["cmds"])
         self.envsUpdateFromDB()
-        self.templateText.setText(currentModule["template"])
+        self.templateText.setText(self.currentModule["template"])
      
     def modSaveToDB(self):
         """
@@ -446,14 +503,14 @@ class MainWindow(QMainWindow):
         """
         
         # Save all values to currentModule dict
-        currentModule["conflict"] = self.conflictText.text()
-        currentModule["module_whatis"] = self.whatisText.text()
-        currentModule["singularity_image"] = self.singularityImageText.text()
-        currentModule["singularity_bindpaths"] = self.singularityBindText.text()
-        currentModule["singularity_flags"] = self.singularityFlagsText.text()
-        currentModule["cmds"] = self.cmdsText.toPlainText()
+        self.currentModule["conflict"] = self.conflictText.text()
+        self.currentModule["module_whatis"] = self.whatisText.text()
+        self.currentModule["singularity_image"] = self.singularityImageText.text()
+        self.currentModule["singularity_bindpaths"] = self.singularityBindText.text()
+        self.currentModule["singularity_flags"] = self.singularityFlagsText.text()
+        self.currentModule["cmds"] = self.cmdsText.toPlainText()
         self.envsSaveToDB()
-        currentModule["template"] = self.templateText.text()
+        self.currentModule["template"] = self.templateText.text()
         
     def pickSingularityImageFile(self):
         """
@@ -499,16 +556,16 @@ class MainWindow(QMainWindow):
             modVersion = newModDial.modVersionText.text()
             
             # Check a module with the same name already exist:
-            if (modName in db.keys()):
+            if (modName in self.db.keys()):
             
                 # If the module of the same name and version exists, warn and do nother
-                if (modVersion in db[modName].keys()):
+                if (modVersion in self.db[modName].keys()):
                     QMessageBox.warning(self, 'Warning', 'Module of the same name and version already exists!')
                     
                 else:
                 
                     # If the module name is found but version is not, add a new version to existing module name
-                    db[modName][modVersion] = { 
+                    self.db[modName][modVersion] = { 
                         "conflict":                 "",
                         "module_whatis":            "",
                         "singularity_image":        "",
@@ -522,7 +579,7 @@ class MainWindow(QMainWindow):
             else:
             
                 # If the module name is not found, add a new module name
-                db[modName] = { 
+                self.db[modName] = { 
                     modVersion : {
                         "conflict":                 "",
                         "module_whatis":            "",
@@ -537,9 +594,9 @@ class MainWindow(QMainWindow):
                 
             # Update dropdown menu
             self.nameDropUpdateFromDB()
-            self.nameDrop.setCurrentText(newModDial.modNameText.text())
+            self.nameDropSetCurrentText(newModDial.modNameText.text())
             self.versionDropUpdateFromDB()
-            self.versionDrop.setCurrentText(newModDial.modVersionText.text())
+            self.versionDropSetCurrentText(newModDial.modVersionText.text())
             self.modUpdateFromDB()
             
             # Mark database as changed
@@ -552,16 +609,16 @@ class MainWindow(QMainWindow):
         
         # Confirm whether to delete
         reply = QMessageBox.question(self, 'Confirmation',
-                                     "Are you sure you want to delete this module?", QMessageBox.Yes |
+                                     "Are you sure you want to delete this module? This change cannot be reverted!", QMessageBox.Yes |
                                      QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             
             # Check whether this module has multiple versions
-            if len(db[self.nameDrop.currentText()].keys()) > 1:
+            if len(self.db[self.nameDrop.currentText()].keys()) > 1:
                 
                 # If so, only delete the selected version
-                del db[self.nameDrop.currentText()][self.versionDrop.currentText()]
+                del self.db[self.nameDrop.currentText()][self.versionDrop.currentText()]
                 
                 # Select next available version
                 self.versionDropUpdateFromDB()
@@ -569,7 +626,7 @@ class MainWindow(QMainWindow):
             else:
                 
                 # If not (this is the only version), delete the entire module entry
-                del db[self.nameDrop.currentText()]
+                del self.db[self.nameDrop.currentText()]
                 
                 # Update the name dropdown menu
                 self.nameDropUpdateFromDB()
@@ -626,7 +683,7 @@ class MainWindow(QMainWindow):
         self.envsTable.clear()
         
         # Reset table
-        keys = list(currentModule["envs"].keys())
+        keys = list(self.currentModule["envs"].keys())
         self.envsTable.setHorizontalHeaderLabels(["Name", "Value"])
         self.envsTable.setRowCount(len(keys))
         
@@ -634,7 +691,7 @@ class MainWindow(QMainWindow):
         for row in range(len(keys)):
             item = QTableWidgetItem(keys[row])
             self.envsTable.setItem(row, 0, item)
-            item = QTableWidgetItem(currentModule["envs"][keys[row]])
+            item = QTableWidgetItem(self.currentModule["envs"][keys[row]])
             self.envsTable.setItem(row, 1, item)
      
     def envsSaveToDB(self):
@@ -643,7 +700,7 @@ class MainWindow(QMainWindow):
         """
     
         # Save current values in the table to dictionary
-        currentModule["envs"] = self.envsTableToDict()
+        self.currentModule["envs"] = self.envsTableToDict()
 
 
     #============================================================
@@ -666,9 +723,9 @@ class MainWindow(QMainWindow):
             self.modSaveToDB()
             
             # Save changes
-            db[self.nameDrop.currentText()][self.versionDrop.currentText()] = currentModule
+            self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
             with open(confirmationDial.dbname.text(), "w") as fw:
-                json.dump(db, fw, indent=4)
+                json.dump(self.db, fw, indent=4)
 
     def genModKey(self):
         """
@@ -686,9 +743,9 @@ class MainWindow(QMainWindow):
             self.modSaveToDB()
             
             # Save changes
-            db[self.nameDrop.currentText()][self.versionDrop.currentText()] = currentModule
+            self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
             with open(confirmationDial.dbname.text(), "w") as fw:
-                json.dump(db, fw, indent=4)
+                json.dump(self.db, fw, indent=4)
             
             # Create folder if not exist
             pathModKey = f"../modulekey/{self.nameDrop.currentText()}/{self.versionDrop.currentText()}"
@@ -716,12 +773,12 @@ class MainWindow(QMainWindow):
             self.modSaveToDB()
             
             # Save changes
-            db[self.nameDrop.currentText()][self.versionDrop.currentText()] = currentModule
+            self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
             with open(confirmationDial.dbname.text(), "w") as fw:
-                json.dump(db, fw, indent=4)
+                json.dump(self.db, fw, indent=4)
                 
             # Loop over all modules in db to create module keys
-            for modName in db.keys():
+            for modName in self.db.keys():
             
                 # First remove all module keys with this name (of different versions)
                 #for f in os.listdir(modName):
@@ -731,7 +788,7 @@ class MainWindow(QMainWindow):
                 #        print(f'Error occurred while deleting file {f}. Error: {e}')
                 
                 # Then export all module keys
-                for modVersion in db[modName].keys():
+                for modVersion in self.db[modName].keys():
                 
                     # Create folder if not exist
                     pathModKey = f"../modulekey/{modName}/{modVersion}"
@@ -741,7 +798,7 @@ class MainWindow(QMainWindow):
             
                     # Export module file
                     with open(pathModKey, "w") as fw:
-                        fw.write(self.retModKey(modName, modVersion, db[modName][modVersion]))
+                        fw.write(self.retModKey(modName, modVersion, self.db[modName][modVersion]))
         
 
     #============================================================
@@ -756,7 +813,7 @@ class MainWindow(QMainWindow):
         # Default module name, version, and module dictionary to current if not given
         modName = modName or self.nameDrop.currentText()
         modVersion = modVersion or self.versionDrop.currentText()
-        dictModule = dictModule or currentModule
+        dictModule = dictModule or self.currentModule
     
         # Parse environmental variable dictionary into a single string
         envsStr = ""
@@ -830,14 +887,14 @@ class MainWindow(QMainWindow):
         Check if the current form (module key) is changed from currentModule
         """
         
-        if (currentModule["conflict"] != self.conflictText.text() or \
-            currentModule["module_whatis"] != self.whatisText.text() or \
-            currentModule["singularity_image"] != self.singularityImageText.text() or \
-            currentModule["singularity_bindpaths"] != self.singularityBindText.text() or \
-            currentModule["singularity_flags"] != self.singularityFlagsText.text() or \
-            currentModule["cmds"] != self.cmdsText.toPlainText() or \
-            currentModule["envs"] != self.envsTableToDict() or \
-            currentModule["template"] != self.templateText.text() ):
+        if (self.currentModule["conflict"] != self.conflictText.text() or \
+            self.currentModule["module_whatis"] != self.whatisText.text() or \
+            self.currentModule["singularity_image"] != self.singularityImageText.text() or \
+            self.currentModule["singularity_bindpaths"] != self.singularityBindText.text() or \
+            self.currentModule["singularity_flags"] != self.singularityFlagsText.text() or \
+            self.currentModule["cmds"] != self.cmdsText.toPlainText() or \
+            self.currentModule["envs"] != self.envsTableToDict() or \
+            self.currentModule["template"] != self.templateText.text() ):
             return(True)
         else:
             return(False)
@@ -852,11 +909,19 @@ class MainWindow(QMainWindow):
             
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
-                                     "You have unsaved changes! Doing so will disgard all unsaved changes. Are you sure to continue?", 
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                     "You have unsaved changes! To avoid data loss, do you want to save the before continue?", 
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
             
-            # Only return True if there is unsaved change and choose to remain on the page
-            if reply == QMessageBox.No:
+            # Depending on the response:
+            #   "Yes":      Run "saveDB" method and continue
+            #   "No":       Do not save and continue
+            #   "Cancel":   Do not save and stay
+            if reply == QMessageBox.Yes:
+                self.saveDB()
+                return(False)
+            elif reply == QMessageBox.No:
+                return(False)
+            else:
                 return(True)
     
     def stayForUnsavedModChanges(self):
@@ -869,11 +934,19 @@ class MainWindow(QMainWindow):
             
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
-                                     "You have unsaved changes in the form below! Doing so will disgard all unsaved changes. Are you sure to continue?", 
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                     "You have unsaved changes in the form below! To avoid data loss, do you want to save the before continue?", 
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
             
-            # Only return True if there is unsaved change and choose to remain on the page
-            if reply == QMessageBox.No:
+            # Depending on the response:
+            #   "Yes":      Run "saveDB" method and continue
+            #   "No":       Do not save and continue
+            #   "Cancel":   Do not save and stay
+            if reply == QMessageBox.Yes:
+                self.saveDB()
+                return(False)
+            elif reply == QMessageBox.No:
+                return(False)
+            else:
                 return(True)
         
 # New module dialog
