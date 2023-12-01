@@ -136,12 +136,15 @@ class MainWindow(QMainWindow):
         pal = self.conflictText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.conflictText.setPalette(pal)
+        self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # What-is
         self.whatisText = QLineEdit(self)
+        self.whatisText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Singularity image path (editable text field and file picker button)
         self.singularityImageText = QLineEdit(self)
+        self.singularityImageText.textChanged.connect(self.setTitleForUnsavedChanges)
         self.singularityImagePickerBtn = QPushButton("Browse", self)
         self.singularityImagePickerBtn.clicked.connect(self.pickSingularityImageFile)
         self.singularityImageLayout = QHBoxLayout()
@@ -154,9 +157,11 @@ class MainWindow(QMainWindow):
         pal = self.singularityBindText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.singularityBindText.setPalette(pal)
+        self.singularityBindText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Singularity flags
         self.singularityFlagsText = QLineEdit(self)
+        self.singularityFlagsText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Commands to replace
         self.cmdsText = QTextEdit(self)
@@ -164,10 +169,12 @@ class MainWindow(QMainWindow):
         pal = self.cmdsText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.cmdsText.setPalette(pal)
+        self.cmdsText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Environment variables to set up
         self.envsTable = QTableWidget(1, 2, self)
         self.envsUpdateFromDB()
+        self.envsTable.itemChanged.connect(self.setTitleForUnsavedChanges)
         
         # Environment variables add / delete entry
         self.envsAddBtn =  QPushButton("Add", self)
@@ -180,6 +187,7 @@ class MainWindow(QMainWindow):
         
         # Template file path (editable text field and file picker button)
         self.templateText = QLineEdit(self)
+        self.templateText.textChanged.connect(self.setTitleForUnsavedChanges)
         self.templatePickerBtn = QPushButton("Browse", self)
         self.templatePickerBtn.clicked.connect(self.pickTemplate)
         self.templateLayout = QHBoxLayout()
@@ -268,6 +276,9 @@ class MainWindow(QMainWindow):
         
         # Mark database as unchanged
         self.flagDBChanged = False
+        
+        # Update window title
+        self.setTitleForUnsavedChanges()
     
     def openDB(self):
         """
@@ -292,6 +303,9 @@ class MainWindow(QMainWindow):
             
             # Mark database as unchanged
             self.flagDBChanged = False
+        
+            # Update window title
+            self.setTitleForUnsavedChanges()
 
     def saveDB(self):
         """
@@ -317,6 +331,9 @@ class MainWindow(QMainWindow):
         
                 # Mark database as unchanged
                 self.flagDBChanged = False
+        
+                # Update window title
+                self.setTitleForUnsavedChanges()
             
             else:
             
@@ -339,6 +356,9 @@ class MainWindow(QMainWindow):
         
                     # Mark database as unchanged
                     self.flagDBChanged = False
+        
+                # Update window title
+                self.setTitleForUnsavedChanges()
                 
         else:
         
@@ -371,6 +391,9 @@ class MainWindow(QMainWindow):
         
                 # Mark database as unchanged
                 self.flagDBChanged = False
+        
+                # Update window title
+                self.setTitleForUnsavedChanges()
                 
         else:
         
@@ -496,6 +519,9 @@ class MainWindow(QMainWindow):
         self.cmdsText.setText(self.currentModule["cmds"])
         self.envsUpdateFromDB()
         self.templateText.setText(self.currentModule["template"])
+        
+        # Update window title
+        self.setTitleForUnsavedChanges()
      
     def modSaveToDB(self):
         """
@@ -601,6 +627,9 @@ class MainWindow(QMainWindow):
             
             # Mark database as changed
             self.flagDBChanged = True
+        
+            # Update window title
+            self.setTitleForUnsavedChanges()
 
     def delMod(self):
         """
@@ -634,6 +663,9 @@ class MainWindow(QMainWindow):
             
             # Mark database as changed
             self.flagDBChanged = True
+        
+            # Update window title
+            self.setTitleForUnsavedChanges()
             
 
     #============================================================
@@ -657,6 +689,9 @@ class MainWindow(QMainWindow):
         items = self.envsTable.selectedItems()
         for item in items:
             self.envsTable.removeRow(item.row())
+        
+        # Update window title (Manually update because "itemChanged" signal is not triggered at deletion)
+        self.setTitleForUnsavedChanges()
      
     def envsTableToDict(self):
         """
@@ -898,6 +933,16 @@ class MainWindow(QMainWindow):
             return(True)
         else:
             return(False)
+            
+    def setTitleForUnsavedChanges(self):
+        """
+        Every time an unsaved change is present, add a "*" in front of the window title.
+        """
+        
+        if (self.isDBChanged() or self.isModKeyChanged()):
+            self.setWindowTitle("*" + self.title)
+        else:
+            self.setWindowTitle(self.title)
     
     def stayForUnsavedChanges(self):
         """
