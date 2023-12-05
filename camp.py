@@ -85,9 +85,13 @@ class MainWindow(QMainWindow):
         self.helpMenu = self.menubar.addMenu(' Help ')
         
         self.aboutAct = QAction('About', self)
-        #self.aboutAct.triggered.connect(self.aboutDialog)
+        self.aboutAct.triggered.connect(self.aboutDialog)
         self.aboutAct.setShortcut("F1")
         self.helpMenu.addAction(self.aboutAct)
+        
+        self.aboutQTAct = QAction('About QT', self)
+        self.aboutQTAct.triggered.connect(self.aboutQtDialog)
+        self.helpMenu.addAction(self.aboutQTAct)
 
         
         #--------------------------------------------------------
@@ -420,14 +424,28 @@ class MainWindow(QMainWindow):
         # If has not successfully returned at this point, return False
         return(False)
 
-    def selectModKeyPath(self):
+    def aboutDialog(self):
         """
-        Select path to export module keys.
+        Show about information
         """
-        directory = QFileDialog.getExistingDirectory(self, 'Select Directory')
+        
+        QMessageBox.about(self, "About", \
+            f"""{self.title}
 
-        if directory:
-            print("Selected directory:", directory)
+CAMP is a QT-based GUI software tool to automatically generate module keys for container-based software packages.
+            
+Version: \t1.0
+Author: \tJason Li
+Home: \thttps://github.com/lsuhpchelp/CAMP
+License: \tMIT License
+""")
+
+    def aboutQtDialog(self):
+        """
+        Show about information
+        """
+        
+        QMessageBox.aboutQt(self, "About QT")
 
 
     #============================================================
