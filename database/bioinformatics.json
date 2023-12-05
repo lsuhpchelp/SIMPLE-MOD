@@ -61,18 +61,6 @@
             "template": "template/template.tcl"
         }
     },
-    "jax": {
-        "0.4.13": {
-            "conflict": "python pytorch tensorflow",
-            "module_whatis": "JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.",
-            "singularity_image": "/home/admin/singularity/jax-0.4.13.sif",
-            "singularity_bindpaths": "",
-            "singularity_flags": "--nv",
-            "cmds": "python python3 pip pip3",
-            "envs": {},
-            "template": "template/template.tcl"
-        }
-    },
     "jellyfish": {
         "2.3.0": {
             "conflict": "",
@@ -81,18 +69,6 @@
             "singularity_bindpaths": "",
             "singularity_flags": "-e",
             "cmds": "jellyfish",
-            "envs": {},
-            "template": "template/template.tcl"
-        }
-    },
-    "pytorch": {
-        "2.0.1": {
-            "conflict": "python tensorflow jax",
-            "module_whatis": "PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
-            "singularity_image": "/home/admin/singularity/pytorch-2.0.1.sif",
-            "singularity_bindpaths": "",
-            "singularity_flags": "--nv",
-            "cmds": "python python3 pip pip3 torchrun",
             "envs": {},
             "template": "template/template.tcl"
         }
@@ -117,18 +93,6 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "ace2sam maq2sam-long maq2sam-short md5fa md5sum-lite plot-ampliconstats plot-bamstats samtools wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
-            "envs": {},
-            "template": "template/template.tcl"
-        }
-    },
-    "tensorflow": {
-        "2.13.0": {
-            "conflict": "python pytorch jax",
-            "module_whatis": "Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
-            "singularity_image": "/home/admin/singularity/tensorflow-2.13.0.sif",
-            "singularity_bindpaths": "",
-            "singularity_flags": "--nv",
-            "cmds": "python python3 pip pip3",
             "envs": {},
             "template": "template/template.tcl"
         }
@@ -177,6 +141,18 @@
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "gatk",
+            "envs": {},
+            "template": "template/template.tcl"
+        }
+    },
+    "cellbender": {
+        "0.3.0": {
+            "conflict": "",
+            "module_whatis": "CellBender is a software package for eliminating technical artifacts from high-throughput single-cell RNA sequencing (scRNA-seq) data.",
+            "singularity_image": "/home/admin/singularity/cellbender-0.3.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "cellbender",
             "envs": {},
             "template": "template/template.tcl"
         }

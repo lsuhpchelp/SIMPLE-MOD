@@ -254,7 +254,7 @@ class MainWindow(QMainWindow):
         """
         
         # Check any unsaved changes
-        if (self.stayForUnsavedChanges()): return
+        if (self.cancelForUnsavedChanges()): return
         
         # Reset database to empty
         self.dbFilePath = ""
@@ -286,7 +286,7 @@ class MainWindow(QMainWindow):
         """
         
         # Check any unsaved changes
-        if (self.stayForUnsavedChanges()): return
+        if (self.cancelForUnsavedChanges()): return
         
         # Pick a database file to open
         fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', "database/", filter="Text Files (*.json)")
@@ -312,6 +312,9 @@ class MainWindow(QMainWindow):
         Save database to file. 
             1. No prompt if a database is already selected (dbFilePath is not empty)
             2. Prompt to select file if a database is not selected (dbFilePath is empty)
+        Return:
+            True:   Successfully saved
+            False:  Not saved
         """
         
         # At least one module (current) must exist, or return error:
@@ -334,6 +337,9 @@ class MainWindow(QMainWindow):
         
                 # Update window title
                 self.setTitleForUnsavedChanges()
+                
+                # Return successful
+                return(True)
             
             else:
             
@@ -357,16 +363,25 @@ class MainWindow(QMainWindow):
                     # Mark database as unchanged
                     self.flagDBChanged = False
         
-                # Update window title
-                self.setTitleForUnsavedChanges()
+                    # Update window title
+                    self.setTitleForUnsavedChanges()
+                
+                    # Return successful
+                    return(True)
                 
         else:
         
             QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
+        
+        # If has not successfully returned at this point, return False
+        return(False)
 
     def saveDBAs(self):
         """
         Save database to file, but always select a file regardless if a file is already selected (i.e., "Save As" function)
+        Return:
+            True:   Successfully saved
+            False:  Not saved
         """
         
         # At least one module (current) must exist, or return error:
@@ -395,9 +410,15 @@ class MainWindow(QMainWindow):
                 # Update window title
                 self.setTitleForUnsavedChanges()
                 
+                # Return successful
+                return(True)
+                
         else:
         
             QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
+        
+        # If has not successfully returned at this point, return False
+        return(False)
 
     def selectModKeyPath(self):
         """
@@ -438,7 +459,7 @@ class MainWindow(QMainWindow):
         """
         
         # Check any unsaved changes in the current module form
-        if (self.stayForUnsavedModChanges()): 
+        if (self.cancelForUnsavedModChanges()): 
         
             # If choose to stay for unsaved changes, revert all
             self.nameDrop.currentTextChanged.disconnect()
@@ -477,7 +498,7 @@ class MainWindow(QMainWindow):
         """
         
         # Check any unsaved changes
-        if (self.stayForUnsavedModChanges()): 
+        if (self.cancelForUnsavedModChanges()): 
         
             # If choose to stay for unsaved changes, revert all
             self.versionDrop.currentTextChanged.disconnect()
@@ -569,7 +590,7 @@ class MainWindow(QMainWindow):
         """
         
         # Check any unsaved changes
-        if (self.stayForUnsavedModChanges()): return
+        if (self.cancelForUnsavedModChanges()): return
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -742,75 +763,50 @@ class MainWindow(QMainWindow):
     # Execution buttons methods
     #============================================================
 
-    def saveToFile(self):
-        """
-        Save module form to file
-        """
-    
-        # Confirm first
-        confirmationDial = ConfirmationDialog(self)
-        confirmationDial.msg.setText("Are you sure to save to this database? This change is irreversible!")
-        
-        # If confirmed, save module info to file
-        if confirmationDial.exec_():
-            
-            # Set currentModule to the values in the fields
-            self.modSaveToDB()
-            
-            # Save changes
-            self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-            with open(confirmationDial.dbname.text(), "w") as fw:
-                json.dump(self.db, fw, indent=4)
-
     def genModKey(self):
         """
-        Generate module key for current module
+        Generate module key for current form. Saving is not assumed.
         """
-    
-        # Confirm first
-        confirmationDial = ConfirmationDialog(self)
-        confirmationDial.msg.setText("Changes will be saved to database before creating the module key. \nAre you sure to proceed? This change is irreversible!")
         
-        # If confirmed, save module info to file and export module key
-        if confirmationDial.exec_():
+        # Asked the user to select a directory
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory', 'modulekey',)
+
+        if directory:
         
-            # Set currentModule to the values in the fields
-            self.modSaveToDB()
-            
-            # Save changes
-            self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-            with open(confirmationDial.dbname.text(), "w") as fw:
-                json.dump(self.db, fw, indent=4)
+            # Save a temporary module dict (allows exporting current module without saving)
+            tmpModule = {
+                "conflict":                 self.conflictText.text(),
+                "module_whatis":            self.whatisText.text(),
+                "singularity_image":        self.singularityImageText.text(),
+                "singularity_bindpaths":    self.singularityBindText.text(),
+                "singularity_flags":        self.singularityFlagsText.text(),
+                "cmds":                     self.cmdsText.toPlainText(),
+                "envs":                     self.envsTableToDict(),
+                "template":                 self.templateText.text()
+            }
             
             # Create folder if not exist
-            pathModKey = f"../modulekey/{self.nameDrop.currentText()}/{self.versionDrop.currentText()}"
+            pathModKey = f"{directory}/{self.nameDrop.currentText()}/{self.versionDrop.currentText()}"
             dir = os.path.dirname(pathModKey)
             if not os.path.exists(dir):
                 os.makedirs(dir)
             
             # Export module file
             with open(pathModKey, "w") as fw:
-                fw.write(self.retModKey())
+                fw.write(self.retModKey(dictModule=tmpModule))
 
     def genAllModKeys(self):
         """
-        Generate module keys for current database
+        Generate module keys for current database. Must save first.
         """
-    
-        # Confirm first
-        confirmationDial = ConfirmationDialog(self)
-        confirmationDial.msg.setText("Changes will be saved to database before creating the module keys. \nAre you sure to proceed? This change is irreversible!")
         
-        # If confirmed, save module info to file and export module key
-        if confirmationDial.exec_():
+        # Check any unsaved changes
+        if (self.cancelForUnsavedChanges()): return
         
-            # Set currentModule to the values in the fields
-            self.modSaveToDB()
-            
-            # Save changes
-            self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-            with open(confirmationDial.dbname.text(), "w") as fw:
-                json.dump(self.db, fw, indent=4)
+        # Asked the user to select a directory
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory', 'modulekey',)
+
+        if directory:
                 
             # Loop over all modules in db to create module keys
             for modName in self.db.keys():
@@ -826,7 +822,7 @@ class MainWindow(QMainWindow):
                 for modVersion in self.db[modName].keys():
                 
                     # Create folder if not exist
-                    pathModKey = f"../modulekey/{modName}/{modVersion}"
+                    pathModKey = f"{directory}/{modName}/{modVersion}"
                     dir = os.path.dirname(pathModKey)
                     if not os.path.exists(dir):
                         os.makedirs(dir)
@@ -882,7 +878,7 @@ class MainWindow(QMainWindow):
         Exit CAMP.
         """
         # Check any unsaved changes
-        if (self.stayForUnsavedChanges()): 
+        if (self.cancelForUnsavedChanges()): 
             event.ignore()
 
     def resizeEnvsColumns(self):
@@ -897,6 +893,8 @@ class MainWindow(QMainWindow):
         """
         Enable/Disable current module form.
         """
+        self.saveDBAct.setEnabled(isEnabled)
+        self.saveDBAsAct.setEnabled(isEnabled)
         self.conflictText.setEnabled(isEnabled)
         self.whatisText.setEnabled(isEnabled)
         self.singularityImageText.setEnabled(isEnabled)
@@ -910,6 +908,8 @@ class MainWindow(QMainWindow):
         self.templateText.setEnabled(isEnabled)
         self.templatePickerBtn.setEnabled(isEnabled)
         self.delBtn.setEnabled(isEnabled)
+        self.genBtn.setEnabled(isEnabled)
+        self.exportBtn.setEnabled(isEnabled)
         
     def isDBChanged(self):
         """
@@ -944,7 +944,7 @@ class MainWindow(QMainWindow):
         else:
             self.setWindowTitle(self.title)
     
-    def stayForUnsavedChanges(self):
+    def cancelForUnsavedChanges(self):
         """
         Check if either the database or the current form is changed.
         """
@@ -962,14 +962,17 @@ class MainWindow(QMainWindow):
             #   "No":       Do not save and continue
             #   "Cancel":   Do not save and stay
             if reply == QMessageBox.Yes:
-                self.saveDB()
-                return(False)
+                # Return False (continue) if successfully saved, otherwise return True to stay
+                if (self.saveDB()):
+                    return(False)
+                else:
+                    return(True)
             elif reply == QMessageBox.No:
                 return(False)
             else:
                 return(True)
     
-    def stayForUnsavedModChanges(self):
+    def cancelForUnsavedModChanges(self):
         """
         Check only if the current form is changed.
         """
@@ -987,14 +990,18 @@ class MainWindow(QMainWindow):
             #   "No":       Do not save and continue
             #   "Cancel":   Do not save and stay
             if reply == QMessageBox.Yes:
-                self.saveDB()
-                return(False)
+                # Return False (continue) if successfully saved, otherwise return True to stay
+                if (self.saveDB()):
+                    return(False)
+                else:
+                    return(True)
             elif reply == QMessageBox.No:
                 return(False)
             else:
                 return(True)
-        
-# New module dialog
+
+
+# New module dialog class
 class NewModuleDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -1035,50 +1042,9 @@ class NewModuleDialog(QDialog):
             self.accept() 
         else:
             QMessageBox.warning(self, 'Warning', 'Module name and version cannot be empty!')
-        
-# Confirmation dialog
-class ConfirmationDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        
-        # Create text field to enter database name
-        self.dbname = QLineEdit(self)
-        self.dbname.setText("campDB.json")
-        self.formLayout = QFormLayout()
-        self.formLayout.addRow("Database name:", self.dbname)
+            
 
-        # Create buttons
-        self.confirmBtn = QPushButton('Confirm', self)
-        self.confirmBtn.clicked.connect(self.checkEmpty)
-        self.cancelBtn = QPushButton('Cancel', self)
-        self.cancelBtn.clicked.connect(self.reject)
-
-        # Create button layout and add buttons
-        self.btnLayout = QHBoxLayout()
-        self.btnLayout.addWidget(self.confirmBtn)
-        self.btnLayout.addWidget(self.cancelBtn)
-        
-        # Create entire layout
-        self.layout = QVBoxLayout()
-        self.msg = QLabel("")
-        self.layout.addWidget(self.msg)
-        self.layout.addLayout(self.formLayout)
-        self.layout.addWidget(QLabel(""))
-        self.layout.addLayout(self.btnLayout)
-        self.setLayout(self.layout)
-        self.setWindowTitle("Confirm")
-    
-    def checkEmpty(self):
-        
-        # Strip string
-        self.dbname.setText(self.dbname.text().strip())
-        
-        # Check empty
-        if self.dbname.text():
-            self.accept() 
-        else:
-            QMessageBox.warning(self, 'Warning', 'Database file name name cannot be empty!')
-
+# Main function
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
