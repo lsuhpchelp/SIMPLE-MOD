@@ -18,7 +18,7 @@ module-version 3.5.0
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/busco-5.4.7.sif"
-set SINGULARITY_BINDPATHS ""
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
@@ -39,10 +39,10 @@ aa2nonred.pl add_name_to_gff3.pl augustus2browser.pl augustus2gbrowse.pl autoAug
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
         if { [ module-info shelltype csh ] } {
-            puts "alias $cmd singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+            puts "alias $cmd singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
         } elseif { [ module-info shelltype sh ] } {
             puts "$cmd () {"
-            puts "    singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "    singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
             #puts "export -f $cmd"
         }

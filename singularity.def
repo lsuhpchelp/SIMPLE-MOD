@@ -1,0 +1,32 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+
+################################################################################
+%labels
+################################################################################
+
+Maintainer      Jason Li
+Version         1.0
+Description     CAMP is a QT-based GUI software tool to automatically generate module keys for container-based software packages.
+
+################################################################################
+%post
+################################################################################
+
+# Install dependencies
+
+apt update
+DEBIAN_FRONTEND="noninteractive" apt install -y qt5-default
+ln -fs /usr/share/zoneinfo/America/Chicago /etc/localtime
+dpkg-reconfigure --frontend noninteractive tzdata
+apt install -y python3 pip git
+apt clean
+
+pip install --upgrade pip
+pip3 install pyqt5
+pip3 cache purge
+
+# Clone CAMP repo
+#cd /opt
+#git clone 

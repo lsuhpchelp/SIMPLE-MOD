@@ -37,10 +37,10 @@ $envs
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
         if { [ module-info shelltype csh ] } {
-            puts "alias $cmd singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+            puts "alias $cmd singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
         } elseif { [ module-info shelltype sh ] } {
             puts "$cmd () {"
-            puts "    singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "    singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
             #puts "export -f $cmd"
         }

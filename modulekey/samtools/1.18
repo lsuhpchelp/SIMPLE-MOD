@@ -18,7 +18,7 @@ module-version 1.18
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/samtools-1.18.sif"
-set SINGULARITY_BINDPATHS ""
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
@@ -38,10 +38,10 @@ blast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl no
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
         if { [ module-info shelltype csh ] } {
-            puts "alias $cmd singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+            puts "alias $cmd singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
         } elseif { [ module-info shelltype sh ] } {
             puts "$cmd () {"
-            puts "    singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "    singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
             #puts "export -f $cmd"
         }

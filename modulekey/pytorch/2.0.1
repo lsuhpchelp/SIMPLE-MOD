@@ -18,7 +18,7 @@ module-version 2.0.1
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/pytorch-2.0.1.sif"
-set SINGULARITY_BINDPATHS ""
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS "--nv"
 
 # List of commands to overwrite
@@ -37,10 +37,10 @@ python python3 pip pip3 torchrun
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
         if { [ module-info shelltype csh ] } {
-            puts "alias $cmd singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+            puts "alias $cmd singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
         } elseif { [ module-info shelltype sh ] } {
             puts "$cmd () {"
-            puts "    singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "    singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
             puts "}"
             #puts "export -f $cmd"
         }

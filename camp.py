@@ -26,7 +26,11 @@ class MainWindow(QMainWindow):
         
         super().__init__()
         
-        # Attributes to be reused
+        # Key attributes (customizable)
+        self.defaultBindingPath = "/work,/project,/usr/local/packages,/ddnA,/var/scratch"
+                                            # Default binding path
+        
+        # Key attributes (Do not touch)
         self.title = "Containerized App Modulekey Producer (CAMP)"
                                             # Window title
         self.flagDBChanged = False          # Whether the database is changed from creation or opening
@@ -157,7 +161,7 @@ class MainWindow(QMainWindow):
         
         # Singularity binding path
         self.singularityBindText = QLineEdit(self)
-        self.singularityBindText.setPlaceholderText("(Bound by default: /home,/work,/project,/usr/local/packages,/ddnA,/var/scratch,/tmp)")
+        self.singularityBindText.setPlaceholderText(f"(Bound by default: /home,/tmp,{self.defaultBindingPath})")
         pal = self.singularityBindText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.singularityBindText.setPalette(pal)
@@ -880,7 +884,7 @@ License: \tMIT License
             whatis = dictModule["module_whatis"],
             modVersion = modVersion,
             singularity_image = dictModule["singularity_image"],
-            singularity_bindpaths = dictModule["singularity_bindpaths"],
+            singularity_bindpaths = self.defaultBindingPath + "," + dictModule["singularity_bindpaths"],
             singularity_flags = dictModule["singularity_flags"],
             cmds_dummy = dictModule["cmds"],
             envs = envsStr
