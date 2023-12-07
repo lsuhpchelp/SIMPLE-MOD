@@ -531,7 +531,7 @@ License: \tMIT License
         """
         
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open Singularity Image File', filter="Singularity Image (*.sif *.img)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Choose Singularity Image File', filter="Singularity Image (*.sif *.img)")
         if fname:
             self.singularityImageText.setText(fname)
         
@@ -541,7 +541,7 @@ License: \tMIT License
         """
         
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Choose a Module Key Template File', filter="All files (*)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Choose Module Key Template File', "template", filter="All files (*)")
         if fname:
             self.templateText.setText(fname)
             
@@ -735,7 +735,7 @@ License: \tMIT License
         """
         
         # Asked the user to select a directory
-        directory = QFileDialog.getExistingDirectory(self, 'Select Directory', 'modulekey',)
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory to Save Module Keys', 'modulekey',)
 
         # If a directory is successfully selected...
         if directory:
@@ -782,7 +782,7 @@ License: \tMIT License
         if (self.cancelForUnsavedChanges()): return
         
         # Asked the user to select a directory
-        directory = QFileDialog.getExistingDirectory(self, 'Select Directory', 'modulekey',)
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory to Save Module Keys', 'modulekey',)
 
         # If a directory is successfully selected...
         if directory:
