@@ -6,7 +6,7 @@
 # =====================================================================
 
 
-import sys, json, os
+import sys, json, os, tempfile
 from string import Template
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, 
@@ -34,7 +34,6 @@ class MainWindow(QMainWindow):
         self.title = "Containerized App Modulekey Producer (CAMP)"
                                             # Window title
         self.flagDBChanged = False          # Whether the database is changed from creation or opening
-        self.dbFilePath = ""                # Path to database file (empty if it's new)
         self.db = {}                        # Loaded database dictionary (empty if it's new)
         self.currentModule = {              # Current opened module
             "conflict":                 "",
@@ -71,11 +70,6 @@ class MainWindow(QMainWindow):
         self.saveDBAct.triggered.connect(self.saveDB)
         self.saveDBAct.setShortcut("Ctrl+S")
         self.fileMenu.addAction(self.saveDBAct)
-        
-        self.saveDBAsAct = QAction('Save Database As ...', self)
-        self.saveDBAsAct.triggered.connect(self.saveDBAs)
-        self.saveDBAsAct.setShortcut("Ctrl+Alt+S")
-        self.fileMenu.addAction(self.saveDBAsAct)
         
         self.fileMenu.addSeparator()
         
@@ -221,7 +215,7 @@ class MainWindow(QMainWindow):
         # Add / edit buttons
         self.genBtn = QPushButton("\nGenerate current module key\n", self)
         self.genBtn.clicked.connect(self.genModKey)
-        self.exportBtn = QPushButton("\nGenerate all module keys from data file\n", self)
+        self.exportBtn = QPushButton("\nGenerate all module keys from current database\n", self)
         self.exportBtn.clicked.connect(self.genAllModKeys)
         self.confirmationBtnsLayout = QHBoxLayout()
         self.confirmationBtnsLayout.addWidget(self.genBtn)
@@ -265,7 +259,6 @@ class MainWindow(QMainWindow):
         if (self.cancelForUnsavedChanges()): return
         
         # Reset database to empty
-        self.dbFilePath = ""
         self.db = {}
         self.currentModule = {
             "conflict":                 "",
@@ -297,13 +290,22 @@ class MainWindow(QMainWindow):
         if (self.cancelForUnsavedChanges()): return
         
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', "database/", filter="Text Files (*.json)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', "database/", filter="JSON Files (*.json)")
+        
+        # If successfully picked a file...
         if fname:
+            
+            # Try if this file is writable:
+            # If writable, continue saving; if not, return False
+            try:
+                f = open(fname)
+            except:
+                QMessageBox.critical(self, 'Error!', 'You cannot read this file!')
+                return(False)
         
             # Read to "db" dictionary
-            self.dbFilePath = fname
-            with open(fname) as f:
-                self.db = json.load(f)
+            self.db = json.load(f)
+            f.close()
                 
             # Update currrent form
             self.nameDropUpdateFromDB()
@@ -317,9 +319,7 @@ class MainWindow(QMainWindow):
 
     def saveDB(self):
         """
-        Save database to file. 
-            1. No prompt if a database is already selected (dbFilePath is not empty)
-            2. Prompt to select file if a database is not selected (dbFilePath is empty)
+        Save database to file. To avoid data loss, always ask for confirmation.
         Return:
             True:   Successfully saved
             False:  Not saved
@@ -328,89 +328,33 @@ class MainWindow(QMainWindow):
         # At least one module (current) must exist, or return error:
         if (self.nameDrop.currentText() and self.nameDrop.currentText()):
             
-            # If dbFilePaht is not empty, save with no prompt
-            # If dbFilePaht is empty, ask to pick a file
-            if (self.dbFilePath):
-                
-                # Set currentModule to the values in the fields
-                self.modSaveToDB()
-            
-                # Save changes
-                self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-                with open(self.dbFilePath, "w") as fw:
-                    json.dump(self.db, fw, indent=4)
-        
-                # Mark database as unchanged
-                self.flagDBChanged = False
-        
-                # Update window title
-                self.setTitleForUnsavedChanges()
-                
-                # Return successful
-                return(True)
-            
-            else:
-            
-                # Pick a database file to save
-                fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', "database/", filter="Text Files (*.json)")
-                if fname:
-        
-                    # Add ".json" extension of not already added
-                    if (fname.split(".")[-1] != "json"):
-                        fname += ".json"
-                
-                    # Set currentModule to the values in the fields
-                    self.modSaveToDB()
-            
-                    # Save changes
-                    self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-                    self.dbFilePath = fname
-                    with open(fname, "w") as fw:
-                        json.dump(self.db, fw, indent=4)
-        
-                    # Mark database as unchanged
-                    self.flagDBChanged = False
-        
-                    # Update window title
-                    self.setTitleForUnsavedChanges()
-                
-                    # Return successful
-                    return(True)
-                
-        else:
-        
-            QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
-        
-        # If has not successfully returned at this point, return False
-        return(False)
-
-    def saveDBAs(self):
-        """
-        Save database to file, but always select a file regardless if a file is already selected (i.e., "Save As" function)
-        Return:
-            True:   Successfully saved
-            False:  Not saved
-        """
-        
-        # At least one module (current) must exist, or return error:
-        if (self.nameDrop.currentText() and self.nameDrop.currentText()):
-        
             # Pick a database file to save
-            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database As...', "database/", filter="Text Files (*.json)")
+            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', "database/", filter="JSON Files (*.json)")
+                
+            # If successfully picked a file...
             if fname:
         
                 # Add ".json" extension of not already added
                 if (fname.split(".")[-1] != "json"):
                     fname += ".json"
+            
+                # Try if this file is writable:
+                # If writable, continue saving; if not, return False
+                try:
+                    fw = open(fname, "w")
+                except:
+                    QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
+                    return(False)
                 
-                # Set currentModule to the values in the fields
+                # Set current form to currentModule
                 self.modSaveToDB()
             
-                # Save changes
+                # Save currentModule to database
                 self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-                self.dbFilePath = fname
-                with open(fname, "w") as fw:
-                    json.dump(self.db, fw, indent=4)
+                
+                # Save database to file
+                json.dump(self.db, fw, indent=4)
+                fw.close()
         
                 # Mark database as unchanged
                 self.flagDBChanged = False
@@ -423,7 +367,7 @@ class MainWindow(QMainWindow):
                 
         else:
         
-            QMessageBox.warning(self, 'Warning', 'At least one module must exist to save!')
+            QMessageBox.critical(self, 'Error!', 'At least one module must exist to save!')
         
         # If has not successfully returned at this point, return False
         return(False)
@@ -629,7 +573,7 @@ License: \tMIT License
             
                 # If the module of the same name and version exists, warn and do nother
                 if (modVersion in self.db[modName].keys()):
-                    QMessageBox.warning(self, 'Warning', 'Module of the same name and version already exists!')
+                    QMessageBox.critical(self, 'Error', 'Module of the same name and version already exists!')
                     
                 else:
                 
@@ -793,8 +737,17 @@ License: \tMIT License
         # Asked the user to select a directory
         directory = QFileDialog.getExistingDirectory(self, 'Select Directory', 'modulekey',)
 
+        # If a directory is successfully selected...
         if directory:
-        
+            
+            # Try if the directory is writable:
+            # If writable, continue generating; if not, return False
+            try:
+                fw = tempfile.TemporaryFile(dir=directory)
+            except:
+                QMessageBox.critical(self, 'Error!', 'Failed! You do not have permission to write to this directory!')
+                return(False)
+                    
             # Save a temporary module dict (allows exporting current module without saving)
             tmpModule = {
                 "conflict":                 self.conflictText.text(),
@@ -816,6 +769,9 @@ License: \tMIT License
             # Export module file
             with open(pathModKey, "w") as fw:
                 fw.write(self.retModKey(dictModule=tmpModule))
+            
+            # Pop a successful message
+            QMessageBox.information(self, 'Success!', 'You have successfully generated the current module key!')
 
     def genAllModKeys(self):
         """
@@ -828,17 +784,19 @@ License: \tMIT License
         # Asked the user to select a directory
         directory = QFileDialog.getExistingDirectory(self, 'Select Directory', 'modulekey',)
 
+        # If a directory is successfully selected...
         if directory:
+            
+            # Try if the directory is writable:
+            # If writable, continue generating; if not, return False
+            try:
+                fw = tempfile.TemporaryFile(dir=directory)
+            except:
+                QMessageBox.critical(self, 'Error!', 'Failed! You do not have permission to write to this directory!')
+                return(False)
                 
             # Loop over all modules in db to create module keys
             for modName in self.db.keys():
-            
-                # First remove all module keys with this name (of different versions)
-                #for f in os.listdir(modName):
-                #    try:
-                #        os.remove(f"../modulekey/{modName}/{f}")
-                #    except Exception as e:
-                #        print(f'Error occurred while deleting file {f}. Error: {e}')
                 
                 # Then export all module keys
                 for modVersion in self.db[modName].keys():
@@ -852,6 +810,9 @@ License: \tMIT License
                     # Export module file
                     with open(pathModKey, "w") as fw:
                         fw.write(self.retModKey(modName, modVersion, self.db[modName][modVersion]))
+            
+            # Pop a successful message
+            QMessageBox.information(self, 'Success!', 'You have successfully generated all module keys from the current database!')
         
 
     #============================================================
@@ -916,7 +877,6 @@ License: \tMIT License
         Enable/Disable current module form.
         """
         self.saveDBAct.setEnabled(isEnabled)
-        self.saveDBAsAct.setEnabled(isEnabled)
         self.conflictText.setEnabled(isEnabled)
         self.whatisText.setEnabled(isEnabled)
         self.singularityImageText.setEnabled(isEnabled)
@@ -1063,7 +1023,7 @@ class NewModuleDialog(QDialog):
         if self.modNameText.text().strip() and self.modVersionText.text().strip():
             self.accept() 
         else:
-            QMessageBox.warning(self, 'Warning', 'Module name and version cannot be empty!')
+            QMessageBox.critical(self, 'Error', 'Module name and version cannot be empty!')
             
 
 # Main function
