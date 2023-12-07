@@ -28,5 +28,12 @@ pip3 install pyqt5
 pip3 cache purge
 
 # Clone CAMP repo
-#cd /opt
-#git clone 
+
+cd /opt
+git clone https://github.com/lsuhpchelp/CAMP.git
+
+################################################################################
+%runscript
+################################################################################
+cd /opt/CAMP
+python3 camp.py
