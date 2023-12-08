@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
                                             # Default binding path
         
         # Key attributes (Do not touch)
-        self.title = "Containerized App Modulekey Producer (CAMP)"
+        self.title = "Containerized Application Modulekey Producer (CAMP)"
                                             # Window title
         self.flagDBChanged = False          # Whether the database is changed from creation or opening
         self.db = {}                        # Loaded database dictionary (empty if it's new)
@@ -203,7 +203,7 @@ class MainWindow(QMainWindow):
         self.moduleEditLayout.addRow("Singularity image path", self.singularityImageLayout)
         self.moduleEditLayout.addRow("Singularity binding paths", self.singularityBindText)
         self.moduleEditLayout.addRow("Singularity flags", self.singularityFlagsText)
-        self.moduleEditLayout.addRow("Commands to replace", self.cmdsText)
+        self.moduleEditLayout.addRow("Commands to map", self.cmdsText)
         self.moduleEditLayout.addRow("Set up environmental variable", self.envsTable)
         self.moduleEditLayout.addRow("", self.envsBtnLayout)
         self.moduleEditLayout.addRow("Module key template", self.templateLayout)
