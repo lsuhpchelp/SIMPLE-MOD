@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
                                             # Default binding path
         
         # Key attributes (Do not touch)
-        self.title = "Containerized Application Modulekey Producer (CAMP)"
+        self.title = "CAMP (Containerized Application Modulekey Producer)"
                                             # Window title
         self.flagDBChanged = False          # Whether the database is changed from creation or opening
         self.db = {}                        # Loaded database dictionary (empty if it's new)

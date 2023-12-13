@@ -20,7 +20,7 @@
             "singularity_flags": "-e",
             "cmds": "Trinity jellyfish ace2sam bowtie bowtie2 bowtie2-build bowtie2-inspect samtools tabix wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl interpolate_sam.pl novo2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
             "envs": {
-                "TRINITY_HOME": "singularity exec -B /work,/project,/usr/local/packages,/ddnA,/var/scratch,$SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/bin"
+                "TRINITY_HOME": "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/bin"
             },
             "template": "template/template.tcl"
         }
