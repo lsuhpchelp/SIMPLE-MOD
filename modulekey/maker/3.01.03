@@ -10,25 +10,24 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict trinity bowtie2 samtools jellyfish
+conflict maker 
 
 # Module information
-module-whatis Trinity RNA-Seq de novo transcriptome assembly.
-module-version 2.15.1
+module-whatis MAKER is a portable and easily configurable genome annotation pipeline.
+module-version 3.01.03
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/trinity-2.15.1.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/maker-3.01.03.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
-set SINGULARITY_FLAGS "-e"
+set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {
-Trinity jellyfish ace2sam bowtie bowtie2 bowtie2-build bowtie2-inspect samtools tabix wgsim
-blast2sam.pl bowtie2sam.pl export2sam.pl interpolate_sam.pl novo2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl
+maker maker2chado maker2eval_gtf maker2jbrowse maker2wap maker2zff maker_functional_fasta maker_functional_gff maker_map_ids
+AED_cdf_generator.pl cegma2gff.pl cegma2zff chado2gff3 compare_gff3_to_chado cufflinks2gff3 fasta_merge fasta_tool genemark_gtf2gff3 gff3_merge ipr_update_gff iprscan2gff3  map2assembly map_data_ids map_fasta_ids map_gff_ids match2gene.pl quality_filter.pl split_gff3 tophat2gff3 train_augustus.pl zff2genbank.pl
 }
 
 # Set environment varialbles
-setenv TRINITY_HOME "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/bin"
 
 
 # ---------------------------------------------------------------------

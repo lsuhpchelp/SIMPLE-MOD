@@ -33,14 +33,17 @@ salmon
 # Module key setup template
 # ---------------------------------------------------------------------
 
+# Combine Singularity exec command
+set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE"
+
 # Overwrite the list of commands upon loading
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
         if { [ module-info shelltype csh ] } {
-            puts "alias $cmd singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $*; "
+            puts "alias $cmd $singularity_exec $cmd $*; "
         } elseif { [ module-info shelltype sh ] } {
             puts "$cmd () {"
-            puts "    singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE $cmd $@"
+            puts "    $singularity_exec $cmd $@"
             puts "}"
             #puts "export -f $cmd"
         }
