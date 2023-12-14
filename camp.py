@@ -841,6 +841,7 @@ License: \tMIT License
         # Return formatted module key string based on the template
         return tmpModKey.safe_substitute(
             modName = modName,
+            modNameCap = modName.upper(),
             conflict = dictModule["conflict"],
             whatis = dictModule["module_whatis"],
             modVersion = modVersion,

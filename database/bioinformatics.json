@@ -166,7 +166,7 @@
             "singularity_flags": "",
             "cmds": "maker maker2chado maker2eval_gtf maker2jbrowse maker2wap maker2zff maker_functional_fasta maker_functional_gff maker_map_ids\nAED_cdf_generator.pl cegma2gff.pl cegma2zff chado2gff3 compare_gff3_to_chado cufflinks2gff3 fasta_merge fasta_tool genemark_gtf2gff3 gff3_merge ipr_update_gff iprscan2gff3  map2assembly map_data_ids map_fasta_ids map_gff_ids match2gene.pl quality_filter.pl split_gff3 tophat2gff3 train_augustus.pl zff2genbank.pl",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/template-mpi.tcl"
         }
     }
 }

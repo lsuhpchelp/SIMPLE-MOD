@@ -37,6 +37,9 @@ AED_cdf_generator.pl cegma2gff.pl cegma2zff chado2gff3 compare_gff3_to_chado cuf
 # Combine Singularity exec command
 set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE"
 
+# Set Singularity environment
+setenv SINGULARITY_MAKER $singularity_exec
+
 # Overwrite the list of commands upon loading
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
@@ -67,9 +70,20 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
     puts stderr "
 \[ Help information \]
 
-1. You may use below commands as normal:
+1. This module only works on computing nodes (not available on head nodes). Make sure you start a job!
+
+2. Below executables are available:
 $cmds
-2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
+3. To run MPI executables, please add \"\$SINGULARITY_MAKER\" before the executable and after \"mpirun\"/\"mpiexec\"/\"srun\". 
+
+   E.g., change this:
+
+       mpirun \[opts\] executable \[opts\]
+
+   to:
+
+       mpirun \[opts\] \$SINGULARITY_MAKER executable \[opts\]
+
 "
 }
 proc ModulesHelp {} {

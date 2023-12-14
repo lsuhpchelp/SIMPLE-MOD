@@ -67,9 +67,10 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
     puts stderr "
 \[ Help information \]
 
-1. You may use below commands as normal:
+1. This module only works on computing nodes (not available on head nodes). Make sure you start a job!
+
+2. Below executables are available:
 $cmds
-2. Those commands may only run on computing nodes (not available on head nodes). Make sure you start a job!
 "
 }
 proc ModulesHelp {} {

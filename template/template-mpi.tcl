@@ -36,6 +36,9 @@ $envs
 # Combine Singularity exec command
 set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE"
 
+# Set Singularity environment
+setenv SINGULARITY_$modNameCap $singularity_exec
+
 # Overwrite the list of commands upon loading
 if { [ module-info mode load ] } {
     foreach cmd $cmds {
@@ -70,6 +73,16 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 
 2. Below executables are available:
 $cmds
+3. To run MPI executables, please add \"\$SINGULARITY_$modNameCap\" before the executable and after \"mpirun\"/\"mpiexec\"/\"srun\". 
+
+   E.g., change this:
+
+       mpirun \[opts\] executable \[opts\]
+
+   to:
+
+       mpirun \[opts\] \$SINGULARITY_$modNameCap executable \[opts\]
+
 "
 }
 proc ModulesHelp {} {
