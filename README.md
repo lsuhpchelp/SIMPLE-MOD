@@ -18,18 +18,39 @@ CAMP is designed for HPC administrators who oversee software installation and de
 
 CAMP is most suitable for software accessible via a handful of executables. However, it is not suitable for all software or use cases. For example, it is not suitable for pure libraries, and may be not suitable for software that would be used as dependencies. It is at the administrators' discretion to determine which software packages can be deployed with CAMP. Administrators are also responsible for testing the deployed module keys on the clusters. The databases and templates provided with the code are for reference only, and the LSU HPC group shall not be held responsible for the installation, deployment, testing, and validation of the software.
 
+
 ## 2. Installation
 
 ### 1) Running with Python
 
-## 3. Contributors
+CAMP is a QT-based GUI software, and installation-free. To run CAMP, simply run it with Python:
 
+```
+python camp.py
+```
 
+It requires PyQt5 as its dependency. If it is not installed on your system, please install it with pip:
 
-
-
+```
+pip install pyqt5
+```
 
 ### 2) Running in a Singularity image
+
+For any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a CAMP container image and run it with Singularity/Apptainer. The recipe is provided in `singularity.def`. To build it with Singularity/Appatainer, please run the below command in terminal:
+
+```
+singularity build camp.sif singularity.def
+```
+
+Once the image is build, you may run it with:
+
+```
+singularity run camp.sif
+```
+
+
+## 3. Contributors
 
 
 
