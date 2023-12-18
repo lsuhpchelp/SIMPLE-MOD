@@ -4,6 +4,8 @@
   - [1.1 About CAMP](#11-About-CAMP)
   - [1.2 Who is CAMP for](#12-Who-is-CAMP-for)
 - [2. Installation](#2-Installation)
+  - [2.1 Running with Python](#21-Running-with-Python)
+  - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
 - [3. Contributors](#3-Contributors)
 
 ## 1. Introduction
@@ -21,7 +23,7 @@ CAMP is most suitable for software accessible via a handful of executables. Howe
 
 ## 2. Installation
 
-### 1) Running with Python
+### 2.1 Running with Python
 
 CAMP is a QT-based GUI software, and installation-free. To run CAMP, simply run it with Python:
 
@@ -35,7 +37,7 @@ It requires PyQt5 as its dependency. If it is not installed on your system, plea
 pip install pyqt5
 ```
 
-### 2) Running in a Singularity image
+### 2.2 Running in a Singularity image
 
 For any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a CAMP container image and run it with Singularity/Apptainer. The recipe is provided in `singularity.def`. To build it with Singularity/Appatainer, please run the below command in terminal:
 
