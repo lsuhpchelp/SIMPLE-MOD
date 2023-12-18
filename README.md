@@ -25,13 +25,13 @@ CAMP is most suitable for software accessible via a handful of executables. Howe
 
 ### 2.1 Running with Python
 
-CAMP is a QT-based GUI software, and installation-free. To run CAMP, simply run it with Python:
+As a QT-based Python program, CAMP is installation-free. To run CAMP, simply run it with Python:
 
 ```
 python camp.py
 ```
 
-It requires PyQt5 as its dependency. If it is not installed on your system, please install it with pip:
+It is tested with Python 3 and PyQt5 module as dependency. If PyQt5 is not installed on your system, please install it with pip:
 
 ```
 pip install pyqt5
