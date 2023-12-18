@@ -1,8 +1,8 @@
 # CAMP (Containerized Application Modulekey Producer)
 
 - [1. Introduction](#1-Introduction)
-  - [1.1 About CAMP](#1-1-About-CAMP)
-  - [1.2 Who is CAMP for](#1-2-Who-is-CAMP-for)
+  - [1.1 About CAMP](#11-About-CAMP)
+  - [1.2 Who is CAMP for](#12-Who-is-CAMP-for)
 - [2. Installation](#2-Installation)
 - [3. Contributors](#3-Contributors)
 
