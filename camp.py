@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
         self.moduleEditLayout.addRow("Software description", self.whatisText)
         self.moduleEditLayout.addRow("Singularity image path", self.singularityImageLayout)
         self.moduleEditLayout.addRow("Singularity binding paths", self.singularityBindText)
-        self.moduleEditLayout.addRow("Singularity flags", self.singularityFlagsText)
+        self.moduleEditLayout.addRow("Additional Singularity flags", self.singularityFlagsText)
         self.moduleEditLayout.addRow("Commands to map", self.cmdsText)
         self.moduleEditLayout.addRow("Set up environmental variable", self.envsTable)
         self.moduleEditLayout.addRow("", self.envsBtnLayout)
