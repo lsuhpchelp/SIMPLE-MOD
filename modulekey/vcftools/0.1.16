@@ -23,7 +23,7 @@ set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {
-
+vcftools
 }
 
 # Set environment varialbles

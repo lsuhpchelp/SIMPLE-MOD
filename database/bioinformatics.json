@@ -176,7 +176,7 @@
             "singularity_image": "/home/admin/singularity/vcftools-0.1.16.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
-            "cmds": "",
+            "cmds": "vcftools",
             "envs": {},
             "template": "template/template.tcl"
         }
