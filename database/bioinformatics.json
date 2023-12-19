@@ -168,5 +168,17 @@
             "envs": {},
             "template": "template/template-mpi.tcl"
         }
+    },
+    "vcftools": {
+        "0.1.16": {
+            "conflict": "",
+            "module_whatis": "CAMP is a QT-based GUI software tool to automatically generate module keys for container-based software packages.",
+            "singularity_image": "/home/admin/singularity/vcftools-0.1.16.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "",
+            "envs": {},
+            "template": "template/template.tcl"
+        }
     }
 }
