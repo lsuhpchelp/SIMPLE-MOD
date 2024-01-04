@@ -34,5 +34,17 @@
             "envs": {},
             "template": "template/template.tcl"
         }
+    },
+    "horovod": {
+        "0.28.1": {
+            "conflict": "",
+            "module_whatis": "Distributed training framework for TensorFlow, Keras, PyTorch, and Apache MXNet.",
+            "singularity_image": "/home/admin/singularity/horovod-0.28.1-gpu-jupyter.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "python python3 pip pip3",
+            "envs": {},
+            "template": "template/template-mpi.tcl"
+        }
     }
 }

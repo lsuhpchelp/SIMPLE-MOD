@@ -34,14 +34,16 @@ $envs
 # ---------------------------------------------------------------------
 
 # Combine Singularity exec command
-set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE"
+set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Overwrite the list of commands upon loading
 if { [ module-info mode load ] } {
-    foreach cmd $cmds {
-        if { [ module-info shelltype csh ] } {
+    if { [ module-info shelltype csh ] } {
+        foreach cmd $cmds {
             puts "alias $cmd $singularity_exec $cmd $*; "
-        } elseif { [ module-info shelltype sh ] } {
+        }
+    } elseif { [ module-info shelltype sh ] } {
+        foreach cmd $cmds {
             puts "$cmd () {"
             puts "    $singularity_exec $cmd $@"
             puts "}"
@@ -52,10 +54,12 @@ if { [ module-info mode load ] } {
 
 # Unset commands upon unloading
 if { [ module-info mode unload ] } {
-    foreach cmd $cmds {
-        if { [ module-info shelltype csh ] } {
-            puts "unalias $cmd"
-        } elseif { [ module-info shelltype sh ] } {
+    if { [ module-info shelltype csh ] } {
+        foreach cmd $cmds {
+            puts "unalias $cmd;"
+        }
+    } elseif { [ module-info shelltype sh ] } {
+        foreach cmd $cmds {
             puts "unset -f $cmd"
         }
     }
