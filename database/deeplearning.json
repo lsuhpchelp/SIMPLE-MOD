@@ -37,7 +37,7 @@
     },
     "horovod": {
         "0.28.1": {
-            "conflict": "",
+            "conflict": "python pytorch tensorflow jax",
             "module_whatis": "Distributed training framework for TensorFlow, Keras, PyTorch, and Apache MXNet.",
             "singularity_image": "/home/admin/singularity/horovod-0.28.1-gpu-jupyter.sif",
             "singularity_bindpaths": "",
