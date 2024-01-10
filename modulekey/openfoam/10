@@ -16,20 +16,20 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict horovod python pytorch tensorflow jax
+conflict openfoam 
 
 # Module information
-module-whatis Distributed training framework for TensorFlow, Keras, PyTorch, and Apache MXNet.
-module-version 0.28.1
+module-whatis OpenFOAM is free, open source software for CFD from the OpenFOAM Foundation.
+module-version 10
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/horovod-0.28.1-gpu-jupyter.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/openfoam10-openmpi.4.0.3-pmi2.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
-set SINGULARITY_FLAGS "--nv"
+set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {
-python python3 pip pip3
+icoFoam
 }
 
 # Set environment varialbles
@@ -40,8 +40,8 @@ python python3 pip pip3
 # ---------------------------------------------------------------------
 
 # Set wrapper paths
-puts "mkdir /work/\$USER/.modulebin/horovod/0.28.1 -p; "
-prepend-path PATH /work/$env(USER)/.modulebin/horovod/0.28.1
+puts "mkdir /work/\$USER/.modulebin/openfoam/10 -p; "
+prepend-path PATH /work/$env(USER)/.modulebin/openfoam/10
 
 # Combine Singularity exec command
 set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
@@ -50,16 +50,16 @@ set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FL
 if { [ module-info mode load ] } {
     if { [ module-info shelltype csh ] } {
         foreach cmd $cmds {
-            puts "echo '#\\!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/horovod/0.28.1/$cmd;"
-            puts "echo '$singularity_exec $cmd $*' >> /work/\$USER/.modulebin/horovod/0.28.1/$cmd;"
-            puts "chmod u+x /work/\$USER/.modulebin/horovod/0.28.1/$cmd;"
+            puts "echo '#\\!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/openfoam/10/$cmd;"
+            puts "echo '$singularity_exec $cmd $*' >> /work/\$USER/.modulebin/openfoam/10/$cmd;"
+            puts "chmod u+x /work/\$USER/.modulebin/openfoam/10/$cmd;"
         }
         puts "rehash"
     } elseif { [ module-info shelltype sh ] } {
         foreach cmd $cmds {
-            puts "echo '#!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/horovod/0.28.1/$cmd;"
-            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/horovod/0.28.1/$cmd;"
-            puts "chmod u+x /work/\$USER/.modulebin/horovod/0.28.1/$cmd;"
+            puts "echo '#!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/openfoam/10/$cmd;"
+            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/openfoam/10/$cmd;"
+            puts "chmod u+x /work/\$USER/.modulebin/openfoam/10/$cmd;"
         }
     }
 }

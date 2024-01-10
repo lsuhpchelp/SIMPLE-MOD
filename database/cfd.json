@@ -1,0 +1,14 @@
+{
+    "openfoam": {
+        "10": {
+            "conflict": "",
+            "module_whatis": "OpenFOAM is free, open source software for CFD from the OpenFOAM Foundation.",
+            "singularity_image": "/home/admin/singularity/openfoam10-openmpi.4.0.3-pmi2.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "icoFoam blockMesh decomposePar",
+            "envs": {},
+            "template": "template/temp-ModuleRelease-mpi.tcl"
+        }
+    }
+}

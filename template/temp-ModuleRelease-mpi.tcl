@@ -39,28 +39,51 @@ $envs
 # Module key setup
 # ---------------------------------------------------------------------
 
-# Set wrapper paths
-puts "mkdir /work/\$USER/.modulebin/$modName/$modVersion -p; "
-prepend-path PATH /work/$env(USER)/.modulebin/$modName/$modVersion
-
 # Combine Singularity exec command
 set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
-# Create wrapper directory and write wrappers there
+# Set wrapper directory
+file mkdir /work/$env(USER)/.modulebin/$modName/$modVersion
+prepend-path PATH /work/$env(USER)/.modulebin/$modName/$modVersion
+
+# Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
+
+    # If it is csh type shell
     if { [ module-info shelltype csh ] } {
+    
+        # Find shell header
+        puts "setenv shellheader '#\\!/bin/'`ps -p \$\$ -o comm=`;"
+        puts "if ( ! \$?prompt ) setenv shellheader `head -n1 \$0`;"
+    
+        # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo '#\\!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
+            puts "echo \$shellheader > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "echo '$singularity_exec $cmd $*' >> /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
         }
-        puts "rehash"
+        
+        # Refresh cache (only for csh type shell)
+        puts "rehash;"
+        
+        # Unset shell header variable
+        puts "unsetenv shellheader;"
+        
+    # If it is sh type shell
     } elseif { [ module-info shelltype sh ] } {
+    
+        # Find shell header
+        puts "\[\[ -t 0 \]\] && shellheader='#!/bin/'`ps -p \$\$ -o comm=` || shellheader=`head -n1 \$0`;"
+    
+        # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo '#!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
+            puts "echo \$shellheader > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
         }
+        
+        # Unset shell header variable
+        puts "unset shellheader;"
     }
 }
 
@@ -74,8 +97,7 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 1. This module only works on computing nodes (not available on head nodes). Make sure you start a job!
 
 2. Below executables are available:
-$cmds
-"
+$cmds"
 }
 proc ModulesHelp {} {
 }

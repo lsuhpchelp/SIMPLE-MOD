@@ -79,8 +79,7 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 1. This module only works on computing nodes (not available on head nodes). Make sure you start a job!
 
 2. Below executables are available:
-$cmds
-"
+$cmds"
 }
 proc ModulesHelp {} {
 }

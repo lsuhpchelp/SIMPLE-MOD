@@ -8,7 +8,7 @@
             "singularity_flags": "",
             "cmds": "aln2wig augustus bam2hints bam2wig compileSpliceCands etraining fastBlockSearch filterBam getSeq homGeneMapping joingenes prepareAlign utrrnaseq\naugustify.py bamToWig.py cleanup-blastdb-volumes.py edirect.py executeTestCGP.py extractAnno.py findRepetitiveProtSeqs.py fix_in_frame_stop_codon_genes.py generate_plot.py getAnnoFastaFromJoingenes.py run_sepp.py run_upp.py split_sequences.py stringtie2fa.py sumlabels.py sumtrees.py windowmasker_2.2.22_adapter.py\naa2nonred.pl add_name_to_gff3.pl augustus2browser.pl augustus2gbrowse.pl autoAug.pl autoAugPred.pl autoAugTrain.pl bedgraph2wig.pl blast2sam.pl blat2gbrowse.pl blat2hints.pl block2prfl.pl bowtie2sam.pl cegma2gff.pl checkParamArchive.pl cleanDOSfasta.pl clusterAndSplitGenes.pl compare_masking.pl computeFlankingRegion.pl createAugustusJoblist.pl del_from_prfl.pl evalCGP.pl eval_dualdecomp.pl eval_multi_gtf.pl exonerate2hints.pl exoniphyDb2hints.pl export2sam.pl extractTranscriptEnds.pl fasta-sanitize.pl filter-ppx.pl filterGenes.pl filterGenesIn.pl filterGenesIn_mRNAname.pl filterGenesOut_mRNAname.pl filterInFrameStopCodons.pl filterMaf.pl filterPSL.pl filterShrimp.pl filterSpliceHints.pl findGffNamesInFasta.pl fix_joingenes_gtf.pl gbSmallDNA2gff.pl gbrowseold2gff3.pl getAnnoFasta.pl getLinesMatching.pl get_loci_from_gb.pl gff2gbSmallDNA.pl gffGetmRNA.pl gp2othergp.pl gtf2aa.pl gtf2bed.pl gtf2gff.pl gth2gtf.pl hal2maf_split.pl interpolate_sam.pl joinPeptides.pl join_aug_pred.pl join_mult_hints.pl legacy_blast.pl maf2conswig.pl makeMatchLists.pl makeUtrTrainingSet.pl maskNregions.pl merge_masking.pl moveParameters.pl msa2prfl.pl new_species.pl novo2sam.pl opt_init_and_term_probs.pl optimize_augustus.pl parseSim4Output.pl partition_gtf2gb.pl pasapolyA2hints.pl peptides2alternatives.pl peptides2hints.pl phastconsDB2hints.pl polyA2hints.pl prints2prfl.pl psl2sam.pl pslMap.pl randomSplit.pl rename_species.pl retroDB2hints.pl rmRedundantHints.pl runAllSim4.pl sam2vcf.pl samMap.pl samtools.pl scipiogff2gff.pl seq_cache_populate.pl setStopCodonFreqs.pl simpleFastaHeaders.pl simplifyFastaHeaders.pl soap2sam.pl splitMfasta.pl split_wiggle.pl summarizeACGTcontent.pl transMap2hints.pl uniquePeptides.pl update_blastdb.pl utrgff2gbrowse.pl weedMaf.pl wgsim_eval.pl wig2hints.pl wigchoose.pl writeResultsPage.pl yaml2gff.1.4.pl zoom2sam.pl",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "trinity": {
@@ -22,7 +22,7 @@
             "envs": {
                 "TRINITY_HOME": "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/bin"
             },
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "bcftools": {
@@ -34,7 +34,7 @@
             "singularity_flags": "",
             "cmds": "bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "bowtie2": {
@@ -46,7 +46,7 @@
             "singularity_flags": "",
             "cmds": "bowtie2 bowtie2-build bowtie2-inspect",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "busco": {
@@ -58,7 +58,7 @@
             "singularity_flags": "",
             "cmds": "busco generate_plot.py",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "jellyfish": {
@@ -70,7 +70,7 @@
             "singularity_flags": "-e",
             "cmds": "jellyfish",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "salmon": {
@@ -82,7 +82,7 @@
             "singularity_flags": "",
             "cmds": "salmon",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "samtools": {
@@ -94,7 +94,7 @@
             "singularity_flags": "",
             "cmds": "ace2sam maq2sam-long maq2sam-short md5fa md5sum-lite plot-ampliconstats plot-bamstats samtools wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "blast": {
@@ -106,7 +106,7 @@
             "singularity_flags": "",
             "cmds": "blastn blastp blastx tblastn tblastx\nblast_formatter blast_formatter_vdb blast_vdb_cmd blastdb_aliastool blastdb_path blastdbcheck blastdbcmd blastn_vdb  convert2blastmask datatool deltablast dustmasker makeblastdb makembindex makeprofiledb project_tree_builder psiblast rpsblast rpstblastn run_with_lock segmasker tblastn_vdb test_pcre windowmasker\nlegacy_blast.pl update_blastdb.pl cleanup-blastdb-volumes.py windowmasker_2.2.22_adapter.py get_species_taxids.sh",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "snakemake": {
@@ -118,7 +118,7 @@
             "singularity_flags": "",
             "cmds": "snakemake",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "hisat2": {
@@ -130,7 +130,7 @@
             "singularity_flags": "",
             "cmds": "hisat2 hisat2-align-l hisat2-align-s hisat2-build hisat2-build-l hisat2-build-s hisat2-inspect hisat2-inspect-l hisat2-inspect-s\nhisat2_extract_exons.py hisat2_extract_snps_haplotypes_UCSC.py hisat2_extract_snps_haplotypes_VCF.py hisat2_extract_splice_sites.py hisat2_read_statistics.py hisat2_simulate_reads.py",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "gatk": {
@@ -142,7 +142,7 @@
             "singularity_flags": "",
             "cmds": "gatk",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "cellbender": {
@@ -154,7 +154,7 @@
             "singularity_flags": "--nv",
             "cmds": "cellbender",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "maker": {
@@ -166,7 +166,7 @@
             "singularity_flags": "",
             "cmds": "maker maker2chado maker2eval_gtf maker2jbrowse maker2wap maker2zff maker_functional_fasta maker_functional_gff maker_map_ids\nAED_cdf_generator.pl cegma2gff.pl cegma2zff chado2gff3 compare_gff3_to_chado cufflinks2gff3 fasta_merge fasta_tool genemark_gtf2gff3 gff3_merge ipr_update_gff iprscan2gff3  map2assembly map_data_ids map_fasta_ids map_gff_ids match2gene.pl quality_filter.pl split_gff3 tophat2gff3 train_augustus.pl zff2genbank.pl",
             "envs": {},
-            "template": "template/template-mpi.tcl"
+            "template": "template/temp-ModuleRelease-mpi.tcl"
         }
     },
     "vcftools": {
@@ -178,7 +178,7 @@
             "singularity_flags": "",
             "cmds": "vcftools",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "agat": {
@@ -190,7 +190,7 @@
             "singularity_flags": "",
             "cmds": "agat\nagat_convert_bed2gff.pl agat_convert_embl2gff.pl agat_convert_genscan2gff.pl agat_convert_mfannot2gff.pl agat_convert_minimap2_bam2gff.pl agat_convert_sp_gff2bed.pl agat_convert_sp_gff2gtf.pl agat_convert_sp_gff2tsv.pl agat_convert_sp_gff2zff.pl agat_convert_sp_gxf2gxf.pl agat_sp_Prokka_inferNameFromAttributes.pl agat_sp_add_introns.pl agat_sp_add_start_and_stop.pl agat_sp_alignment_output_style.pl agat_sp_clipN_seqExtremities_and_fixCoordinates.pl agat_sp_compare_two_BUSCOs.pl agat_sp_compare_two_annotations.pl agat_sp_complement_annotations.pl agat_sp_ensembl_output_style.pl agat_sp_extract_attributes.pl agat_sp_extract_sequences.pl agat_sp_filter_by_ORF_size.pl agat_sp_filter_by_locus_distance.pl agat_sp_filter_by_mrnaBlastValue.pl agat_sp_filter_feature_by_attribute_presence.pl agat_sp_filter_feature_by_attribute_value.pl agat_sp_filter_feature_from_keep_list.pl agat_sp_filter_feature_from_kill_list.pl agat_sp_filter_gene_by_intron_numbers.pl agat_sp_filter_gene_by_length.pl agat_sp_filter_incomplete_gene_coding_models.pl agat_sp_filter_record_by_coordinates.pl agat_sp_fix_cds_phases.pl agat_sp_fix_features_locations_duplicated.pl agat_sp_fix_fusion.pl agat_sp_fix_longest_ORF.pl agat_sp_fix_overlaping_genes.pl agat_sp_fix_small_exon_from_extremities.pl agat_sp_flag_premature_stop_codons.pl agat_sp_flag_short_introns.pl agat_sp_functional_statistics.pl agat_sp_keep_longest_isoform.pl agat_sp_kraken_assess_liftover.pl agat_sp_list_short_introns.pl agat_sp_load_function_from_protein_align.pl agat_sp_manage_IDs.pl agat_sp_manage_UTRs.pl agat_sp_manage_attributes.pl agat_sp_manage_functional_annotation.pl agat_sp_manage_introns.pl agat_sp_merge_annotations.pl agat_sp_prokka_fix_fragmented_gene_annotations.pl agat_sp_sensitivity_specificity.pl agat_sp_separate_by_record_type.pl agat_sp_statistics.pl agat_sp_webApollo_compliant.pl agat_sq_add_attributes_from_tsv.pl agat_sq_add_hash_tag.pl agat_sq_add_locus_tag.pl agat_sq_count_attributes.pl agat_sq_filter_feature_from_fasta.pl agat_sq_list_attributes.pl agat_sq_manage_IDs.pl agat_sq_manage_attributes.pl agat_sq_mask.pl agat_sq_remove_redundant_entries.pl agat_sq_repeats_analyzer.pl agat_sq_rfam_analyzer.pl agat_sq_split.pl agat_sq_stat_basic.pl",
             "envs": {},
-            "template": "template/template.tcl"
+            "template": "template/temp-ModuleRelease.tcl"
         }
     }
 }
