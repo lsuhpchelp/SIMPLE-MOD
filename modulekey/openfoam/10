@@ -16,7 +16,7 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict openfoam 
+conflict openfoam paraview
 
 # Module information
 module-whatis OpenFOAM is free, open source software for CFD from the OpenFOAM Foundation.
@@ -29,7 +29,13 @@ set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {
-icoFoam
+DPMFoam MPPICFoam XiEngineFoam buoyantPimpleFoam buoyantReactingParticleFoam buoyantSimpleFoam coalChemistryFoam coldEngineFoam compressibleInterFilmFoam engineFoam fireFoam foamCleanCase foamCleanPath foamCleanTutorials foamCloneCase foamCreateVideo foamEtcFile foamExec foamGet foamInfo foamJob foamLog foamMonitor foamNew foamNewApp foamNewBC foamNewFunctionObject foamNewSource foamNewTemplate foamRunTutorials foamSearch foamSequenceVTKFiles foamTags icoUncoupledKinematicParcelFoam interPhaseChangeFoam mergeOrSplitBaffles moveDynamicMesh mpirunDebug org-html org-latex org-pdflatex paraFoam reactingMultiphaseEulerFoam reactingParcelFoam reactingParticleFoam reactingTwoPhaseEulerFoam rhoReactingBuoyantFoam rhoReactingFoam simpleReactingParcelFoam simpleReactingParticleFoam sprayFoam surfaceFeatureExtract tools twoPhaseEulerFoam uncoupledKinematicParcelFoam 
+
+PDRFoam PDRMesh SRFPimpleFoam SRFSimpleFoam XiFoam adiabaticFlameT adjointShapeOptimisationFoam ansysToFoam applyBoundaryLayer attachMesh autoPatch autoRefineMesh blockMesh boundaryFoam boxTurb buoyantFoam buoyantReactingFoam cavitatingFoam cfx4ToFoam changeDictionary checkMesh chemFoam chemkinToFoam chtMultiRegionFoam collapseEdges combinePatchFaces compressibleInterFoam compressibleMultiphaseInterFoam createBaffles createExternalCoupledPatchGeometry createNonConformalCouples createPatch datToFoam decomposePar deformedGeom denseParticleFoam dnsFoam driftFluxFoam dsmcFoam dsmcInitialise electrostaticFoam engineCompRatio engineSwirl equilibriumCO equilibriumFlameT extrude2DMesh extrudeMesh extrudeToRegionMesh faceAgglomerate financialFoam flattenMesh fluent3DMeshToFoam fluentMeshToFoam foamDataToFluent foamDictionary foamFormatConvert foamListTimes foamMeshToFluent foamSetupCHT foamToEnsight foamToEnsightParts foamToGMV foamToStarMesh foamToSurface foamToTetDualMesh foamToVTK foamyHexMesh foamyQuadMesh gambitToFoam gmshToFoam icoFoam ideasUnvToFoam insideCells interFoam interMixingFoam kivaToFoam laplacianFoam magneticFoam mapFields mapFieldsPar mdEquilibrationFoam mdFoam mdInitialise mergeBaffles mergeMeshes mhdFoam mirrorMesh mixtureAdiabaticFlameT modifyMesh moveMesh mshToFoam multiphaseEulerFoam multiphaseInterFoam netgenNeutralToFoam noise objToVTK orientFaceZone particleFoam particleTracks patchSummary pdfPlot pimpleFoam pisoFoam plot3dToFoam polyDualMesh porousSimpleFoam postProcess potentialFoam potentialFreeSurfaceFoam reactingFoam reconstructPar reconstructParMesh redistributePar refineHexMesh refineMesh refineWallLayer refinementLevel removeFaces renumberMesh rhoCentralFoam rhoParticleFoam rhoPimpleFoam rhoPorousSimpleFoam rhoSimpleFoam rotateMesh sammToFoam scalarTransportFoam selectCells setAtmBoundaryLayer setFields setWaves setsToZones shallowWaterFoam simpleFoam singleCellMesh smapToFoam snappyHexMesh solidDisplacementFoam solidEquilibriumDisplacementFoam splitBaffles splitCells splitMesh splitMeshRegions star3ToFoam star4ToFoam steadyParticleTracks stitchMesh subsetMesh surfaceAdd surfaceAutoPatch surfaceBooleanFeatures surfaceCheck surfaceClean surfaceCoarsen surfaceConvert surfaceFeatureConvert surfaceFeatures surfaceFind surfaceHookUp surfaceInertia surfaceLambdaMuSmooth surfaceMeshConvert surfaceMeshConvertTesting surfaceMeshExport surfaceMeshImport surfaceMeshInfo surfaceMeshTriangulate surfaceOrient surfacePointMerge surfaceRedistributePar surfaceRefineRedGreen surfaceSplitByPatch surfaceSplitByTopology surfaceSplitNonManifolds surfaceSubset surfaceToPatch surfaceTransformPoints temporalInterpolate tetgenToFoam thermoFoam topoSet transformPoints twoLiquidMixingFoam viewFactorsGen vtkUnstructuredToFoam writeMeshObj zipUpMesh 
+
+paraview paraview-config paraview.conf pvbatch pvdataserver pvpython pvrenderserver pvserver smTestDriver-pv5.10 vtkParseJava-pv5.10 vtkProbeOpenGLVersion-pv5.10 vtkProcessXML-pv5.10 vtkWrapClientServer-pv5.10 vtkWrapHierarchy-pv5.10 vtkWrapJava-pv5.10 vtkWrapPython-pv5.10 vtkWrapPythonInit-pv5.10 vtkprotoc-pv5.10 
+
+wclean wcleanLnIncludeAll wcleanPlatform wdep wmake wmakeCheckPwd wmakeCollect wmakeFilesAndOptions wmakeLnInclude wmakeLnIncludeAll wmakePrintBuild wmakeScheduler wmakeSchedulerUptime wrmdep wrmo 
 }
 
 # Set environment varialbles
@@ -39,28 +45,51 @@ icoFoam
 # Module key setup
 # ---------------------------------------------------------------------
 
-# Set wrapper paths
-puts "mkdir /work/\$USER/.modulebin/openfoam/10 -p; "
-prepend-path PATH /work/$env(USER)/.modulebin/openfoam/10
-
 # Combine Singularity exec command
 set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
-# Create wrapper directory and write wrappers there
+# Set wrapper directory
+file mkdir /work/$env(USER)/.modulebin/openfoam/10
+prepend-path PATH /work/$env(USER)/.modulebin/openfoam/10
+
+# Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
+
+    # If it is csh type shell
     if { [ module-info shelltype csh ] } {
+    
+        # Find shell header
+        #puts "setenv shellheader '#\\!/bin/'`ps -p \$\$ -o comm=`;"
+        #puts "if ( ! \$?prompt ) setenv shellheader `head -n1 \$0`;"
+    
+        # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo '#\\!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/openfoam/10/$cmd;"
+            puts "echo '#\\!/bin/bash' > /work/\$USER/.modulebin/openfoam/10/$cmd;"
             puts "echo '$singularity_exec $cmd $*' >> /work/\$USER/.modulebin/openfoam/10/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/openfoam/10/$cmd;"
         }
-        puts "rehash"
+        
+        # Refresh cache (only for csh type shell)
+        puts "rehash;"
+        
+        # Unset shell header variable
+        #puts "unsetenv shellheader;"
+        
+    # If it is sh type shell
     } elseif { [ module-info shelltype sh ] } {
+    
+        # Find shell header
+        #puts "\[\[ -t 0 \]\] && shellheader='#!/bin/'`ps -p \$\$ -o comm=` || shellheader=`head -n1 \$0`;"
+    
+        # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo '#!/bin/'`echo \$0 | sed 's|.*/||; s|.*-||'` > /work/\$USER/.modulebin/openfoam/10/$cmd;"
+            puts "echo '#!/bin/bash' > /work/\$USER/.modulebin/openfoam/10/$cmd;"
             puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/openfoam/10/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/openfoam/10/$cmd;"
         }
+        
+        # Unset shell header variable
+        #puts "unset shellheader;"
     }
 }
 
@@ -74,8 +103,7 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 1. This module only works on computing nodes (not available on head nodes). Make sure you start a job!
 
 2. Below executables are available:
-$cmds
-"
+$cmds"
 }
 proc ModulesHelp {} {
 }

@@ -53,12 +53,12 @@ if { [ module-info mode load ] } {
     if { [ module-info shelltype csh ] } {
     
         # Find shell header
-        puts "setenv shellheader '#\\!/bin/'`ps -p \$\$ -o comm=`;"
-        puts "if ( ! \$?prompt ) setenv shellheader `head -n1 \$0`;"
+        #puts "setenv shellheader '#\\!/bin/'`ps -p \$\$ -o comm=`;"
+        #puts "if ( ! \$?prompt ) setenv shellheader `head -n1 \$0`;"
     
         # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo \$shellheader > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
+            puts "echo '#\\!/bin/bash' > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "echo '$singularity_exec $cmd $*' >> /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
         }
@@ -67,23 +67,23 @@ if { [ module-info mode load ] } {
         puts "rehash;"
         
         # Unset shell header variable
-        puts "unsetenv shellheader;"
+        #puts "unsetenv shellheader;"
         
     # If it is sh type shell
     } elseif { [ module-info shelltype sh ] } {
     
         # Find shell header
-        puts "\[\[ -t 0 \]\] && shellheader='#!/bin/'`ps -p \$\$ -o comm=` || shellheader=`head -n1 \$0`;"
+        #puts "\[\[ -t 0 \]\] && shellheader='#!/bin/'`ps -p \$\$ -o comm=` || shellheader=`head -n1 \$0`;"
     
         # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo \$shellheader > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
+            puts "echo '#!/bin/bash' > /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/$modName/$modVersion/$cmd;"
         }
         
         # Unset shell header variable
-        puts "unset shellheader;"
+        #puts "unset shellheader;"
     }
 }
 

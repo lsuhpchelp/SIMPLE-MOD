@@ -119,6 +119,16 @@
             "cmds": "snakemake",
             "envs": {},
             "template": "template/temp-ModuleRelease.tcl"
+        },
+        "8.1.0": {
+            "conflict": "",
+            "module_whatis": "The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.",
+            "singularity_image": "/home/admin/singularity/snakemake-8.1.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "snakemake",
+            "envs": {},
+            "template": "template/temp-ModuleRelease.tcl"
         }
     },
     "hisat2": {
