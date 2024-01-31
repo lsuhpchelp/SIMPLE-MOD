@@ -60,7 +60,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $cmds {
             puts "echo '#\\!/bin/bash' > /work/\$USER/.modulebin/maker/3.01.03/$cmd;"
-            puts "echo '$singularity_exec $cmd $*' >> /work/\$USER/.modulebin/maker/3.01.03/$cmd;"
+            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/maker/3.01.03/$cmd;"
             puts "chmod u+x /work/\$USER/.modulebin/maker/3.01.03/$cmd;"
         }
         

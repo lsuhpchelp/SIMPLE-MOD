@@ -40,7 +40,7 @@ $envs
 # ---------------------------------------------------------------------
 
 # Combine Singularity exec command
-set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
+set singularity_exec "singularity run -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
 file mkdir /work/$env(USER)/.modulebin/$modName/$modVersion

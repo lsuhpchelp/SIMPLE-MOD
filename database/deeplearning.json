@@ -1,7 +1,7 @@
 {
     "jax": {
         "0.4.13": {
-            "conflict": "python pytorch tensorflow",
+            "conflict": "python pytorch tensorflow horovod",
             "module_whatis": "JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.",
             "singularity_image": "/home/admin/singularity/jax-0.4.13.sif",
             "singularity_bindpaths": "",
@@ -13,7 +13,7 @@
     },
     "pytorch": {
         "2.0.1": {
-            "conflict": "python tensorflow jax",
+            "conflict": "python tensorflow jax horovod",
             "module_whatis": "PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
             "singularity_image": "/home/admin/singularity/pytorch-2.0.1.sif",
             "singularity_bindpaths": "",
@@ -25,7 +25,7 @@
     },
     "tensorflow": {
         "2.13.0": {
-            "conflict": "python pytorch jax",
+            "conflict": "python pytorch jax horovod",
             "module_whatis": "Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
             "singularity_image": "/home/admin/singularity/tensorflow-2.13.0.sif",
             "singularity_bindpaths": "",

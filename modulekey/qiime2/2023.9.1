@@ -16,20 +16,20 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict pytorch python tensorflow jax horovod
+conflict qiime2 python tensorflow pytorch horovod jax
 
 # Module information
-module-whatis PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
-module-version 2.0.1
+module-whatis QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.
+module-version 2023.9.1
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/pytorch-2.0.1.sif"
+set SINGULARITY_IMAGE "/project/jasonli3/containers/amplicon_2023.9.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
-set SINGULARITY_FLAGS "--nv"
+set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {
-python python3 pip pip3 torchrun
+qiime python python3 pip pip3
 }
 
 # Set environment varialbles
