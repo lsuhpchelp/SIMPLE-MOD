@@ -207,7 +207,7 @@
         "2023.9.1": {
             "conflict": "python tensorflow pytorch horovod jax",
             "module_whatis": "QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.",
-            "singularity_image": "/project/jasonli3/containers/amplicon_2023.9.sif",
+            "singularity_image": "/home/admin/singularity/qiime2-2023.9.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "qiime python python3 pip pip3",
