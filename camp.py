@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
             "singularity_flags":        "",
             "cmds":                     "",
             "envs":                     {  },
-            "template":                 "template/temp-ModuleRelease.tcl"
+            "template":                 "template/temp-Modules.tcl"
 }
         
         #--------------------------------------------------------
@@ -268,7 +268,7 @@ class MainWindow(QMainWindow):
             "singularity_flags":        "",
             "cmds":                     "",
             "envs":                     {  },
-            "template":                 "template/temp-ModuleRelease.tcl"
+            "template":                 "template/temp-Modules.tcl"
         }
         
         # Update current form
@@ -586,7 +586,7 @@ License: \tMIT License
                         "singularity_flags":        "",
                         "cmds":                     "",
                         "envs":                     {  },
-                        "template":                 "template/temp-ModuleRelease.tcl"
+                        "template":                 "template/temp-Modules.tcl"
                     }
                     
             else:
@@ -601,7 +601,7 @@ License: \tMIT License
                         "singularity_flags":        "",
                         "cmds":                     "",
                         "envs":                     {  },
-                        "template":                 "template/temp-ModuleRelease.tcl"
+                        "template":                 "template/temp-Modules.tcl"
                     }
                 }
                 
