@@ -16,20 +16,20 @@
 # ---------------------------------------------------------------------
 
 # Conflicts
-conflict bwa 
+conflict busco 
 
 # Module information
-module-whatis Burrow-Wheeler Aligner for short-read alignment (see minimap2 for long-read alignment)
-module-version 0.7.17
+module-whatis Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.
+module-version 5.6.1
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/bwa-0.7.17.sif"
+set SINGULARITY_IMAGE "/project/jasonli3/containers/busco-5.6.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS ""
 
 # List of commands to overwrite
 set cmds {
-bwa qualfa2fq.pl xa2multi.pl
+busco generate_plot.py
 }
 
 # Set environment varialbles
@@ -43,8 +43,8 @@ bwa qualfa2fq.pl xa2multi.pl
 set singularity_exec "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
-file mkdir /work/$env(USER)/.modulebin/bwa/0.7.17
-prepend-path PATH /work/$env(USER)/.modulebin/bwa/0.7.17
+file mkdir /work/$env(USER)/.modulebin/busco/5.6.1
+prepend-path PATH /work/$env(USER)/.modulebin/busco/5.6.1
 
 # Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
@@ -58,9 +58,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo '#\\!/bin/bash' > /work/\$USER/.modulebin/bwa/0.7.17/$cmd;"
-            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/bwa/0.7.17/$cmd;"
-            puts "chmod u+x /work/\$USER/.modulebin/bwa/0.7.17/$cmd;"
+            puts "echo '#\\!/bin/bash' > /work/\$USER/.modulebin/busco/5.6.1/$cmd;"
+            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/busco/5.6.1/$cmd;"
+            puts "chmod u+x /work/\$USER/.modulebin/busco/5.6.1/$cmd;"
         }
         
         # Refresh cache (only for csh type shell)
@@ -77,9 +77,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $cmds {
-            puts "echo '#!/bin/bash' > /work/\$USER/.modulebin/bwa/0.7.17/$cmd;"
-            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/bwa/0.7.17/$cmd;"
-            puts "chmod u+x /work/\$USER/.modulebin/bwa/0.7.17/$cmd;"
+            puts "echo '#!/bin/bash' > /work/\$USER/.modulebin/busco/5.6.1/$cmd;"
+            puts "echo '$singularity_exec $cmd $@' >> /work/\$USER/.modulebin/busco/5.6.1/$cmd;"
+            puts "chmod u+x /work/\$USER/.modulebin/busco/5.6.1/$cmd;"
         }
         
         # Unset shell header variable

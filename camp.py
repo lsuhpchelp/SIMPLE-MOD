@@ -112,10 +112,13 @@ class MainWindow(QMainWindow):
         # Add / Delete buttons
         self.addBtn = QPushButton("Add a new module", self)
         self.addBtn.clicked.connect(self.addMod)
+        self.copyBtn = QPushButton("Copy current module", self)
+        self.copyBtn.clicked.connect(self.copyMod)
         self.delBtn = QPushButton("Delete selected module", self)
         self.delBtn.clicked.connect(self.delMod)
         self.blk1BtnLayout = QHBoxLayout()
         self.blk1BtnLayout.addWidget(self.addBtn)
+        self.blk1BtnLayout.addWidget(self.copyBtn)
         self.blk1BtnLayout.addWidget(self.delBtn)
         
         # Combine module choose layout
@@ -574,6 +577,7 @@ License: \tMIT License
                 # If the module of the same name and version exists, warn and do nother
                 if (modVersion in self.db[modName].keys()):
                     QMessageBox.critical(self, 'Error', 'Module of the same name and version already exists!')
+                    return
                     
                 else:
                 
@@ -603,6 +607,57 @@ License: \tMIT License
                         "envs":                     {  },
                         "template":                 "template/temp-Modules.tcl"
                     }
+                }
+                
+            # Update dropdown menu
+            self.nameDropUpdateFromDB()
+            self.nameDropSetCurrentText(newModDial.modNameText.text())
+            self.versionDropUpdateFromDB()
+            self.versionDropSetCurrentText(newModDial.modVersionText.text())
+            self.modUpdateFromDB()
+            
+            # Mark database as changed
+            self.flagDBChanged = True
+        
+            # Update window title
+            self.setTitleForUnsavedChanges()
+
+    def copyMod(self):
+        """
+        Copy current module.
+        """
+        
+        # Check any unsaved changes
+        if (self.cancelForUnsavedModChanges()): return
+    
+        # Open a dialog
+        newModDial = NewModuleDialog(self)
+        
+        # If confirmed, create module
+        if newModDial.exec_():
+
+            # Strip module name and version
+            modName = newModDial.modNameText.text()
+            modVersion = newModDial.modVersionText.text()
+            
+            # Check a module with the same name already exist:
+            if (modName in self.db.keys()):
+            
+                # If the module of the same name and version exists, warn and do nother
+                if (modVersion in self.db[modName].keys()):
+                    QMessageBox.critical(self, 'Error', 'Module of the same name and version already exists!')
+                    return
+                    
+                else:
+                
+                    # If the module name is found but version is not, add a new version to existing module name
+                    self.db[modName][modVersion] = self.currentModule.copy()
+                    
+            else:
+            
+                # If the module name is not found, add a new module name
+                self.db[modName] = { 
+                    modVersion : self.currentModule.copy()
                 }
                 
             # Update dropdown menu
@@ -890,6 +945,7 @@ License: \tMIT License
         self.envsDelBtn.setEnabled(isEnabled)
         self.templateText.setEnabled(isEnabled)
         self.templatePickerBtn.setEnabled(isEnabled)
+        self.copyBtn.setEnabled(isEnabled)
         self.delBtn.setEnabled(isEnabled)
         self.genBtn.setEnabled(isEnabled)
         self.exportBtn.setEnabled(isEnabled)

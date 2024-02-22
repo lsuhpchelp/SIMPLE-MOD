@@ -8,7 +8,8 @@
 #           >= 4.5.2. See https://github.com/cea-hpc/modules
 #          May not be compatible with different module systems.
 #       2) This module template uses shell functions to map executables
-#          in container images.
+#          in container images. 
+#          (An older implementation. No long in use)
 # =====================================================================
 
 # ---------------------------------------------------------------------
@@ -72,7 +73,8 @@ if { [ module-info mode unload ] } {
 }
 
 # For "module help" and "module load"
-if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mode display ] } {
+proc ModulesHelp {} {
+    global cmds
     puts stderr "
 \[ Help information \]
 
@@ -81,5 +83,6 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 2. Below executables are available:
 $cmds"
 }
-proc ModulesHelp {} {
+if { [ module-info mode load ] || [ module-info mode display ]} {
+    ModulesHelp
 }

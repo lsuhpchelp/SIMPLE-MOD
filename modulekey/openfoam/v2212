@@ -97,7 +97,8 @@ if { [ module-info mode load ] } {
 # Currently, wrappers will not be deleted to avoid unwanted issues.
 
 # For "module help" and "module load"
-if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mode display ] } {
+proc ModulesHelp {} {
+    global cmds
     puts stderr "
 \[ Help information \]
 
@@ -106,5 +107,6 @@ if { [ module-info mode help ] || [ module-info mode load ] || [ module-info mod
 2. Below executables are available:
 $cmds"
 }
-proc ModulesHelp {} {
+if { [ module-info mode load ] || [ module-info mode display ]} {
+    ModulesHelp
 }
