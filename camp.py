@@ -463,7 +463,7 @@ License: \tMIT License
         self.versionDrop.currentTextChanged.disconnect()
         self.versionDrop.clear()
         if (self.nameDrop.currentText()) :
-            self.versionDrop.addItems(sorted(self.db[self.nameDrop.currentText()].keys()))
+            self.versionDrop.addItems(sorted(self.db[self.nameDrop.currentText()].keys(), reverse=True))
         self.modUpdateFromDB()
         self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
 

@@ -12,6 +12,9 @@
 #          May not be compatible with different module systems.
 #       2) This template generates wrapper scripts in users' 
 #          environment, and works with MPI-enabled software packages.
+#       3) This template is designed for NGC (or similarly designed
+#          containers) which uses "singularity run" instead of 
+#          "singularity exec".
 # =====================================================================
 
 # ---------------------------------------------------------------------
@@ -25,36 +28,36 @@ set WRAPPER_PATH /work/$env(USER)/.modulebin
 # ---------------------------------------------------------------------
 
 # Module information
-module-whatis Name: bowtie2
-module-whatis Version: 2.5.1
-module-whatis Description: A fast and sensitive gapped read aligner.
+module-whatis Name: $modName
+module-whatis Version: $modVersion
+module-whatis Description: $whatis
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/bowtie2-2.5.1.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
-set SINGULARITY_FLAGS ""
+set SINGULARITY_IMAGE "$singularity_image"
+set SINGULARITY_BINDPATHS "$singularity_bindpaths"
+set SINGULARITY_FLAGS "$singularity_flags"
 
 # Conflicts
-conflict bowtie2 
+conflict $modName $conflict
 
 # List of commands to overwrite
 set CMDS {
-bowtie2 bowtie2-build bowtie2-inspect
+$cmds_dummy
 }
 
 # Set environment varialbles
-
+$envs
 
 # ---------------------------------------------------------------------
 # Module key setup
 # ---------------------------------------------------------------------
 
 # Combine Singularity exec command
-set SINGULARITY_EXEC "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
+set SINGULARITY_EXEC "singularity run -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
-file mkdir $WRAPPER_PATH/bowtie2/2.5.1
-prepend-path PATH $WRAPPER_PATH/bowtie2/2.5.1
+file mkdir $WRAPPER_PATH/$modName/$modVersion
+prepend-path PATH $WRAPPER_PATH/$modName/$modVersion
 
 # Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
@@ -64,9 +67,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/bowtie2/2.5.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/bowtie2/2.5.1/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/bowtie2/2.5.1/$cmd;"
+            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/$modName/$modVersion/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/$modName/$modVersion/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/$modName/$modVersion/$cmd;"
         }
         
         # Refresh cache (only for csh type shell)
@@ -77,9 +80,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#!/bin/bash' > $WRAPPER_PATH/bowtie2/2.5.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/bowtie2/2.5.1/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/bowtie2/2.5.1/$cmd;"
+            puts "echo '#!/bin/bash' > $WRAPPER_PATH/$modName/$modVersion/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/$modName/$modVersion/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/$modName/$modVersion/$cmd;"
         }
         
     }
