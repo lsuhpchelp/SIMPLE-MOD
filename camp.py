@@ -80,6 +80,14 @@ class MainWindow(QMainWindow):
 
         
         # Menu 2
+        self.settingsMenu = self.menubar.addMenu(' Settings ')
+        
+        self.preferencesAct = QAction('Preferences', self)
+        self.preferencesAct.triggered.connect(self.preferencesDialog)
+        self.settingsMenu.addAction(self.preferencesAct)
+
+        
+        # Menu 3
         self.helpMenu = self.menubar.addMenu(' Help ')
         
         self.aboutAct = QAction('About', self)
@@ -374,6 +382,13 @@ class MainWindow(QMainWindow):
         
         # If has not successfully returned at this point, return False
         return(False)
+
+    def preferencesDialog(self):
+        """
+        Preferences settingsMenu
+        """
+        
+        QMessageBox.aboutQt(self, "About QT")
 
     def aboutDialog(self):
         """

@@ -63,7 +63,7 @@
         "5.6.1": {
             "conflict": "",
             "module_whatis": "Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.",
-            "singularity_image": "/project/jasonli3/containers/busco-5.6.1.sif",
+            "singularity_image": "/home/admin/singularity/busco-5.6.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "busco generate_plot.py",
