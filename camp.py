@@ -11,7 +11,7 @@ from string import Template
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, 
                              QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, 
-                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QAction, QFileDialog)
+                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
 
 # Main window
 class MainWindow(QMainWindow):
@@ -26,11 +26,11 @@ class MainWindow(QMainWindow):
         
         super().__init__()
         
-        # Key attributes (customizable)
-        self.defaultBindingPath = "/work,/project,/usr/local/packages,/ddnA,/var/scratch"
-                                            # Default binding path
+        # Load preferences
+        with open("config.json") as f:
+            self.config = json.load(f)
         
-        # Key attributes (Do not touch)
+        # Key attributes
         self.title = "CAMP (Containerized Application Modulekey Producer)"
                                             # Window title
         self.flagDBChanged = False          # Whether the database is changed from creation or opening
@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
             "singularity_flags":        "",
             "cmds":                     "",
             "envs":                     {  },
-            "template":                 "template/temp-Modules.tcl"
+            "template":                 self.config["defaultTemplate"]
 }
         
         #--------------------------------------------------------
@@ -61,12 +61,12 @@ class MainWindow(QMainWindow):
         self.newDBAct.setShortcut("Ctrl+N")
         self.fileMenu.addAction(self.newDBAct)
         
-        self.openDBAct = QAction('Open Database', self)
+        self.openDBAct = QAction('Open Database...', self)
         self.openDBAct.triggered.connect(self.openDB)
         self.openDBAct.setShortcut("Ctrl+O")
         self.fileMenu.addAction(self.openDBAct)
         
-        self.saveDBAct = QAction('Save Database', self)
+        self.saveDBAct = QAction('Save Database...', self)
         self.saveDBAct.triggered.connect(self.saveDB)
         self.saveDBAct.setShortcut("Ctrl+S")
         self.fileMenu.addAction(self.saveDBAct)
@@ -82,8 +82,9 @@ class MainWindow(QMainWindow):
         # Menu 2
         self.settingsMenu = self.menubar.addMenu(' Settings ')
         
-        self.preferencesAct = QAction('Preferences', self)
+        self.preferencesAct = QAction('Preferences...', self)
         self.preferencesAct.triggered.connect(self.preferencesDialog)
+        self.preferencesAct.setShortcut("Ctrl+P")
         self.settingsMenu.addAction(self.preferencesAct)
 
         
@@ -145,7 +146,7 @@ class MainWindow(QMainWindow):
         
         # Conflicts
         self.conflictText = QLineEdit(self)
-        self.conflictText.setPlaceholderText("(Seperate by space. Itself will be added by default.)")
+        self.conflictText.setPlaceholderText("(Seperate by space. Itself is already added.)")
         pal = self.conflictText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.conflictText.setPalette(pal)
@@ -166,7 +167,7 @@ class MainWindow(QMainWindow):
         
         # Singularity binding path
         self.singularityBindText = QLineEdit(self)
-        self.singularityBindText.setPlaceholderText(f"(Bound by default: /home,/tmp,{self.defaultBindingPath})")
+        self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config["defaultBindingPath"]})")
         pal = self.singularityBindText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.singularityBindText.setPalette(pal)
@@ -174,6 +175,10 @@ class MainWindow(QMainWindow):
         
         # Singularity flags
         self.singularityFlagsText = QLineEdit(self)
+        self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config["defaultFlags"]})")
+        pal = self.singularityFlagsText.palette()
+        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        self.singularityFlagsText.setPalette(pal)
         self.singularityFlagsText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Commands to replace
@@ -279,7 +284,7 @@ class MainWindow(QMainWindow):
             "singularity_flags":        "",
             "cmds":                     "",
             "envs":                     {  },
-            "template":                 "template/temp-Modules.tcl"
+            "template":                 self.config["defaultTemplate"]
         }
         
         # Update current form
@@ -388,7 +393,27 @@ class MainWindow(QMainWindow):
         Preferences settingsMenu
         """
         
-        QMessageBox.aboutQt(self, "About QT")
+        # Open a dialog
+        prefDial = PreferenceDialog(self)
+        
+        # If confirmed, save preferences
+        if prefDial.exec_():
+            
+            # Save preferences to self.config
+            self.config["defaultBindingPath"] = prefDial.defaultBindingPathText.text()
+            self.config["defaultFlags"] = prefDial.defaultFlagsText.text()
+            self.config["defaultImagePath"] = prefDial.defaultImagePathText.text()
+            self.config["defaultTemplate"] = prefDial.defaultTemplateText.text()
+            self.config["defaultModKeyPath"] = prefDial.defaultModKeyPathText.text()
+        
+            # Write to config.json file
+            with open("config.json", "w") as fw:
+                json.dump(self.config, fw, indent=4)
+            
+            # Update prompts
+            self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config["defaultBindingPath"]})")
+            self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config["defaultFlags"]})")
+            
 
     def aboutDialog(self):
         """
@@ -549,7 +574,7 @@ License: \tMIT License
         """
         
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Choose Singularity Image File', filter="Singularity Image (*.sif *.img)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Choose Singularity Image File', self.config["defaultImagePath"], filter="Singularity Image (*.sif *.img)")
         if fname:
             self.singularityImageText.setText(fname)
         
@@ -605,7 +630,7 @@ License: \tMIT License
                         "singularity_flags":        "",
                         "cmds":                     "",
                         "envs":                     {  },
-                        "template":                 "template/temp-Modules.tcl"
+                        "template":                 self.config["defaultTemplate"]
                     }
                     
             else:
@@ -620,7 +645,7 @@ License: \tMIT License
                         "singularity_flags":        "",
                         "cmds":                     "",
                         "envs":                     {  },
-                        "template":                 "template/temp-Modules.tcl"
+                        "template":                 self.config["defaultTemplate"]
                     }
                 }
                 
@@ -805,7 +830,7 @@ License: \tMIT License
         """
         
         # Asked the user to select a directory
-        directory = QFileDialog.getExistingDirectory(self, 'Select Directory to Save Module Keys', 'modulekey',)
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory to Save Module Keys', self.config["defaultModKeyPath"])
 
         # If a directory is successfully selected...
         if directory:
@@ -852,7 +877,7 @@ License: \tMIT License
         if (self.cancelForUnsavedChanges()): return
         
         # Asked the user to select a directory
-        directory = QFileDialog.getExistingDirectory(self, 'Select Directory to Save Module Keys', 'modulekey',)
+        directory = QFileDialog.getExistingDirectory(self, 'Select Directory to Save Module Keys', self.config["defaultModKeyPath"])
 
         # If a directory is successfully selected...
         if directory:
@@ -911,13 +936,13 @@ License: \tMIT License
         # Return formatted module key string based on the template
         return tmpModKey.safe_substitute(
             modName = modName,
-            modNameCap = modName.upper(),
+            #modNameCap = modName.upper(),
             conflict = dictModule["conflict"],
             whatis = dictModule["module_whatis"],
             modVersion = modVersion,
             singularity_image = dictModule["singularity_image"],
-            singularity_bindpaths = self.defaultBindingPath + "," + dictModule["singularity_bindpaths"],
-            singularity_flags = dictModule["singularity_flags"],
+            singularity_bindpaths = ",".join((self.config["defaultBindingPath"], dictModule["singularity_bindpaths"])),
+            singularity_flags = " ".join((self.config["defaultFlags"], dictModule["singularity_flags"])),
             cmds_dummy = dictModule["cmds"],
             envs = envsStr
         )
@@ -1060,32 +1085,32 @@ class NewModuleDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        # Create text field to enter database name
-        self.modNameText = QLineEdit(self)
-        self.modVersionText = QLineEdit(self)
+        # Create form layout
         self.formLayout = QFormLayout()
+        
+        # Create text field to enter module name and versions
+        self.modNameText = QLineEdit(self)
         self.formLayout.addRow("Module name:", self.modNameText)
+        self.modVersionText = QLineEdit(self)
         self.formLayout.addRow("Module version:", self.modVersionText)
 
-        # Create buttons
-        self.confirmBtn = QPushButton('Confirm', self)
-        self.confirmBtn.clicked.connect(self.checkEmpty)
-        self.cancelBtn = QPushButton('Cancel', self)
-        self.cancelBtn.clicked.connect(self.reject)
-
-        # Create button layout and add buttons
-        self.btnLayout = QHBoxLayout()
-        self.btnLayout.addWidget(self.confirmBtn)
-        self.btnLayout.addWidget(self.cancelBtn)
+        # Create "Save" and "Cancel" buttons
+        self.btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        self.btns.accepted.connect(self.checkEmpty)
+        self.btns.rejected.connect(self.reject)
+        self.btns.setCenterButtons(True)
         
         # Create entire layout
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.formLayout)
-        self.layout.addLayout(self.btnLayout)
+        self.layout.addWidget(self.btns)
         self.setLayout(self.layout)
         self.setWindowTitle("Add a new module")
     
     def checkEmpty(self):
+        """
+        Check if either module name or version is empty.
+        """
         
         # Strip string
         self.modNameText.setText(self.modNameText.text().strip())
@@ -1096,7 +1121,99 @@ class NewModuleDialog(QDialog):
             self.accept() 
         else:
             QMessageBox.critical(self, 'Error', 'Module name and version cannot be empty!')
-            
+
+
+# Preference dialog class
+class PreferenceDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        # Create form layout
+        self.formLayout = QFormLayout()
+        
+        # Set default binding paths
+        self.defaultBindingPathText = QLineEdit(self)
+        self.defaultBindingPathText.setText(parent.config["defaultBindingPath"])
+        self.formLayout.addRow("Always bind these paths: ", self.defaultBindingPathText)
+        
+        # Set default flags
+        self.defaultFlagsText = QLineEdit(self)
+        self.defaultFlagsText.setText(parent.config["defaultFlags"])
+        self.formLayout.addRow("Always enable these flags:", self.defaultFlagsText)
+        
+        # Set default image directory (editable text field and file picker button)
+        self.defaultImagePathText = QLineEdit(self)
+        self.defaultImagePathText.setText(parent.config["defaultImagePath"])
+        self.defaultImagePathPickerBtn = QPushButton("Browse", self)
+        self.defaultImagePathPickerBtn.clicked.connect(self.pickDefaultImagePath)
+        self.defaultImagePathLayout = QHBoxLayout()
+        self.defaultImagePathLayout.addWidget(self.defaultImagePathText)
+        self.defaultImagePathLayout.addWidget(self.defaultImagePathPickerBtn)
+        self.formLayout.addRow("Default Singularity images directory:", self.defaultImagePathLayout)
+        
+        # Set default module template (editable text field and file picker button)
+        self.defaultTemplateText = QLineEdit(self)
+        self.defaultTemplateText.setText(parent.config["defaultTemplate"])
+        self.defaultTemplatePickerBtn = QPushButton("Browse", self)
+        self.defaultTemplatePickerBtn.clicked.connect(self.pickDefaultTemplate)
+        self.defaultTemplateLayout = QHBoxLayout()
+        self.defaultTemplateLayout.addWidget(self.defaultTemplateText)
+        self.defaultTemplateLayout.addWidget(self.defaultTemplatePickerBtn)
+        self.formLayout.addRow("Default module template:", self.defaultTemplateLayout)
+        
+        # Set default module key generation path (editable text field and file picker button)
+        self.defaultModKeyPathText = QLineEdit(self)
+        self.defaultModKeyPathText.setText(parent.config["defaultModKeyPath"])
+        self.defaultModKeyPathPickerBtn = QPushButton("Browse", self)
+        self.defaultModKeyPathPickerBtn.clicked.connect(self.pickDefaultModKeyPath)
+        self.defaultModKeyPathLayout = QHBoxLayout()
+        self.defaultModKeyPathLayout.addWidget(self.defaultModKeyPathText)
+        self.defaultModKeyPathLayout.addWidget(self.defaultModKeyPathPickerBtn)
+        self.formLayout.addRow("Default directory to generate module keys:", self.defaultModKeyPathLayout)
+
+        # Create "Save" and "Cancel" buttons
+        self.btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, self)
+        self.btns.accepted.connect(self.accept)
+        self.btns.rejected.connect(self.reject)
+        self.btns.setCenterButtons(True)
+        
+        # Create entire layout
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.formLayout)
+        self.layout.addWidget(self.btns)
+        self.setLayout(self.layout)
+        self.setWindowTitle("Preferences")
+        self.resize(600, self.size().height())
+    
+    def pickDefaultImagePath(self):
+        """
+        Pick default Singularity path in file browser.
+        """
+        
+        # Pick a directory
+        directory = QFileDialog.getExistingDirectory(self, 'Select Default Singularity Image Directory', self.defaultImagePathText.text().strip())
+        if directory:
+            self.defaultImagePathText.setText(directory)
+    
+    def pickDefaultTemplate(self):
+        """
+        Pick default module template in file browser.
+        """
+        
+        # Pick a file
+        fname, _ = QFileDialog.getOpenFileName(self, 'Choose Default Module Key Template File', self.defaultTemplateText.text().strip(), filter="All files (*)")
+        if fname:
+            self.defaultTemplateText.setText(fname)
+    
+    def pickDefaultModKeyPath(self):
+        """
+        Pick default default module key generation path in file browser.
+        """
+        
+        # Pick a directory
+        directory = QFileDialog.getExistingDirectory(self, 'Select Default Directory to Generate Module Keys', self.defaultModKeyPathText.text().strip())
+        if directory:
+            self.defaultModKeyPathText.setText(directory)
 
 # Main function
 if __name__ == "__main__":
