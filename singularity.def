@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: ubuntu:20.04
+From: ubuntu:22.04
 
 
 ################################################################################
@@ -17,10 +17,7 @@ Description     CAMP is a QT-based GUI software tool to automatically generate m
 # Install dependencies
 
 apt update
-DEBIAN_FRONTEND="noninteractive" apt install -y qt5-default
-ln -fs /usr/share/zoneinfo/America/Chicago /etc/localtime
-dpkg-reconfigure --frontend noninteractive tzdata
-apt install -y python3 pip git
+apt install -y python3 pip git qtbase5-dev qt5-qmake
 apt clean
 
 pip install --upgrade pip

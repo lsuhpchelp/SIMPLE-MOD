@@ -139,6 +139,7 @@ class MainWindow(QMainWindow):
         self.conflictText.setPlaceholderText("(Seperate by space. Itself is already added.)")
         pal = self.conflictText.palette()
         pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+                # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
         self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
         
@@ -157,25 +158,19 @@ class MainWindow(QMainWindow):
         
         # Singularity binding path
         self.singularityBindText = QLineEdit(self)
-        self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config["defaultBindingPath"]})")
-        pal = self.singularityBindText.palette()
-        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config['defaultBindingPath']})")
         self.singularityBindText.setPalette(pal)
         self.singularityBindText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Singularity flags
         self.singularityFlagsText = QLineEdit(self)
-        self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config["defaultFlags"]})")
-        pal = self.singularityFlagsText.palette()
-        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config['defaultFlags']})")
         self.singularityFlagsText.setPalette(pal)
         self.singularityFlagsText.textChanged.connect(self.setTitleForUnsavedChanges)
         
         # Commands to replace
         self.cmdsText = QTextEdit(self)
         self.cmdsText.setPlaceholderText("(Seperate by space or new line)")
-        pal = self.cmdsText.palette()
-        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
         self.cmdsText.setPalette(pal)
         self.cmdsText.textChanged.connect(self.setTitleForUnsavedChanges)
         
@@ -392,8 +387,8 @@ class MainWindow(QMainWindow):
                 json.dump(self.config, fw, indent=4)
             
             # Update prompts
-            self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config["defaultBindingPath"]})")
-            self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config["defaultFlags"]})")
+            self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config['defaultBindingPath']})")
+            self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config['defaultFlags']})")
             
 
     def aboutDialog(self):
