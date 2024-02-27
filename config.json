@@ -1,7 +1,0 @@
-{
-    "defaultBindingPath": "/work,/project,/usr/local/packages,/ddnA,/ddnB,/var/scratch",
-    "defaultFlags": "",
-    "defaultImagePath": "/home/admin/singularity",
-    "defaultTemplate": "./template/template.tcl",
-    "defaultModKeyPath": "./modulekey"
-}

@@ -27,24 +27,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         
         # Load preferences
-        with open("config.json") as f:
-            self.config = json.load(f)
+        self.loadPreferences()
         
         # Key attributes
         self.title = "CAMP (Containerized Application Modulekey Producer)"
-                                            # Window title
-        self.flagDBChanged = False          # Whether the database is changed from creation or opening
-        self.db = {}                        # Loaded database dictionary (empty if it's new)
-        self.currentModule = {              # Current opened module
-            "conflict":                 "",
-            "module_whatis":            "",
-            "singularity_image":        "",
-            "singularity_bindpaths":    "",
-            "singularity_flags":        "",
-            "cmds":                     "",
-            "envs":                     {  },
-            "template":                 self.config["defaultTemplate"]
-}
+                                                    # Window title
+        self.flagDBChanged = False                  # Whether the database is changed from creation or opening
+        self.db = {}                                # Loaded database dictionary (empty if it's new)
+        self.currentModule = self.retEmptyModule()  # Current opened module
         
         #--------------------------------------------------------
         # Menu bar
@@ -276,16 +266,7 @@ class MainWindow(QMainWindow):
         
         # Reset database to empty
         self.db = {}
-        self.currentModule = {
-            "conflict":                 "",
-            "module_whatis":            "",
-            "singularity_image":        "",
-            "singularity_bindpaths":    "",
-            "singularity_flags":        "",
-            "cmds":                     "",
-            "envs":                     {  },
-            "template":                 self.config["defaultTemplate"]
-        }
+        self.currentModule = self.retEmptyModule()
         
         # Update current form
         self.nameDropUpdateFromDB()
@@ -407,7 +388,7 @@ class MainWindow(QMainWindow):
             self.config["defaultModKeyPath"] = prefDial.defaultModKeyPathText.text()
         
             # Write to config.json file
-            with open("config.json", "w") as fw:
+            with open(os.path.expanduser('~/.camprc'), "w") as fw:
                 json.dump(self.config, fw, indent=4)
             
             # Update prompts
@@ -622,31 +603,13 @@ License: \tMIT License
                 else:
                 
                     # If the module name is found but version is not, add a new version to existing module name
-                    self.db[modName][modVersion] = { 
-                        "conflict":                 "",
-                        "module_whatis":            "",
-                        "singularity_image":        "",
-                        "singularity_bindpaths":    "",
-                        "singularity_flags":        "",
-                        "cmds":                     "",
-                        "envs":                     {  },
-                        "template":                 self.config["defaultTemplate"]
-                    }
+                    self.db[modName][modVersion] = self.retEmptyModule()
                     
             else:
             
                 # If the module name is not found, add a new module name
                 self.db[modName] = { 
-                    modVersion : {
-                        "conflict":                 "",
-                        "module_whatis":            "",
-                        "singularity_image":        "",
-                        "singularity_bindpaths":    "",
-                        "singularity_flags":        "",
-                        "cmds":                     "",
-                        "envs":                     {  },
-                        "template":                 self.config["defaultTemplate"]
-                    }
+                    modVersion : self.retEmptyModule()
                 }
                 
             # Update dropdown menu
@@ -951,6 +914,43 @@ License: \tMIT License
     #============================================================
     # Misc
     #============================================================
+    
+    def loadPreferences(self):
+        """
+        Load preferences from "~/.camprc". Create the file if it does not exist.
+        """
+        
+        # Check if "~/.camprc" exist. 
+        #   If exists, open and read preference settings.
+        #   If not, create it with default settings.
+        if os.path.exists(os.path.expanduser('~/.camprc')):
+            with open(os.path.expanduser('~/.camprc')) as f:
+                self.config = json.load(f)
+        else:
+            self.config = {
+                "defaultBindingPath": "/work,/project,/usr/local/packages,/ddnA,/ddnB,/var/scratch",
+                "defaultFlags": "",
+                "defaultImagePath": "/home/admin/singularity",
+                "defaultTemplate": "./template/template.tcl",
+                "defaultModKeyPath": "./modulekey"
+            }
+            with open(os.path.expanduser('~/.camprc'), "w") as fw:
+                json.dump(self.config, fw, indent=4)
+                
+    def retEmptyModule(self):
+        """
+        Return an empty module dictionary.
+        """
+        return {
+            "conflict":                 "",
+            "module_whatis":            "",
+            "singularity_image":        "",
+            "singularity_bindpaths":    "",
+            "singularity_flags":        "",
+            "cmds":                     "",
+            "envs":                     {  },
+            "template":                 self.config["defaultTemplate"]
+        }
     
     def closeEvent(self, event):
         """
