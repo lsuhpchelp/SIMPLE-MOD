@@ -1,5 +1,7 @@
 # =====================================================================
-# Containerized App Modulekey Producer (CAMP)
+# SIMPLE-MOD 
+#  (Singularity Integrated Module-key Producer for Loadable 
+#   Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
 # Version: 1.0
 # Dependency: PyQt5
@@ -30,7 +32,7 @@ class MainWindow(QMainWindow):
         self.loadPreferences()
         
         # Key attributes
-        self.title = "CAMP (Containerized Application Modulekey Producer)"
+        self.title = "SIMPLE-MOD "
                                                     # Window title
         self.flagDBChanged = False                  # Whether the database is changed from creation or opening
         self.db = {}                                # Loaded database dictionary (empty if it's new)
@@ -382,8 +384,8 @@ class MainWindow(QMainWindow):
             self.config["defaultTemplate"] = prefDial.defaultTemplateText.text()
             self.config["defaultModKeyPath"] = prefDial.defaultModKeyPathText.text()
         
-            # Write to config.json file
-            with open(os.path.expanduser('~/.camprc'), "w") as fw:
+            # Write to configuration file
+            with open(os.path.expanduser('~/.simple-modrc'), "w") as fw:
                 json.dump(self.config, fw, indent=4)
             
             # Update prompts
@@ -398,12 +400,13 @@ class MainWindow(QMainWindow):
         
         QMessageBox.about(self, "About", \
             f"""{self.title}
+(Singularity Integrated Module-key Producer for Loadable Environment MODules)
 
-CAMP is a QT-based GUI software tool to automatically generate module keys for container-based software packages.
+SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
             
 Version: \t1.0
 Author: \tJason Li
-Home: \thttps://github.com/lsuhpchelp/CAMP
+Home: \thttps://github.com/lsuhpchelp/SIMPLE-MOD
 License: \tMIT License
 """)
 
@@ -912,14 +915,14 @@ License: \tMIT License
     
     def loadPreferences(self):
         """
-        Load preferences from "~/.camprc". Create the file if it does not exist.
+        Load preferences from "~/.simple-modrc". Create the file if it does not exist.
         """
         
-        # Check if "~/.camprc" exist. 
+        # Check if "~/.simple-modrc" exist. 
         #   If exists, open and read preference settings.
         #   If not, create it with default settings.
-        if os.path.exists(os.path.expanduser('~/.camprc')):
-            with open(os.path.expanduser('~/.camprc')) as f:
+        if os.path.exists(os.path.expanduser('~/.simple-modrc')):
+            with open(os.path.expanduser('~/.simple-modrc')) as f:
                 self.config = json.load(f)
         else:
             self.config = {
@@ -929,7 +932,7 @@ License: \tMIT License
                 "defaultTemplate": "./template/template.tcl",
                 "defaultModKeyPath": "./modulekey"
             }
-            with open(os.path.expanduser('~/.camprc'), "w") as fw:
+            with open(os.path.expanduser('~/.simple-modrc'), "w") as fw:
                 json.dump(self.config, fw, indent=4)
                 
     def retEmptyModule(self):
@@ -949,7 +952,7 @@ License: \tMIT License
     
     def closeEvent(self, event):
         """
-        Exit CAMP.
+        Exit SIMPLE-MOD.
         """
         # Check any unsaved changes
         if (self.cancelForUnsavedChanges()): 
