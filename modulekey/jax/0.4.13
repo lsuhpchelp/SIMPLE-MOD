@@ -31,7 +31,7 @@ module-whatis Description: JAX is NumPy on the CPU, GPU, and TPU, with great aut
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/jax-0.4.13.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/ddnB,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS " --nv"
 
 # Conflicts

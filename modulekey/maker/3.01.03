@@ -31,7 +31,7 @@ module-whatis Description: MAKER is a portable and easily configurable genome an
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/maker-3.01.03.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/ddnB,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts

@@ -31,7 +31,7 @@ module-whatis Description: CAMP is a QT-based GUI software tool to automatically
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/vcftools-0.1.16.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/ddnB,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts

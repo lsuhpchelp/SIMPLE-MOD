@@ -12,7 +12,7 @@
 
 ### 1.1 About SIMPLE-MOD
 
-SIMPLE-MOD (Singularity Integrated Module-key Producer for Loadable Environment MODules) is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
+**SIMPLE-MOD** (**S**ingularity **I**ntegrated **M**odule-key **P**roducer for **L**oadable **E**nvironment **MOD**ules) is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
 
 Currently, SIMPLE-MOD supports two commonly used module systems through pre-written templates: 
 - ***Environment Modules*** (https://github.com/cea-hpc/modules) 
