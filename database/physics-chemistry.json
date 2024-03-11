@@ -20,5 +20,17 @@
             "envs": {},
             "template": "./template/template-NGC.tcl"
         }
+    },
+    "openbabel": {
+        "3.1.1": {
+            "conflict": "",
+            "module_whatis": "Open Babel is a chemical toolbox designed to speak the many languages of chemical data. It\u2019s an open, collaborative project allowing anyone to search, convert, analyze, or store data from molecular modeling, chemistry, solid-state materials, biochemistry, or related areas.",
+            "singularity_image": "/home/admin/singularity/openbabel-3.1.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "obabel obgui obconformer obdistgen obenergy obfit obfitall obgen obgrep obminimize obmm obprobe obprop obrms obrotamer obrotate obspectrophore obsym obtautomer obthermo roundtrip ",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
