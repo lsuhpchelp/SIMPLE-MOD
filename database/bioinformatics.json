@@ -236,5 +236,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "braker": {
+        "3.0.8": {
+            "conflict": "",
+            "module_whatis": "BRAKER is a pipeline for fully automated prediction of protein coding gene structures with GeneMark-ES/ET/EP/ETP and AUGUSTUS in novel eukaryotic genomes.",
+            "singularity_image": "/home/admin/singularity/braker-3.0.8.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "braker.pl braker_cleanup.pl\ncompute_accuracies.sh downsample_traingenes.pl ensure_n_training_genes.py filterGenemark.pl filterIntronsFindStrand.pl filter_augustus_gff.pl findGenesInIntrons.pl gatech_pmp2hints.pl get_etp_hints.py get_gc_content.py log_reg_prothints.pl sortGeneMark.py stringtie2utr.py ",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
