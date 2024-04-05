@@ -248,5 +248,19 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "nextflow": {
+        "23.10.1": {
+            "conflict": "",
+            "module_whatis": "A DSL for data-driven computational pipelines.",
+            "singularity_image": "/home/admin/singularity/nextflow-23.10.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "nextflow",
+            "envs": {
+                "NXF_HOME": "/work/$env(USER)/.nextflow"
+            },
+            "template": "./template/template.tcl"
+        }
     }
 }
