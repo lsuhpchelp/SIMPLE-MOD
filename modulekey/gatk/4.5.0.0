@@ -25,21 +25,21 @@ set WRAPPER_PATH /work/$env(USER)/.modulebin
 # ---------------------------------------------------------------------
 
 # Module information
-module-whatis Name: qiime2
-module-whatis Version: 2023.9.1
-module-whatis Description: QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.
+module-whatis Name: gatk
+module-whatis Version: 4.5.0.0
+module-whatis Description: It is a collection of command-line tools for analyzing high-throughput sequencing data with a primary focus on variant discovery.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/qiime2-2023.9.1.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/gatk-4.5.0.0.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts
-conflict qiime2 python conda tensorflow pytorch horovod jax
+conflict gatk 
 
 # List of commands to overwrite
 set CMDS {
-qiime python python3 pip pip3
+gatk
 }
 
 # Set environment varialbles
@@ -53,8 +53,8 @@ qiime python python3 pip pip3
 set SINGULARITY_EXEC "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
-file mkdir $WRAPPER_PATH/qiime2/2023.9.1
-prepend-path PATH $WRAPPER_PATH/qiime2/2023.9.1
+file mkdir $WRAPPER_PATH/gatk/4.5.0.0
+prepend-path PATH $WRAPPER_PATH/gatk/4.5.0.0
 
 # Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
@@ -64,9 +64,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/qiime2/2023.9.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/qiime2/2023.9.1/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/qiime2/2023.9.1/$cmd;"
+            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
         }
         
         # Refresh cache (only for csh type shell)
@@ -77,9 +77,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#!/bin/bash' > $WRAPPER_PATH/qiime2/2023.9.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/qiime2/2023.9.1/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/qiime2/2023.9.1/$cmd;"
+            puts "echo '#!/bin/bash' > $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
         }
         
     }
