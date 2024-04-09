@@ -1,9 +1,19 @@
 {
     "jax": {
         "0.4.13": {
-            "conflict": "python pytorch tensorflow horovod",
+            "conflict": "python conda mamba pytorch tensorflow horovod",
             "module_whatis": "JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.",
             "singularity_image": "/home/admin/singularity/jax-0.4.13.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "python python3 pip pip3",
+            "envs": {},
+            "template": "./template/template.tcl"
+        },
+        "0.4.26": {
+            "conflict": "python conda mamba pytorch tensorflow horovod",
+            "module_whatis": "JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.",
+            "singularity_image": "/home/admin/singularity/jax-0.4.26.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "python python3 pip pip3",
@@ -13,9 +23,19 @@
     },
     "pytorch": {
         "2.0.1": {
-            "conflict": "python tensorflow jax horovod",
+            "conflict": "python conda mamba tensorflow jax horovod",
             "module_whatis": "PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
             "singularity_image": "/home/admin/singularity/pytorch-2.0.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "python python3 pip pip3 torchrun",
+            "envs": {},
+            "template": "./template/template.tcl"
+        },
+        "2.2.2": {
+            "conflict": "python conda mamba tensorflow jax horovod",
+            "module_whatis": "PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
+            "singularity_image": "/home/admin/singularity/pytorch-2.2.2.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "python python3 pip pip3 torchrun",
@@ -25,9 +45,19 @@
     },
     "tensorflow": {
         "2.13.0": {
-            "conflict": "python pytorch jax horovod",
+            "conflict": "python conda mamba pytorch jax horovod",
             "module_whatis": "Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
             "singularity_image": "/home/admin/singularity/tensorflow-2.13.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "python python3 pip pip3",
+            "envs": {},
+            "template": "./template/template.tcl"
+        },
+        "2.16.1": {
+            "conflict": "python conda mamba pytorch jax horovod",
+            "module_whatis": "Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.",
+            "singularity_image": "/home/admin/singularity/tensorflow-2.16.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "python python3 pip pip3",
@@ -37,7 +67,7 @@
     },
     "horovod": {
         "0.28.1": {
-            "conflict": "python pytorch tensorflow jax",
+            "conflict": "python conda mamba pytorch tensorflow jax",
             "module_whatis": "Distributed training framework for TensorFlow, Keras, PyTorch, and Apache MXNet.",
             "singularity_image": "/home/admin/singularity/horovod-0.28.1-gpu-jupyter.sif",
             "singularity_bindpaths": "",

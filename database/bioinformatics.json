@@ -255,7 +255,7 @@
             "template": "./template/template.tcl"
         },
         "2024.2": {
-            "conflict": "python conda tensorflow pytorch horovod jax",
+            "conflict": "python conda mamba tensorflow pytorch horovod jax",
             "module_whatis": "QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.",
             "singularity_image": "/home/admin/singularity/qiime2-2024.2.sif",
             "singularity_bindpaths": "",
