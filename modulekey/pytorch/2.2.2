@@ -25,21 +25,21 @@ set WRAPPER_PATH /home/$env(USER)/.local/bin/modules
 # ---------------------------------------------------------------------
 
 # Module information
-module-whatis Name: busco
-module-whatis Version: 5.4.7
-module-whatis Description: Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.
+module-whatis Name: pytorch
+module-whatis Version: 2.2.2
+module-whatis Description: PyTorch framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/busco-5.4.7.sif"
+set SINGULARITY_IMAGE "/home/admin/singularity/pytorch-2.2.2.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
-set SINGULARITY_FLAGS " "
+set SINGULARITY_FLAGS " --nv"
 
 # Conflicts
-conflict busco 
+conflict pytorch python conda mamba tensorflow jax horovod
 
 # List of commands to overwrite
 set CMDS {
-busco generate_plot.py
+python python3 pip pip3 torchrun
 }
 
 # Set environment varialbles
@@ -53,8 +53,8 @@ busco generate_plot.py
 set SINGULARITY_EXEC "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
-file mkdir $WRAPPER_PATH/busco/5.4.7
-prepend-path PATH $WRAPPER_PATH/busco/5.4.7
+file mkdir $WRAPPER_PATH/pytorch/2.2.2
+prepend-path PATH $WRAPPER_PATH/pytorch/2.2.2
 
 # Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
@@ -64,9 +64,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/busco/5.4.7/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/busco/5.4.7/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/busco/5.4.7/$cmd;"
+            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/pytorch/2.2.2/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/pytorch/2.2.2/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/pytorch/2.2.2/$cmd;"
         }
         
         # Refresh cache (only for csh type shell)
@@ -77,9 +77,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#!/bin/bash' > $WRAPPER_PATH/busco/5.4.7/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/busco/5.4.7/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/busco/5.4.7/$cmd;"
+            puts "echo '#!/bin/bash' > $WRAPPER_PATH/pytorch/2.2.2/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/pytorch/2.2.2/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/pytorch/2.2.2/$cmd;"
         }
         
     }

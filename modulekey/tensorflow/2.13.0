@@ -18,7 +18,7 @@
 # Wrapper scripts path (Customize me)
 # ---------------------------------------------------------------------
 
-set WRAPPER_PATH /work/$env(USER)/.modulebin
+set WRAPPER_PATH /home/$env(USER)/.local/bin/modules
 
 # ---------------------------------------------------------------------
 # Software specific information
@@ -35,7 +35,7 @@ set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch
 set SINGULARITY_FLAGS " --nv"
 
 # Conflicts
-conflict tensorflow python pytorch jax horovod
+conflict tensorflow python conda mamba pytorch jax horovod
 
 # List of commands to overwrite
 set CMDS {

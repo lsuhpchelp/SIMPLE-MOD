@@ -18,7 +18,7 @@
 # Wrapper scripts path (Customize me)
 # ---------------------------------------------------------------------
 
-set WRAPPER_PATH /work/$env(USER)/.modulebin
+set WRAPPER_PATH /home/$env(USER)/.local/bin/modules
 
 # ---------------------------------------------------------------------
 # Software specific information
