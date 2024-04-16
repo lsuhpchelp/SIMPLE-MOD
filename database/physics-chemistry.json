@@ -32,5 +32,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "octopus": {
+        "14.0": {
+            "conflict": "",
+            "module_whatis": "Octopus is a software package for density-functional theory (DFT), and time-dependent density functional theory (TDDFT).",
+            "singularity_image": "/home/admin/singularity/octopus-14.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "octopus\ncreate_combinations.py oct-analyze_projections oct-atomic_occupations oct-casida_spectrum oct-center-geom oct-check_deallocs oct-conductivity oct-convert oct-dielectric-function oct-display_partitions oct-floquet oct-harmonic-spectrum oct-help oct-infrared_spectrum oct-local_multipoles oct-oscillator-strength oct-photoelectron_spectrum oct-propagation_spectrum oct-run_performance_testsuite.sh oct-run_periodic_table oct-run_regression_test.pl oct-run_testsuite.sh oct-spin_susceptibility oct-unfold oct-vdW_c6 oct-vibrational_spectrum oct-wannier90 oct-xyz-anim ",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
