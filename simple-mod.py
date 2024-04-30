@@ -926,7 +926,7 @@ License: \tMIT License
                 self.config = json.load(f)
         else:
             self.config = {
-                "defaultBindingPath": "/work,/project,/usr/local/packages,/ddnA,/var/scratch",
+                "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
                 "defaultFlags": "",
                 "defaultImagePath": "/home/admin/singularity",
                 "defaultTemplate": "./template/template.tcl",
