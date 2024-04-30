@@ -31,7 +31,7 @@ module-whatis Description: Octopus is a software package for density-functional 
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/octopus-14.0.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts

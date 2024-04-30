@@ -31,7 +31,7 @@ module-whatis Description: OpenFOAM is free, open source software for CFD from t
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/openfoam10-openmpi.4.0.3-pmi2.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts

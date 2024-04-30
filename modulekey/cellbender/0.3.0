@@ -31,7 +31,7 @@ module-whatis Description: CellBender is a software package for eliminating tech
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/cellbender-0.3.0.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " --nv"
 
 # Conflicts

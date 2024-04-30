@@ -31,7 +31,7 @@ module-whatis Description: Tensorflow framework for deep learning, with GPU supp
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow-2.13.0.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " --nv"
 
 # Conflicts

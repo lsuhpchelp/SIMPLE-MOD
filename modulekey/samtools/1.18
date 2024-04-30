@@ -31,7 +31,7 @@ module-whatis Description: Tools (written in C using htslib) for manipulating ne
 
 # Singularity options
 set SINGULARITY_IMAGE "/home/admin/singularity/samtools-1.18.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/ddnA,/var/scratch,"
+set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts
