@@ -30,7 +30,7 @@ module-whatis Version: 0.4.26
 module-whatis Description: JAX is NumPy on the CPU, GPU, and TPU, with great automatic differentiation for high-performance machine learning research.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/jax-0.4.26.sif"
+set SINGULARITY_IMAGE "/project/containers/images/jax-0.4.26.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " --nv"
 

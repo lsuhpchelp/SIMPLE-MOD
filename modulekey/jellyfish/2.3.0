@@ -30,7 +30,7 @@ module-whatis Version: 2.3.0
 module-whatis Description: A fast multi-threaded k-mer counter
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/trinity-2.15.1.sif"
+set SINGULARITY_IMAGE "/project/containers/images/trinity-2.15.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " -e"
 

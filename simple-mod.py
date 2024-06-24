@@ -928,7 +928,7 @@ License: \tMIT License
             self.config = {
                 "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
                 "defaultFlags": "",
-                "defaultImagePath": "/home/admin/singularity",
+                "defaultImagePath": "/project/containers/images",
                 "defaultTemplate": "./template/template.tcl",
                 "defaultModKeyPath": "./modulekey"
             }

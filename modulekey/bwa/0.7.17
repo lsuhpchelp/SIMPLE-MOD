@@ -30,7 +30,7 @@ module-whatis Version: 0.7.17
 module-whatis Description: Burrow-Wheeler Aligner for short-read alignment (see minimap2 for long-read alignment)
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/bwa-0.7.17.sif"
+set SINGULARITY_IMAGE "/project/containers/images/bwa-0.7.17.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 

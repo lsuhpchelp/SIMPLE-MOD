@@ -30,7 +30,7 @@ module-whatis Version: 3.01.03
 module-whatis Description: MAKER is a portable and easily configurable genome annotation pipeline.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/maker-3.01.03.sif"
+set SINGULARITY_IMAGE "/project/containers/images/maker-3.01.03.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 

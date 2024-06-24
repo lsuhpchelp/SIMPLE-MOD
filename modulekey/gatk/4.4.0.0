@@ -30,7 +30,7 @@ module-whatis Version: 4.4.0.0
 module-whatis Description: It is a collection of command-line tools for analyzing high-throughput sequencing data with a primary focus on variant discovery.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/gatk-4.4.0.0.sif"
+set SINGULARITY_IMAGE "/project/containers/images/gatk-4.4.0.0.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 

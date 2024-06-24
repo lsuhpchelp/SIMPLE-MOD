@@ -3,7 +3,7 @@
         "3.5.0": {
             "conflict": "",
             "module_whatis": "AUGUSTUS is a program to find genes and their structures in one or more genomes.",
-            "singularity_image": "/home/admin/singularity/busco-5.7.1.sif",
+            "singularity_image": "/project/containers/images/busco-5.7.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "aln2wig augustus bam2hints bam2wig compileSpliceCands etraining fastBlockSearch filterBam getSeq homGeneMapping joingenes prepareAlign utrrnaseq\naugustify.py bamToWig.py cleanup-blastdb-volumes.py edirect.py executeTestCGP.py extractAnno.py findRepetitiveProtSeqs.py fix_in_frame_stop_codon_genes.py generate_plot.py getAnnoFastaFromJoingenes.py run_sepp.py run_upp.py split_sequences.py stringtie2fa.py sumlabels.py sumtrees.py windowmasker_2.2.22_adapter.py\naa2nonred.pl add_name_to_gff3.pl augustus2browser.pl augustus2gbrowse.pl autoAug.pl autoAugPred.pl autoAugTrain.pl bedgraph2wig.pl blast2sam.pl blat2gbrowse.pl blat2hints.pl block2prfl.pl bowtie2sam.pl cegma2gff.pl checkParamArchive.pl cleanDOSfasta.pl clusterAndSplitGenes.pl compare_masking.pl computeFlankingRegion.pl createAugustusJoblist.pl del_from_prfl.pl evalCGP.pl eval_dualdecomp.pl eval_multi_gtf.pl exonerate2hints.pl exoniphyDb2hints.pl export2sam.pl extractTranscriptEnds.pl fasta-sanitize.pl filter-ppx.pl filterGenes.pl filterGenesIn.pl filterGenesIn_mRNAname.pl filterGenesOut_mRNAname.pl filterInFrameStopCodons.pl filterMaf.pl filterPSL.pl filterShrimp.pl filterSpliceHints.pl findGffNamesInFasta.pl fix_joingenes_gtf.pl gbSmallDNA2gff.pl gbrowseold2gff3.pl getAnnoFasta.pl getLinesMatching.pl get_loci_from_gb.pl gff2gbSmallDNA.pl gffGetmRNA.pl gp2othergp.pl gtf2aa.pl gtf2bed.pl gtf2gff.pl gth2gtf.pl hal2maf_split.pl interpolate_sam.pl joinPeptides.pl join_aug_pred.pl join_mult_hints.pl legacy_blast.pl maf2conswig.pl makeMatchLists.pl makeUtrTrainingSet.pl maskNregions.pl merge_masking.pl moveParameters.pl msa2prfl.pl new_species.pl novo2sam.pl opt_init_and_term_probs.pl optimize_augustus.pl parseSim4Output.pl partition_gtf2gb.pl pasapolyA2hints.pl peptides2alternatives.pl peptides2hints.pl phastconsDB2hints.pl polyA2hints.pl prints2prfl.pl psl2sam.pl pslMap.pl randomSplit.pl rename_species.pl retroDB2hints.pl rmRedundantHints.pl runAllSim4.pl sam2vcf.pl samMap.pl samtools.pl scipiogff2gff.pl seq_cache_populate.pl setStopCodonFreqs.pl simpleFastaHeaders.pl simplifyFastaHeaders.pl soap2sam.pl splitMfasta.pl split_wiggle.pl summarizeACGTcontent.pl transMap2hints.pl uniquePeptides.pl update_blastdb.pl utrgff2gbrowse.pl weedMaf.pl wgsim_eval.pl wig2hints.pl wigchoose.pl writeResultsPage.pl yaml2gff.1.4.pl zoom2sam.pl",
@@ -15,7 +15,7 @@
         "2.15.1": {
             "conflict": "bowtie2 samtools jellyfish",
             "module_whatis": "Trinity RNA-Seq de novo transcriptome assembly.",
-            "singularity_image": "/home/admin/singularity/trinity-2.15.1.sif",
+            "singularity_image": "/project/containers/images/trinity-2.15.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "-e",
             "cmds": "Trinity jellyfish ace2sam bowtie bowtie2 bowtie2-build bowtie2-inspect samtools tabix wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl interpolate_sam.pl novo2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
@@ -29,7 +29,7 @@
         "1.18": {
             "conflict": "",
             "module_whatis": "BCFtools is a program for variant calling and manipulating files in the Variant Call Format (VCF) and its binary counterpart BCF.",
-            "singularity_image": "/home/admin/singularity/bcftools-1.18.sif",
+            "singularity_image": "/project/containers/images/bcftools-1.18.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "bcftools color-chrs.pl gff2gff.py guess-ploidy.py plot-roh.py plot-vcfstats run-roh.pl vcfutils.pl",
@@ -41,7 +41,7 @@
         "2.5.1": {
             "conflict": "",
             "module_whatis": "A fast and sensitive gapped read aligner.",
-            "singularity_image": "/home/admin/singularity/bowtie2-2.5.1.sif",
+            "singularity_image": "/project/containers/images/bowtie2-2.5.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "bowtie2 bowtie2-build bowtie2-inspect",
@@ -53,7 +53,7 @@
         "5.4.7": {
             "conflict": "",
             "module_whatis": "Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.",
-            "singularity_image": "/home/admin/singularity/busco-5.4.7.sif",
+            "singularity_image": "/project/containers/images/busco-5.4.7.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "busco generate_plot.py",
@@ -63,7 +63,7 @@
         "5.7.1": {
             "conflict": "",
             "module_whatis": "Based on evolutionarily-informed expectations of gene content of near-universal single-copy orthologs, BUSCO metric is complementary to technical metrics like N50.",
-            "singularity_image": "/home/admin/singularity/busco-5.7.1.sif",
+            "singularity_image": "/project/containers/images/busco-5.7.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "busco generate_plot.py",
@@ -75,7 +75,7 @@
         "2.3.0": {
             "conflict": "",
             "module_whatis": "A fast multi-threaded k-mer counter",
-            "singularity_image": "/home/admin/singularity/trinity-2.15.1.sif",
+            "singularity_image": "/project/containers/images/trinity-2.15.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "-e",
             "cmds": "jellyfish",
@@ -87,7 +87,7 @@
         "1.10.2": {
             "conflict": "",
             "module_whatis": "Highly-accurate & wicked fast transcript-level quantification from RNA-seq reads using selective alignment.",
-            "singularity_image": "/home/admin/singularity/salmon-1.10.2.sif",
+            "singularity_image": "/project/containers/images/salmon-1.10.2.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "salmon",
@@ -99,7 +99,7 @@
         "1.18": {
             "conflict": "",
             "module_whatis": "Tools (written in C using htslib) for manipulating next-generation sequencing data.",
-            "singularity_image": "/home/admin/singularity/samtools-1.18.sif",
+            "singularity_image": "/project/containers/images/samtools-1.18.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "ace2sam maq2sam-long maq2sam-short md5fa md5sum-lite plot-ampliconstats plot-bamstats samtools wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
@@ -109,7 +109,7 @@
         "1.19": {
             "conflict": "",
             "module_whatis": "Tools (written in C using htslib) for manipulating next-generation sequencing data.",
-            "singularity_image": "/home/admin/singularity/samtools-1.19.sif",
+            "singularity_image": "/project/containers/images/samtools-1.19.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "ace2sam maq2sam-long maq2sam-short md5fa md5sum-lite plot-ampliconstats plot-bamstats samtools wgsim\nblast2sam.pl bowtie2sam.pl export2sam.pl fasta-sanitize.pl interpolate_sam.pl novo2sam.pl psl2sam.pl sam2vcf.pl samtools.pl seq_cache_populate.pl soap2sam.pl wgsim_eval.pl zoom2sam.pl",
@@ -121,7 +121,7 @@
         "2.14.1": {
             "conflict": "",
             "module_whatis": "BLAST finds regions of similarity between biological sequences. The program compares nucleotide or protein sequences to sequence databases and calculates the statistical significance.",
-            "singularity_image": "/home/admin/singularity/blast-2.14.1.sif",
+            "singularity_image": "/project/containers/images/blast-2.14.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "blastn blastp blastx tblastn tblastx\nblast_formatter blast_formatter_vdb blast_vdb_cmd blastdb_aliastool blastdb_path blastdbcheck blastdbcmd blastn_vdb  convert2blastmask datatool deltablast dustmasker makeblastdb makembindex makeprofiledb project_tree_builder psiblast rpsblast rpstblastn run_with_lock segmasker tblastn_vdb test_pcre windowmasker\nlegacy_blast.pl update_blastdb.pl cleanup-blastdb-volumes.py windowmasker_2.2.22_adapter.py get_species_taxids.sh",
@@ -133,7 +133,7 @@
         "7.32.4": {
             "conflict": "",
             "module_whatis": "The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.",
-            "singularity_image": "/home/admin/singularity/snakemake-7.32.4.sif",
+            "singularity_image": "/project/containers/images/snakemake-7.32.4.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "snakemake",
@@ -143,7 +143,7 @@
         "8.1.0": {
             "conflict": "",
             "module_whatis": "The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.",
-            "singularity_image": "/home/admin/singularity/snakemake-8.1.0.sif",
+            "singularity_image": "/project/containers/images/snakemake-8.1.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "snakemake",
@@ -155,7 +155,7 @@
         "2.2.1": {
             "conflict": "",
             "module_whatis": "HISAT2 is a fast and sensitive alignment program for mapping next-generation sequencing reads (both DNA and RNA) to a population of human genomes as well as to a single reference genome.",
-            "singularity_image": "/home/admin/singularity/hisat2-2.2.1.sif",
+            "singularity_image": "/project/containers/images/hisat2-2.2.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "hisat2 hisat2-align-l hisat2-align-s hisat2-build hisat2-build-l hisat2-build-s hisat2-inspect hisat2-inspect-l hisat2-inspect-s\nhisat2_extract_exons.py hisat2_extract_snps_haplotypes_UCSC.py hisat2_extract_snps_haplotypes_VCF.py hisat2_extract_splice_sites.py hisat2_read_statistics.py hisat2_simulate_reads.py",
@@ -167,7 +167,7 @@
         "4.4.0.0": {
             "conflict": "",
             "module_whatis": "It is a collection of command-line tools for analyzing high-throughput sequencing data with a primary focus on variant discovery.",
-            "singularity_image": "/home/admin/singularity/gatk-4.4.0.0.sif",
+            "singularity_image": "/project/containers/images/gatk-4.4.0.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "gatk",
@@ -177,7 +177,7 @@
         "4.5.0.0": {
             "conflict": "",
             "module_whatis": "It is a collection of command-line tools for analyzing high-throughput sequencing data with a primary focus on variant discovery.",
-            "singularity_image": "/home/admin/singularity/gatk-4.5.0.0.sif",
+            "singularity_image": "/project/containers/images/gatk-4.5.0.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "gatk",
@@ -189,7 +189,7 @@
         "0.3.0": {
             "conflict": "",
             "module_whatis": "CellBender is a software package for eliminating technical artifacts from high-throughput single-cell RNA sequencing (scRNA-seq) data.",
-            "singularity_image": "/home/admin/singularity/cellbender-0.3.0.sif",
+            "singularity_image": "/project/containers/images/cellbender-0.3.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "--nv",
             "cmds": "cellbender",
@@ -201,7 +201,7 @@
         "3.01.03": {
             "conflict": "",
             "module_whatis": "MAKER is a portable and easily configurable genome annotation pipeline.",
-            "singularity_image": "/home/admin/singularity/maker-3.01.03.sif",
+            "singularity_image": "/project/containers/images/maker-3.01.03.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "maker maker2chado maker2eval_gtf maker2jbrowse maker2wap maker2zff maker_functional_fasta maker_functional_gff maker_map_ids\nAED_cdf_generator.pl cegma2gff.pl cegma2zff chado2gff3 compare_gff3_to_chado cufflinks2gff3 fasta_merge fasta_tool genemark_gtf2gff3 gff3_merge ipr_update_gff iprscan2gff3  map2assembly map_data_ids map_fasta_ids map_gff_ids match2gene.pl quality_filter.pl split_gff3 tophat2gff3 train_augustus.pl zff2genbank.pl",
@@ -213,7 +213,7 @@
         "0.1.16": {
             "conflict": "",
             "module_whatis": "CAMP is a QT-based GUI software tool to automatically generate module keys for container-based software packages.",
-            "singularity_image": "/home/admin/singularity/vcftools-0.1.16.sif",
+            "singularity_image": "/project/containers/images/vcftools-0.1.16.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "vcftools",
@@ -225,7 +225,7 @@
         "1.2.0": {
             "conflict": "",
             "module_whatis": "Another Gtf/Gff Analysis Toolkit.",
-            "singularity_image": "/home/admin/singularity/agat-1.2.0.sif",
+            "singularity_image": "/project/containers/images/agat-1.2.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "agat\nagat_convert_bed2gff.pl agat_convert_embl2gff.pl agat_convert_genscan2gff.pl agat_convert_mfannot2gff.pl agat_convert_minimap2_bam2gff.pl agat_convert_sp_gff2bed.pl agat_convert_sp_gff2gtf.pl agat_convert_sp_gff2tsv.pl agat_convert_sp_gff2zff.pl agat_convert_sp_gxf2gxf.pl agat_sp_Prokka_inferNameFromAttributes.pl agat_sp_add_introns.pl agat_sp_add_start_and_stop.pl agat_sp_alignment_output_style.pl agat_sp_clipN_seqExtremities_and_fixCoordinates.pl agat_sp_compare_two_BUSCOs.pl agat_sp_compare_two_annotations.pl agat_sp_complement_annotations.pl agat_sp_ensembl_output_style.pl agat_sp_extract_attributes.pl agat_sp_extract_sequences.pl agat_sp_filter_by_ORF_size.pl agat_sp_filter_by_locus_distance.pl agat_sp_filter_by_mrnaBlastValue.pl agat_sp_filter_feature_by_attribute_presence.pl agat_sp_filter_feature_by_attribute_value.pl agat_sp_filter_feature_from_keep_list.pl agat_sp_filter_feature_from_kill_list.pl agat_sp_filter_gene_by_intron_numbers.pl agat_sp_filter_gene_by_length.pl agat_sp_filter_incomplete_gene_coding_models.pl agat_sp_filter_record_by_coordinates.pl agat_sp_fix_cds_phases.pl agat_sp_fix_features_locations_duplicated.pl agat_sp_fix_fusion.pl agat_sp_fix_longest_ORF.pl agat_sp_fix_overlaping_genes.pl agat_sp_fix_small_exon_from_extremities.pl agat_sp_flag_premature_stop_codons.pl agat_sp_flag_short_introns.pl agat_sp_functional_statistics.pl agat_sp_keep_longest_isoform.pl agat_sp_kraken_assess_liftover.pl agat_sp_list_short_introns.pl agat_sp_load_function_from_protein_align.pl agat_sp_manage_IDs.pl agat_sp_manage_UTRs.pl agat_sp_manage_attributes.pl agat_sp_manage_functional_annotation.pl agat_sp_manage_introns.pl agat_sp_merge_annotations.pl agat_sp_prokka_fix_fragmented_gene_annotations.pl agat_sp_sensitivity_specificity.pl agat_sp_separate_by_record_type.pl agat_sp_statistics.pl agat_sp_webApollo_compliant.pl agat_sq_add_attributes_from_tsv.pl agat_sq_add_hash_tag.pl agat_sq_add_locus_tag.pl agat_sq_count_attributes.pl agat_sq_filter_feature_from_fasta.pl agat_sq_list_attributes.pl agat_sq_manage_IDs.pl agat_sq_manage_attributes.pl agat_sq_mask.pl agat_sq_remove_redundant_entries.pl agat_sq_repeats_analyzer.pl agat_sq_rfam_analyzer.pl agat_sq_split.pl agat_sq_stat_basic.pl",
@@ -235,7 +235,7 @@
         "1.4.0": {
             "conflict": "",
             "module_whatis": "Another Gtf/Gff Analysis Toolkit.",
-            "singularity_image": "/home/admin/singularity/agat-1.4.0.sif",
+            "singularity_image": "/project/containers/images/agat-1.4.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "agat\nagat_convert_bed2gff.pl agat_convert_embl2gff.pl agat_convert_genscan2gff.pl agat_convert_mfannot2gff.pl agat_convert_minimap2_bam2gff.pl agat_convert_sp_gff2bed.pl agat_convert_sp_gff2gtf.pl agat_convert_sp_gff2tsv.pl agat_convert_sp_gff2zff.pl agat_convert_sp_gxf2gxf.pl agat_sp_Prokka_inferNameFromAttributes.pl agat_sp_add_introns.pl agat_sp_add_start_and_stop.pl agat_sp_alignment_output_style.pl agat_sp_clipN_seqExtremities_and_fixCoordinates.pl agat_sp_compare_two_BUSCOs.pl agat_sp_compare_two_annotations.pl agat_sp_complement_annotations.pl agat_sp_ensembl_output_style.pl agat_sp_extract_attributes.pl agat_sp_extract_sequences.pl agat_sp_filter_by_ORF_size.pl agat_sp_filter_by_locus_distance.pl agat_sp_filter_by_mrnaBlastValue.pl agat_sp_filter_feature_by_attribute_presence.pl agat_sp_filter_feature_by_attribute_value.pl agat_sp_filter_feature_from_keep_list.pl agat_sp_filter_feature_from_kill_list.pl agat_sp_filter_gene_by_intron_numbers.pl agat_sp_filter_gene_by_length.pl agat_sp_filter_incomplete_gene_coding_models.pl agat_sp_filter_record_by_coordinates.pl agat_sp_fix_cds_phases.pl agat_sp_fix_features_locations_duplicated.pl agat_sp_fix_fusion.pl agat_sp_fix_longest_ORF.pl agat_sp_fix_overlaping_genes.pl agat_sp_fix_small_exon_from_extremities.pl agat_sp_flag_premature_stop_codons.pl agat_sp_flag_short_introns.pl agat_sp_functional_statistics.pl agat_sp_keep_longest_isoform.pl agat_sp_kraken_assess_liftover.pl agat_sp_list_short_introns.pl agat_sp_load_function_from_protein_align.pl agat_sp_manage_IDs.pl agat_sp_manage_UTRs.pl agat_sp_manage_attributes.pl agat_sp_manage_functional_annotation.pl agat_sp_manage_introns.pl agat_sp_merge_annotations.pl agat_sp_prokka_fix_fragmented_gene_annotations.pl agat_sp_sensitivity_specificity.pl agat_sp_separate_by_record_type.pl agat_sp_statistics.pl agat_sp_webApollo_compliant.pl agat_sq_add_attributes_from_tsv.pl agat_sq_add_hash_tag.pl agat_sq_add_locus_tag.pl agat_sq_count_attributes.pl agat_sq_filter_feature_from_fasta.pl agat_sq_list_attributes.pl agat_sq_manage_IDs.pl agat_sq_manage_attributes.pl agat_sq_mask.pl agat_sq_remove_redundant_entries.pl agat_sq_repeats_analyzer.pl agat_sq_rfam_analyzer.pl agat_sq_split.pl agat_sq_stat_basic.pl",
@@ -247,7 +247,7 @@
         "2023.9.1": {
             "conflict": "python conda tensorflow pytorch horovod jax",
             "module_whatis": "QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.",
-            "singularity_image": "/home/admin/singularity/qiime2-2023.9.1.sif",
+            "singularity_image": "/project/containers/images/qiime2-2023.9.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "qiime python python3 pip pip3",
@@ -257,7 +257,7 @@
         "2024.2": {
             "conflict": "python conda mamba tensorflow pytorch horovod jax",
             "module_whatis": "QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.",
-            "singularity_image": "/home/admin/singularity/qiime2-2024.2.sif",
+            "singularity_image": "/project/containers/images/qiime2-2024.2.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "qiime python python3 pip pip3",
@@ -269,7 +269,7 @@
         "0.7.17": {
             "conflict": "",
             "module_whatis": "Burrow-Wheeler Aligner for short-read alignment (see minimap2 for long-read alignment)",
-            "singularity_image": "/home/admin/singularity/bwa-0.7.17.sif",
+            "singularity_image": "/project/containers/images/bwa-0.7.17.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "bwa qualfa2fq.pl xa2multi.pl",
@@ -281,7 +281,7 @@
         "3.0.8": {
             "conflict": "",
             "module_whatis": "BRAKER is a pipeline for fully automated prediction of protein coding gene structures with GeneMark-ES/ET/EP/ETP and AUGUSTUS in novel eukaryotic genomes.",
-            "singularity_image": "/home/admin/singularity/braker-3.0.8.sif",
+            "singularity_image": "/project/containers/images/braker-3.0.8.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "braker.pl braker_cleanup.pl\ncompute_accuracies.sh downsample_traingenes.pl ensure_n_training_genes.py filterGenemark.pl filterIntronsFindStrand.pl filter_augustus_gff.pl findGenesInIntrons.pl gatech_pmp2hints.pl get_etp_hints.py get_gc_content.py log_reg_prothints.pl sortGeneMark.py stringtie2utr.py ",
@@ -293,7 +293,7 @@
         "23.10.1": {
             "conflict": "",
             "module_whatis": "A DSL for data-driven computational pipelines.",
-            "singularity_image": "/home/admin/singularity/nextflow-23.10.1.sif",
+            "singularity_image": "/project/containers/images/nextflow-23.10.1.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "",
             "cmds": "nextflow",

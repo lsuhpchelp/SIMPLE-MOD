@@ -30,7 +30,7 @@ module-whatis Version: 1.18
 module-whatis Description: BCFtools is a program for variant calling and manipulating files in the Variant Call Format (VCF) and its binary counterpart BCF.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/bcftools-1.18.sif"
+set SINGULARITY_IMAGE "/project/containers/images/bcftools-1.18.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 

@@ -30,7 +30,7 @@ module-whatis Version: 0.3.0
 module-whatis Description: CellBender is a software package for eliminating technical artifacts from high-throughput single-cell RNA sequencing (scRNA-seq) data.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/cellbender-0.3.0.sif"
+set SINGULARITY_IMAGE "/project/containers/images/cellbender-0.3.0.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " --nv"
 
