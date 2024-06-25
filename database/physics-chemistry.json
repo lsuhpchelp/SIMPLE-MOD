@@ -44,5 +44,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "cp2k": {
+        "2024.1": {
+            "conflict": "",
+            "module_whatis": "CP2K is a quantum chemistry and solid state physics software package that can perform atomistic simulations of solid state, liquid, molecular, periodic, material, crystal, and biological systems.",
+            "singularity_image": "/project/containers/images/cp2k-2024.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "cp2k dumpdcd graph xyz2dcd",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
