@@ -7,6 +7,10 @@
   - [2.1 Running with Python](#21-Running-with-Python)
   - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
 - [3. User Interface](#3-User-Interface)
+  - [3.1 Menu Bar](#31-Menu-Bar)
+  - [3.2 Module List](#32-Module-List)
+  - [3.3 Module Details](#33-Module-Details)
+  - [3.4 Generate Module Keys](#34-Generate-Module-Keys)
 - [4. Contributors](#4-Contributors)
 
 ## 1. Introduction
@@ -32,7 +36,7 @@ SIMPLE-MOD is primarily designed for HPC administrators; however, interested use
 
 ## 2. Installation
 
-### 2.1 Running with Python
+### 2.1 Running with Python (Recommended)
 
 As a QT-based Python program, SIMPLE-MOD is installation-free. To run SIMPLE-MOD, simply run it with Python:
 
@@ -60,12 +64,44 @@ Once the image is build, you may run it with:
 singularity run simple-mod.sif
 ```
 
+Additional path binding may be required to save module databases and generate module keys in the desired paths. 
+
 
 ## 3. User Interface
 
-Below is the GUI of SIMPLE-MOD:
+The usage of SIMPLE-MOD shoul be straightforward and self-explanatory. Below is the GUI of SIMPLE-MOD:
 
-![README](https://github.com/user-attachments/assets/6c971a08-508d-441a-a20f-c50c3e26b4c8)
+![README](https://raw.githubusercontent.com/lsuhpchelp/SIMPLE-MOD/master/README.png)
+
+### 3.1 Menu Bar
+
+Menu Bar contains 3 menus:
+
+- **_File_**: Create, open, and save module database (.json format).
+- **_Settings_**: Change preferences.
+- **_Help_**: About information.
+
+### 3.2 Module List
+
+- Select module name & version to edit.
+- Create a new module or copy current module.
+- Delete selected module.
+
+### 3.3 Module Details
+
+- **_Conflicts_**: Conflicted modules that cannot be loaded together. (Itself is already added by default)
+- **_Software description_**: Software description.
+- **_Singularity image path_**: Path to Singularity image. Can use remote path if the host system supports.
+- **_Singularity binding paths_**: Binding paths ("-B"). Bound by default (can be changed in Settings): /home,/tmp,/work,/project,/usr/local/packages,/var/scratch.
+- **_Additional Singularity flags_**: Additional flags to add (e.g., "--nv").
+- **_Commands to map_**: Executables inside the container that need to be mapped as wrappers outside of the container. 
+- **_Set up environmental variable_**: Set up additional environmental variable for the module, if needed.
+- **_Module key template_**: Template to generate module keys. Default: ./template/template.tcl
+
+### 3.4 Generate Module Keys
+
+- **_Generate current module key_**: Generate one module key from the current open module.
+- **_Generate all module keys from current database_**: Generate all module keys from the current open database. Database needs to be saved first.
 
 
 ## 4. Contributors
