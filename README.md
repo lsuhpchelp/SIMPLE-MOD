@@ -4,13 +4,13 @@
   - [1.1 About SIMPLE-MOD](#11-About-SIMPLE-MOD)
   - [1.2 Who is SIMPLE-MOD for](#12-Who-is-SIMPLE-MOD-for)
 - [2. Installation](#2-Installation)
-  - [2.1 Running with Python](#21-Running-with-Python)
+  - [2.1 Running with Python (Recommended)](#21-Running-with-Python-Recommended)
   - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
 - [3. User Interface](#3-User-Interface)
   - [3.1 Menu Bar](#31-Menu-Bar)
   - [3.2 Module List](#32-Module-List)
   - [3.3 Module Details](#33-Module-Details)
-  - [3.4 Generate Module Keys](#34-Generate-Module-Keys)
+  - [3.4 Generate Module Key(s)](#34-Generate-Module-Keys)
 - [4. Contributors](#4-Contributors)
 
 ## 1. Introduction
@@ -98,7 +98,7 @@ Menu Bar contains 3 menus:
 - **_Set up environmental variable_**: Set up additional environmental variable for the module, if needed.
 - **_Module key template_**: Template to generate module keys. Default: ./template/template.tcl
 
-### 3.4 Generate Module Keys
+### 3.4 Generate Module Key(s)
 
 - **_Generate current module key_**: Generate one module key from the current open module.
 - **_Generate all module keys from current database_**: Generate all module keys from the current open database. Database needs to be saved first.
