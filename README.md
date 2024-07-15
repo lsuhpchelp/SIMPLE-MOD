@@ -6,7 +6,8 @@
 - [2. Installation](#2-Installation)
   - [2.1 Running with Python](#21-Running-with-Python)
   - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
-- [3. Contributors](#3-Contributors)
+- [3. User Interface](#3-User-Interface)
+- [4. Contributors](#4-Contributors)
 
 ## 1. Introduction
 
@@ -60,7 +61,14 @@ singularity run simple-mod.sif
 ```
 
 
-## 3. Contributors
+## 3. User Interface
+
+Below is the GUI of SIMPLE-MOD:
+
+![README](https://github.com/user-attachments/assets/6c971a08-508d-441a-a20f-c50c3e26b4c8)
+
+
+## 4. Contributors
 
 Main author: Dr. Jason Li ( jasonli3@lsu.edu )
 
