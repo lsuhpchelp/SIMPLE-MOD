@@ -12,6 +12,7 @@
   - [3.3 Module Details](#33-Module-Details)
   - [3.4 Generate Module Key(s)](#34-Generate-Module-Keys)
 - [4. Contributors](#4-Contributors)
+- [5. Cite this work](#5-Cite-this-work)
 
 ## 1. Introduction
 
@@ -107,4 +108,8 @@ Menu Bar contains 3 menus:
 ## 4. Contributors
 
 Main author: Dr. Jason Li ( jasonli3@lsu.edu )
+
+## 5. Cite this work
+
+Jianxiong Li. 2024. "_Transforming Container Experience: Turning Singularity Images into Loadable Environment Modules_". In Practice and Experience in Advanced Research Computing 2024: Human Powered Computing (PEARC '24). Association for Computing Machinery, New York, NY, USA, Article 98, 1–2. https://doi.org/10.1145/3626203.3670551
 
