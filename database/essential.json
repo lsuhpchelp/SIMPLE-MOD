@@ -1,0 +1,14 @@
+{
+    "r": {
+        "4.4.1": {
+            "conflict": "",
+            "module_whatis": "R is a free software environment for statistical computing and graphics.",
+            "singularity_image": "/project/containers/images/r-4.4.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "R Rscript",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    }
+}

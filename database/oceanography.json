@@ -1,0 +1,14 @@
+{
+    "wrf": {
+        "4.6.0": {
+            "conflict": "",
+            "module_whatis": "A state of the art mesoscale numerical weather prediction system designed for both atmospheric research and operational forecasting applications",
+            "singularity_image": "/project/containers/images/wrf-4.6.0.sif",
+            "singularity_bindpaths": "/usr/lib64/libpmi2.so",
+            "singularity_flags": "",
+            "cmds": "wrf.exe ndown.exe  real.exe  tc.exe \ngeogrid.exe  metgrid.exe  ungrib.exe",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    }
+}
