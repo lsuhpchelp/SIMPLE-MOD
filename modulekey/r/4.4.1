@@ -32,7 +32,7 @@ module-whatis Description: R is a free software environment for statistical comp
 # Singularity options
 set SINGULARITY_IMAGE "/project/containers/images/r-4.4.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
-set SINGULARITY_FLAGS " "
+set SINGULARITY_FLAGS " --nv"
 
 # Conflicts
 conflict r 
