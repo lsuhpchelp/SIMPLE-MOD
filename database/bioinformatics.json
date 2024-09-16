@@ -302,5 +302,29 @@
             },
             "template": "./template/template.tcl"
         }
+    },
+    "cellranger": {
+        "8.0.1": {
+            "conflict": "",
+            "module_whatis": "A set of analysis pipelines that perform sample demultiplexing, barcode processing, single cell 3' and 5' gene counting, V(D)J transcript sequence assembly and annotation, and Feature Barcode analysis from single cell data.",
+            "singularity_image": "/project/containers/images/cellranger-8.0.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "cellranger",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    },
+    "bcl2fastq2": {
+        "2.20": {
+            "conflict": "",
+            "module_whatis": "The Illumina bcl2fastq2 Conversion Software v2.20 demultiplexes sequencing data and converts base call (BCL) files into FASTQ files.",
+            "singularity_image": "/project/containers/images/cellranger-8.0.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "bcl2fastq",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
