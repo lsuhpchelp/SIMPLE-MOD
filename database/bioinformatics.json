@@ -326,5 +326,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "beast2": {
+        "2.7.7": {
+            "conflict": "",
+            "module_whatis": "BEAST 2 is a cross-platform program for Bayesian phylogenetic analysis of molecular sequences. ",
+            "singularity_image": "/project/containers/images/beast2-2.7.7.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "applauncher beast beauti densitree loganalyser logcombiner packagemanager treeannotator",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
