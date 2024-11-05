@@ -338,5 +338,29 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "cellranger-arc": {
+        "2.0.2": {
+            "conflict": "",
+            "module_whatis": "Cell Ranger ARC is an advanced analytical suite designed for the Chromium Single Cell Multiome ATAC + Gene Expression sequencing. ",
+            "singularity_image": "/project/containers/images/cellranger-8.0.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "cellranger-arc",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    },
+    "cellranger-atac": {
+        "2.1.0": {
+            "conflict": "",
+            "module_whatis": "Cell Ranger ATAC is delivered as a single, self-contained tar file that can be unpacked anywhere on your system.",
+            "singularity_image": "/project/containers/images/cellranger-8.0.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "cellranger-atac",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
