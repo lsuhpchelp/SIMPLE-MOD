@@ -362,5 +362,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "revbayes": {
+        "1.2.4": {
+            "conflict": "",
+            "module_whatis": "Bayesian Phylogenetic Inference Using Graphical Models and an Interactive Model-Specification Language.",
+            "singularity_image": "/project/containers/images/revbayes-1.2.4.sif",
+            "singularity_bindpaths": "/usr/lib64/libpmi2.so",
+            "singularity_flags": "",
+            "cmds": "rb rb-mpi",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
