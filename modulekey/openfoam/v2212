@@ -33,7 +33,7 @@ module-whatis Version: v2212
 module-whatis Description: OpenFOAM is free, open source software for CFD from the OpenFOAM Foundation.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/openfoam-v2212-openmpi.4.1.2-pmi2.sif"
+set SINGULARITY_IMAGE "/project/containers/images/openfoam-v2212-openmpi.4.1.2-pmi2.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
@@ -72,7 +72,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/openfoam/v2212/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/openfoam/v2212/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/openfoam/v2212/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/openfoam/v2212/$cmd;"
         }
         
@@ -85,7 +85,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/openfoam/v2212/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/openfoam/v2212/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/openfoam/v2212/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/openfoam/v2212/$cmd;"
         }
         

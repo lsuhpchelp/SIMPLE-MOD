@@ -30,7 +30,7 @@ module-whatis Version: 2.15.1
 module-whatis Description: Trinity RNA-Seq de novo transcriptome assembly.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/trinity-2.15.1.sif"
+set SINGULARITY_IMAGE "/project/containers/images/trinity-2.15.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " -e"
 
@@ -67,7 +67,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/trinity/2.15.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/trinity/2.15.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/trinity/2.15.1/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/trinity/2.15.1/$cmd;"
         }
         
@@ -80,7 +80,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/trinity/2.15.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/trinity/2.15.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/trinity/2.15.1/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/trinity/2.15.1/$cmd;"
         }
         

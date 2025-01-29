@@ -30,7 +30,7 @@ module-whatis Version: 0.1.16
 module-whatis Description: CAMP is a QT-based GUI software tool to automatically generate module keys for container-based software packages.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/vcftools-0.1.16.sif"
+set SINGULARITY_IMAGE "/project/containers/images/vcftools-0.1.16.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/vcftools/0.1.16/$cmd;"
         }
         

@@ -30,7 +30,7 @@ module-whatis Version: 2024.2
 module-whatis Description: QIIME 2 is a powerful, extensible, and decentralized microbiome analysis package with a focus on data and analysis transparency. QIIME 2 enables researchers to start an analysis with raw DNA sequence data and finish with publication-quality figures and statistical results.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/qiime2-2024.2.sif"
+set SINGULARITY_IMAGE "/project/containers/images/qiime2-2024.2.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/qiime2/2024.2/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/qiime2/2024.2/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/qiime2/2024.2/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/qiime2/2024.2/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/qiime2/2024.2/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/qiime2/2024.2/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/qiime2/2024.2/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/qiime2/2024.2/$cmd;"
         }
         

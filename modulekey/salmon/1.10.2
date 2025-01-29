@@ -30,7 +30,7 @@ module-whatis Version: 1.10.2
 module-whatis Description: Highly-accurate & wicked fast transcript-level quantification from RNA-seq reads using selective alignment.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/salmon-1.10.2.sif"
+set SINGULARITY_IMAGE "/project/containers/images/salmon-1.10.2.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/salmon/1.10.2/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/salmon/1.10.2/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/salmon/1.10.2/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/salmon/1.10.2/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/salmon/1.10.2/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/salmon/1.10.2/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/salmon/1.10.2/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/salmon/1.10.2/$cmd;"
         }
         

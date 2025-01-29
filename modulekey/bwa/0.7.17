@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/bwa/0.7.17/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/bwa/0.7.17/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/bwa/0.7.17/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/bwa/0.7.17/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/bwa/0.7.17/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/bwa/0.7.17/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/bwa/0.7.17/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/bwa/0.7.17/$cmd;"
         }
         

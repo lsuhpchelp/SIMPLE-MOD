@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/gatk/4.5.0.0/$cmd;"
         }
         

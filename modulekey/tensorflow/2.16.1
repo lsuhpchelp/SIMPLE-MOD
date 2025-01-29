@@ -30,7 +30,7 @@ module-whatis Version: 2.16.1
 module-whatis Description: Tensorflow framework for deep learning, with GPU support, QT support, commonly used Python modules such as jupyter.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/tensorflow-2.16.1.sif"
+set SINGULARITY_IMAGE "/project/containers/images/tensorflow-2.16.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " --nv"
 
@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/tensorflow/2.16.1/$cmd;"
         }
         

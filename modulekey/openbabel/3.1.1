@@ -30,7 +30,7 @@ module-whatis Version: 3.1.1
 module-whatis Description: Open Babel is a chemical toolbox designed to speak the many languages of chemical data. It’s an open, collaborative project allowing anyone to search, convert, analyze, or store data from molecular modeling, chemistry, solid-state materials, biochemistry, or related areas.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/openbabel-3.1.1.sif"
+set SINGULARITY_IMAGE "/project/containers/images/openbabel-3.1.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
@@ -65,7 +65,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
         }
         
@@ -78,7 +78,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/openbabel/3.1.1/$cmd;"
         }
         

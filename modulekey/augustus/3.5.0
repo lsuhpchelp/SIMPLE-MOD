@@ -67,7 +67,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/augustus/3.5.0/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/augustus/3.5.0/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/augustus/3.5.0/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/augustus/3.5.0/$cmd;"
         }
         
@@ -80,7 +80,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/augustus/3.5.0/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/augustus/3.5.0/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/augustus/3.5.0/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/augustus/3.5.0/$cmd;"
         }
         

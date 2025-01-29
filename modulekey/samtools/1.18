@@ -30,7 +30,7 @@ module-whatis Version: 1.18
 module-whatis Description: Tools (written in C using htslib) for manipulating next-generation sequencing data.
 
 # Singularity options
-set SINGULARITY_IMAGE "/home/admin/singularity/samtools-1.18.sif"
+set SINGULARITY_IMAGE "/project/containers/images/samtools-1.18.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
@@ -66,7 +66,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/samtools/1.18/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/samtools/1.18/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/samtools/1.18/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/samtools/1.18/$cmd;"
         }
         
@@ -79,7 +79,7 @@ if { [ module-info mode load ] } {
         # Create wrappers for each command
         foreach cmd $CMDS {
             puts "echo '#!/bin/bash' > $WRAPPER_PATH/samtools/1.18/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd $@' >> $WRAPPER_PATH/samtools/1.18/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/samtools/1.18/$cmd;"
             puts "chmod u+x $WRAPPER_PATH/samtools/1.18/$cmd;"
         }
         
