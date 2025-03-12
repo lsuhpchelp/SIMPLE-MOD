@@ -27,7 +27,7 @@ set WRAPPER_PATH /home/$env(USER)/.local/bin/modules
 # Module information
 module-whatis Name: iqtree
 module-whatis Version: 1.6.7
-module-whatis Description: Efficient software for phylogenomic inference (Legacy)
+module-whatis Description: 
 
 # Singularity options
 set SINGULARITY_IMAGE "/project/containers/images/iqtree-1.6.7.sif"
@@ -39,7 +39,7 @@ conflict iqtree
 
 # List of commands to overwrite
 set CMDS {
-
+iqtree
 }
 
 # Set environment varialbles

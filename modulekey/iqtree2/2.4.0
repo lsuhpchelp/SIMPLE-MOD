@@ -39,7 +39,7 @@ conflict iqtree2
 
 # List of commands to overwrite
 set CMDS {
-
+iqtree2
 }
 
 # Set environment varialbles
