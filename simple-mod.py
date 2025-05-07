@@ -10,10 +10,11 @@
 
 import sys, json, os, tempfile
 from string import Template
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, 
+from PyQt6 import QtGui
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, 
                              QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, 
-                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
+                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QFileDialog)
+from PyQt6.QtGui import QAction
 
 # Main window
 class MainWindow(QMainWindow):
@@ -140,7 +141,7 @@ class MainWindow(QMainWindow):
         self.conflictText = QLineEdit(self)
         self.conflictText.setPlaceholderText("(Seperate by space. Itself is already added.)")
         pal = self.conflictText.palette()
-        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        pal.setColor(QtGui.QPalette.ColorRole.PlaceholderText, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
         self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
@@ -375,7 +376,7 @@ class MainWindow(QMainWindow):
         prefDial = PreferenceDialog(self)
         
         # If confirmed, save preferences
-        if prefDial.exec_():
+        if prefDial.exec():
             
             # Save preferences to self.config
             self.config["defaultBindingPath"] = prefDial.defaultBindingPathText.text()
@@ -584,7 +585,7 @@ License: \tMIT License
         newModDial = NewModuleDialog(self)
         
         # If confirmed, create module
-        if newModDial.exec_():
+        if newModDial.exec():
 
             # Strip module name and version
             modName = newModDial.modNameText.text()
@@ -635,7 +636,7 @@ License: \tMIT License
         newModDial = NewModuleDialog(self)
         
         # If confirmed, create module
-        if newModDial.exec_():
+        if newModDial.exec():
 
             # Strip module name and version
             modName = newModDial.modNameText.text()
@@ -1093,7 +1094,7 @@ class NewModuleDialog(QDialog):
         self.formLayout.addRow("Module version:", self.modVersionText)
 
         # Create "Save" and "Cancel" buttons
-        self.btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self)
         self.btns.accepted.connect(self.checkEmpty)
         self.btns.rejected.connect(self.reject)
         self.btns.setCenterButtons(True)
@@ -1170,7 +1171,7 @@ class PreferenceDialog(QDialog):
         self.formLayout.addRow("Default directory to generate module keys:", self.defaultModKeyPathLayout)
 
         # Create "Save" and "Cancel" buttons
-        self.btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, self)
+        self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         self.btns.setCenterButtons(True)
@@ -1220,4 +1221,4 @@ if __name__ == "__main__":
     mainWindow.show()
     mainWindow.resizeEnvsColumns()
     mainWindow.modUpdateFromDB()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
