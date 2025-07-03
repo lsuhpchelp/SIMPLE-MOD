@@ -1,0 +1,14 @@
+{
+    "genespace": {
+        "1.3.1": {
+            "conflict": "",
+            "module_whatis": "GENESPACE: an R package for synteny- and orthology-constrained comparative genomics.",
+            "singularity_image": "/project/containers/images/genespace.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "orthofinder\nMCScanX\nMCScanX_h\nduplicate_gene_classifier\nR",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    }
+}

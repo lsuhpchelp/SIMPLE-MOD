@@ -1,0 +1,14 @@
+{
+    "vasp": {
+        "6.5.1": {
+            "conflict": "",
+            "module_whatis": "The Vienna Ab initio Simulation Package (VASP) is a computer program for atomic scale materials modelling, e.g. electronic structure calculations and quantum-mechanical molecular dynamics, from first principles.",
+            "singularity_image": "/project/containers/images/vasp6.gpu.pmi2.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "vasp_gam  \nvasp_ncl  \nvasp_std",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    }
+}
