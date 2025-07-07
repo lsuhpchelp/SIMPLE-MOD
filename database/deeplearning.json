@@ -96,5 +96,20 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "ollama": {
+        "0.9.5": {
+            "conflict": "",
+            "module_whatis": "",
+            "singularity_image": "/project/containers/images/ollamaondemand-1.0.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv --env OLLAMA_HOST=\\$OLLAMA_HOST",
+            "cmds": "ollama",
+            "envs": {
+                "OLLAMA_MODELS": "/project/containers/images/.ollama",
+                "OLLAMA_HOST": "127.0.0.1:11434"
+            },
+            "template": "./template/template.tcl"
+        }
     }
 }
