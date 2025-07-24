@@ -374,5 +374,19 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "trinotate": {
+        "4.0.2": {
+            "conflict": "",
+            "module_whatis": "Trinotate is a comprehensive annotation suite designed for automatic functional annotation of transcriptomes, particularly de novo assembled transcriptomes, from model or non-model organisms.",
+            "singularity_image": "/project/containers/images/trinotate-4.0.2.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "-e",
+            "cmds": "Trinotate",
+            "envs": {
+                "TRINITY_HOME": "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS $SINGULARITY_IMAGE /usr/local/src/Trinotate"
+            },
+            "template": "./template/template.tcl"
+        }
     }
 }
