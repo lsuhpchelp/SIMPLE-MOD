@@ -1,0 +1,18 @@
+{
+    "cmg": {
+        "2025.20": {
+            "conflict": "",
+            "module_whatis": "CMG provides reservoir simulation software, including thermal, compositional, black oil and enhanced oil recovery processes.",
+            "singularity_image": "/project/containers/images/cmg-2025.20.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "RunSim.sh",
+            "envs": {
+                "CMG_HOME": "/usr/local/bin",
+                "CMG_LIC_HOST": "2700@ceng-lic-04.eng.lsu.edu",
+                "RLM_LICENSE": "2700@ceng-lic-04.eng.lsu.edu"
+            },
+            "template": "./template/template.tcl"
+        }
+    }
+}
