@@ -10,5 +10,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "paraview": {
+        "5.12.1": {
+            "conflict": "",
+            "module_whatis": "ParaView is an open-source, multi-platform data analysis and visualization application.",
+            "singularity_image": "/project/containers/images/paraviewweb-5.12.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "pvserver",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }

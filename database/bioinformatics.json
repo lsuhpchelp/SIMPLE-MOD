@@ -388,5 +388,17 @@
             },
             "template": "./template/template.tcl"
         }
+    },
+    "htslib": {
+        "1.23": {
+            "conflict": "",
+            "module_whatis": "A C library for reading/writing high-throughput sequencing data",
+            "singularity_image": "/project/containers/images/htslib-1.23.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "bgzip htsfile tabix",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
