@@ -25,21 +25,21 @@ set WRAPPER_PATH /home/$env(USER)/.local/bin/modules
 # ---------------------------------------------------------------------
 
 # Module information
-module-whatis Name: iqtree
-module-whatis Version: 1.6.7
+module-whatis Name: iqtree3
+module-whatis Version: 3.0.1
 module-whatis Description: Efficient software for phylogenomic inference
 
 # Singularity options
-set SINGULARITY_IMAGE "/project/containers/images/iqtree-1.6.7.sif"
+set SINGULARITY_IMAGE "/project/containers/images/iqtree3-3.0.1.sif"
 set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
 set SINGULARITY_FLAGS " "
 
 # Conflicts
-conflict iqtree 
+conflict iqtree3 
 
 # List of commands to overwrite
 set CMDS {
-iqtree
+iqtree3
 }
 
 # Set environment varialbles
@@ -53,8 +53,8 @@ iqtree
 set SINGULARITY_EXEC "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
-file mkdir $WRAPPER_PATH/iqtree/1.6.7
-prepend-path PATH $WRAPPER_PATH/iqtree/1.6.7
+file mkdir $WRAPPER_PATH/iqtree3/3.0.1
+prepend-path PATH $WRAPPER_PATH/iqtree3/3.0.1
 
 # Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
@@ -64,9 +64,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/iqtree/1.6.7/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/iqtree/1.6.7/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/iqtree/1.6.7/$cmd;"
+            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/iqtree3/3.0.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/iqtree3/3.0.1/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/iqtree3/3.0.1/$cmd;"
         }
         
         # Refresh cache (only for csh type shell)
@@ -77,9 +77,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#!/bin/bash' > $WRAPPER_PATH/iqtree/1.6.7/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/iqtree/1.6.7/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/iqtree/1.6.7/$cmd;"
+            puts "echo '#!/bin/bash' > $WRAPPER_PATH/iqtree3/3.0.1/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/iqtree3/3.0.1/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/iqtree3/3.0.1/$cmd;"
         }
         
     }

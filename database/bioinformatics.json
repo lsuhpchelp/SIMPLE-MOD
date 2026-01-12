@@ -400,5 +400,41 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "iqtree": {
+        "1.6.7": {
+            "conflict": "",
+            "module_whatis": "Efficient software for phylogenomic inference",
+            "singularity_image": "/project/containers/images/iqtree-1.6.7.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "iqtree",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    },
+    "iqtree2": {
+        "2.4.0": {
+            "conflict": "",
+            "module_whatis": "Efficient software for phylogenomic inference",
+            "singularity_image": "/project/containers/images/iqtree2-2.4.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "iqtree2",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    },
+    "iqtree3": {
+        "3.0.1": {
+            "conflict": "",
+            "module_whatis": "Efficient software for phylogenomic inference",
+            "singularity_image": "/project/containers/images/iqtree3-3.0.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "iqtree3",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
