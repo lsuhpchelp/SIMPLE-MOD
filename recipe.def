@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: ubuntu:22.04
+From: ubuntu:24.04
 
 
 ################################################################################
@@ -17,7 +17,7 @@ Description     SIMPLE-MOD is a QT-based GUI tool to automatically generate modu
 # Install dependencies
 
 apt update
-apt install -y python3 pip git
+apt install -y python3 pip git qtbase5-dev qt5-qmake qt6-base-dev qmake6
 apt clean
 
 pip install --upgrade pip
