@@ -25,6 +25,12 @@ except ImportError:
                                  QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
     PYQT_VERSION = 5
 
+# Compatibility: QPalette enum scoping differs between PyQt5 and PyQt6
+if PYQT_VERSION == 6:
+    PlaceholderTextColorRole = QtGui.QPalette.ColorRole.PlaceholderText
+else:
+    PlaceholderTextColorRole = QtGui.QPalette.PlaceholderText
+
 # Main window
 class MainWindow(QMainWindow):
 
@@ -150,7 +156,7 @@ class MainWindow(QMainWindow):
         self.conflictText = QLineEdit(self)
         self.conflictText.setPlaceholderText("(Seperate by space. Itself is already added.)")
         pal = self.conflictText.palette()
-        pal.setColor(QtGui.QPalette.ColorRole.PlaceholderText if PYQT_VERSION == 6 else QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        pal.setColor(PlaceholderTextColorRole, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
         self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
