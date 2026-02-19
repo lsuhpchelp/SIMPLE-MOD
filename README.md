@@ -45,7 +45,13 @@ As a QT-based Python program, SIMPLE-MOD is installation-free. To run SIMPLE-MOD
 python simple-mod.py
 ```
 
-It is tested with Python 3 and PyQt5 module as dependency. If PyQt5 is not installed on your system, please install it with pip:
+It is tested with Python 3 and PyQt5/PyQt6 module as dependency. The application will automatically detect which version is installed, preferring PyQt6. If neither is installed on your system, please install one with pip:
+
+```
+pip install pyqt6
+```
+
+or
 
 ```
 pip install pyqt5

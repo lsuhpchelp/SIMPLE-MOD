@@ -4,16 +4,26 @@
 #   Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
 # Version: 1.0
-# Dependency: PyQt5
+# Dependency: PyQt5 or PyQt6
 # =====================================================================
 
 
 import sys, json, os, tempfile
 from string import Template
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, 
-                             QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, 
-                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
+
+try:
+    from PyQt6 import QtGui
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget,
+                                 QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox,
+                                 QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QFileDialog)
+    from PyQt6.QtGui import QAction
+    PYQT_VERSION = 6
+except ImportError:
+    from PyQt5 import QtGui
+    from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
+                                 QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox,
+                                 QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
+    PYQT_VERSION = 5
 
 # Main window
 class MainWindow(QMainWindow):
@@ -140,7 +150,7 @@ class MainWindow(QMainWindow):
         self.conflictText = QLineEdit(self)
         self.conflictText.setPlaceholderText("(Seperate by space. Itself is already added.)")
         pal = self.conflictText.palette()
-        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        pal.setColor(QtGui.QPalette.ColorRole.PlaceholderText if PYQT_VERSION == 6 else QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
         self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
@@ -375,7 +385,7 @@ class MainWindow(QMainWindow):
         prefDial = PreferenceDialog(self)
         
         # If confirmed, save preferences
-        if prefDial.exec_():
+        if prefDial.exec():
             
             # Save preferences to self.config
             self.config["defaultBindingPath"] = prefDial.defaultBindingPathText.text()
@@ -584,7 +594,7 @@ License: \tMIT License
         newModDial = NewModuleDialog(self)
         
         # If confirmed, create module
-        if newModDial.exec_():
+        if newModDial.exec():
 
             # Strip module name and version
             modName = newModDial.modNameText.text()
@@ -635,7 +645,7 @@ License: \tMIT License
         newModDial = NewModuleDialog(self)
         
         # If confirmed, create module
-        if newModDial.exec_():
+        if newModDial.exec():
 
             # Strip module name and version
             modName = newModDial.modNameText.text()
@@ -1220,4 +1230,4 @@ if __name__ == "__main__":
     mainWindow.show()
     mainWindow.resizeEnvsColumns()
     mainWindow.modUpdateFromDB()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
