@@ -30,7 +30,7 @@ except ImportError:
 # Software Information
 TITLE = "SIMPLE-MOD "   # Window title
 VERSION="1.1.0"         # Version
-msgAbout = f"""{TITLE}
+ABOUT = f"""{TITLE}
 (Singularity Integrated Module-key Producer for Loadable Environment MODules)
 
 SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
@@ -421,7 +421,7 @@ class MainWindow(QMainWindow):
         """
         Show about information
         """
-        QMessageBox.about(self, "About", msgAbout)
+        QMessageBox.about(self, "About", ABOUT)
 
     def aboutQtDialog(self):
         """
