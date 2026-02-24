@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: ubuntu:22.04
+From: ubuntu:24.04
 
 
 ################################################################################
@@ -11,26 +11,37 @@ Version         1.0
 Description     SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
 
 ################################################################################
+%files
+################################################################################
+
+* /opt/SIMPLE-MOD/
+
+################################################################################
+%setup
+################################################################################
+
+echo "
+WARNING: This recipe must be built in the repository's root directory!"
+
+################################################################################
 %post
 ################################################################################
 
 # Install dependencies
 
 apt update
-apt install -y python3 pip git qtbase5-dev qt5-qmake
+apt install -y python3 python3-pyqt6 qt6-base-dev qmake6
 apt clean
-
-pip install --upgrade pip
-pip3 install pyqt5
-pip3 cache purge
-
-# Clone SIMPLE-MOD repo
-
-cd /opt
-git clone https://github.com/lsuhpchelp/SIMPLE-MOD.git
 
 ################################################################################
 %runscript
 ################################################################################
+
 cd /opt/SIMPLE-MOD
 python3 simple-mod.py
+
+################################################################################
+%environment
+################################################################################
+
+export QT_QPA_PLATFORM=xcb

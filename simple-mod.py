@@ -3,18 +3,44 @@
 #  (Singularity Integrated Module-key Producer for Loadable 
 #   Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
-# Version: 1.0
-# Dependency: PyQt5
+# Dependency: PyQt5 or PyQt6
 # =====================================================================
 
 
 import sys, json, os, tempfile
 from string import Template
-from PyQt5 import QtGui
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, 
-                             QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox, 
-                             QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
 
+# QT5/6 dual support (prefer QT6)
+try:
+    from PyQt6 import QtGui
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget,
+                                 QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox,
+                                 QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QFileDialog)
+    from PyQt6.QtGui import QAction
+    PYQT_VERSION = 6
+    PlaceholderTextColorRole = QtGui.QPalette.ColorRole.PlaceholderText
+except ImportError:
+    from PyQt5 import QtGui
+    from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget,
+                                 QVBoxLayout, QHBoxLayout, QFormLayout, QMessageBox,
+                                 QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
+    PYQT_VERSION = 5
+    PlaceholderTextColorRole = QtGui.QPalette.PlaceholderText
+    
+# Software Information
+TITLE = "SIMPLE-MOD "   # Window title
+VERSION="1.1.0"         # Version
+ABOUT = f"""{TITLE}
+(Singularity Integrated Module-key Producer for Loadable Environment MODules)
+
+SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
+            
+Version: \t{VERSION}
+Author: \tJason Li
+Home: \thttps://github.com/lsuhpchelp/SIMPLE-MOD
+License: \tMIT License
+"""
+    
 # Main window
 class MainWindow(QMainWindow):
 
@@ -32,8 +58,6 @@ class MainWindow(QMainWindow):
         self.loadPreferences()
         
         # Key attributes
-        self.title = "SIMPLE-MOD "
-                                                    # Window title
         self.flagDBChanged = False                  # Whether the database is changed from creation or opening
         self.db = {}                                # Loaded database dictionary (empty if it's new)
         self.currentModule = self.retEmptyModule()  # Current opened module
@@ -140,7 +164,7 @@ class MainWindow(QMainWindow):
         self.conflictText = QLineEdit(self)
         self.conflictText.setPlaceholderText("(Seperate by space. Itself is already added.)")
         pal = self.conflictText.palette()
-        pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor("#BBBBBB"))
+        pal.setColor(PlaceholderTextColorRole, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
         self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
@@ -245,7 +269,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         # Set main window properties
-        self.setWindowTitle(self.title)
+        self.setWindowTitle(TITLE)
         self.setGeometry(100, 100, 750, 750)
     
     
@@ -375,7 +399,7 @@ class MainWindow(QMainWindow):
         prefDial = PreferenceDialog(self)
         
         # If confirmed, save preferences
-        if prefDial.exec_():
+        if prefDial.exec():
             
             # Save preferences to self.config
             self.config["defaultBindingPath"] = prefDial.defaultBindingPathText.text()
@@ -397,18 +421,7 @@ class MainWindow(QMainWindow):
         """
         Show about information
         """
-        
-        QMessageBox.about(self, "About", \
-            f"""{self.title}
-(Singularity Integrated Module-key Producer for Loadable Environment MODules)
-
-SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
-            
-Version: \t1.0
-Author: \tJason Li
-Home: \thttps://github.com/lsuhpchelp/SIMPLE-MOD
-License: \tMIT License
-""")
+        QMessageBox.about(self, "About", ABOUT)
 
     def aboutQtDialog(self):
         """
@@ -584,7 +597,7 @@ License: \tMIT License
         newModDial = NewModuleDialog(self)
         
         # If confirmed, create module
-        if newModDial.exec_():
+        if newModDial.exec():
 
             # Strip module name and version
             modName = newModDial.modNameText.text()
@@ -635,7 +648,7 @@ License: \tMIT License
         newModDial = NewModuleDialog(self)
         
         # If confirmed, create module
-        if newModDial.exec_():
+        if newModDial.exec():
 
             # Strip module name and version
             modName = newModDial.modNameText.text()
@@ -681,10 +694,10 @@ License: \tMIT License
         
         # Confirm whether to delete
         reply = QMessageBox.question(self, 'Confirmation',
-                                     "Are you sure you want to delete this module? This change cannot be reverted!", QMessageBox.Yes |
-                                     QMessageBox.No, QMessageBox.No)
+                                     "Are you sure you want to delete this module? This change cannot be reverted!", QMessageBox.StandardButton.Yes |
+                                     QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
 
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             
             # Check whether this module has multiple versions
             if len(self.db[self.nameDrop.currentText()].keys()) > 1:
@@ -1017,9 +1030,9 @@ License: \tMIT License
         """
         
         if (self.isDBChanged() or self.isModKeyChanged()):
-            self.setWindowTitle("*" + self.title)
+            self.setWindowTitle("*" + TITLE)
         else:
-            self.setWindowTitle(self.title)
+            self.setWindowTitle(TITLE)
     
     def cancelForUnsavedChanges(self):
         """
@@ -1032,19 +1045,19 @@ License: \tMIT License
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
                                      "You have unsaved changes! To avoid data loss, do you want to save the before continue?", 
-                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
             
             # Depending on the response:
             #   "Yes":      Run "saveDB" method and continue
             #   "No":       Do not save and continue
             #   "Cancel":   Do not save and stay
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 # Return False (continue) if successfully saved, otherwise return True to stay
                 if (self.saveDB()):
                     return(False)
                 else:
                     return(True)
-            elif reply == QMessageBox.No:
+            elif reply == QMessageBox.StandardButton.No:
                 return(False)
             else:
                 return(True)
@@ -1060,19 +1073,19 @@ License: \tMIT License
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
                                      "You have unsaved changes in the form below! To avoid data loss, do you want to save the before continue?", 
-                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Cancel)
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
             
             # Depending on the response:
             #   "Yes":      Run "saveDB" method and continue
             #   "No":       Do not save and continue
             #   "Cancel":   Do not save and stay
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 # Return False (continue) if successfully saved, otherwise return True to stay
                 if (self.saveDB()):
                     return(False)
                 else:
                     return(True)
-            elif reply == QMessageBox.No:
+            elif reply == QMessageBox.StandardButton.No:
                 return(False)
             else:
                 return(True)
@@ -1093,7 +1106,7 @@ class NewModuleDialog(QDialog):
         self.formLayout.addRow("Module version:", self.modVersionText)
 
         # Create "Save" and "Cancel" buttons
-        self.btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self)
         self.btns.accepted.connect(self.checkEmpty)
         self.btns.rejected.connect(self.reject)
         self.btns.setCenterButtons(True)
@@ -1170,7 +1183,7 @@ class PreferenceDialog(QDialog):
         self.formLayout.addRow("Default directory to generate module keys:", self.defaultModKeyPathLayout)
 
         # Create "Save" and "Cancel" buttons
-        self.btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, self)
+        self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         self.btns.setCenterButtons(True)
@@ -1220,4 +1233,4 @@ if __name__ == "__main__":
     mainWindow.show()
     mainWindow.resizeEnvsColumns()
     mainWindow.modUpdateFromDB()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
