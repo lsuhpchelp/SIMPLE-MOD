@@ -459,7 +459,8 @@ class MainWindow(QMainWindow):
         When selected module name is changed.
         """
         
-        # Save current form changes to self.db before switching
+        # Save current form changes to self.db for the previous module before switching
+        # (self.nameDropCurrentText holds the old name, versionDrop still shows the old version)
         if (self.nameDropCurrentText and self.versionDrop.currentText()):
             self.modSaveToDB()
         
@@ -492,7 +493,8 @@ class MainWindow(QMainWindow):
         When selected module version is changed.
         """
         
-        # Save current form changes to self.db before switching
+        # Save current form changes to self.db for the previous module before switching
+        # (self.currentModule still refers to the previous module at this point)
         if (self.nameDrop.currentText() and self.versionDrop.currentText()):
             self.modSaveToDB()
         
@@ -1025,6 +1027,10 @@ class MainWindow(QMainWindow):
     def cancelForUnsavedChanges(self):
         """
         Check if the database has unsaved changes. If so, prompt user to save.
+        Returns:
+            True:   User chose to cancel (stay), or save failed
+            False:  User chose to continue (with or without saving)
+            None:   No unsaved changes detected (operation should continue)
         """
         
         # Only pop a confirmation if there are unsaved changes
