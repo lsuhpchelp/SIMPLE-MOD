@@ -37,7 +37,7 @@ SIMPLE-MOD is primarily designed for HPC administrators; however, interested use
 
 ## 2. Installation
 
-### 2.1 Running with Python (Recommended)
+### 2.1 Running directly with Python (Recommended)
 
 As a QT-based Python program, SIMPLE-MOD is installation-free. To run SIMPLE-MOD, simply run it with Python:
 
@@ -45,22 +45,24 @@ As a QT-based Python program, SIMPLE-MOD is installation-free. To run SIMPLE-MOD
 python simple-mod.py
 ```
 
-It is tested with Python 3 and PyQt5/PyQt6 module as dependency. The application will automatically detect which version is installed, preferring PyQt6. If neither is installed on your system, please install one with pip or conda:
+It is tested with Python 3 and PyQt5/PyQt6 module as dependency. The application will automatically detect the PyQt version, preferring PyQt6. If neither is installed on your system, please install one of following with pip (depending on the QT libraries version on your system):
 
 ```
+# Install PyQt6
 pip install pyqt6
-```
-```
-conda install pyqt6
-```
 
-or
-
-```
+# Or, install PyQt5
 pip install pyqt5
 ```
+
+If your system does not have QT libraries installed, you may use Conda to install all dependencies in a virtual environment.
+
 ```
-conda install pyqt5
+# Install PyQt6
+conda install pyqt6 -c conda-forge
+
+# Or, install PyQt5
+conda install pyqt -c conda-forge
 ```
 
 ### 2.2 Running in a Singularity image
