@@ -7,7 +7,7 @@
 # =====================================================================
 
 
-import sys, json, os, tempfile
+import sys, json, os, tempfile, copy
 from string import Template
 
 # QT5/6 dual support (prefer QT6)
@@ -58,8 +58,8 @@ class MainWindow(QMainWindow):
         self.loadPreferences()
         
         # Key attributes
-        self.flagDBChanged = False                  # Whether the database is changed from creation or opening
         self.db = {}                                # Loaded database dictionary (empty if it's new)
+        self.dbOriginal = {}                        # Original copy of database (for unsaved changes detection)
         self.currentModule = self.retEmptyModule()  # Current opened module
         
         #--------------------------------------------------------
@@ -293,8 +293,8 @@ class MainWindow(QMainWindow):
         self.nameDropUpdateFromDB()
         self.versionDropUpdateFromDB()
         
-        # Mark database as unchanged
-        self.flagDBChanged = False
+        # Save original copy of database
+        self.dbOriginal = copy.deepcopy(self.db)
         
         # Update window title
         self.setTitleForUnsavedChanges()
@@ -329,8 +329,8 @@ class MainWindow(QMainWindow):
             self.nameDropUpdateFromDB()
             self.versionDropUpdateFromDB()
             
-            # Mark database as unchanged
-            self.flagDBChanged = False
+            # Save original copy of database
+            self.dbOriginal = copy.deepcopy(self.db)
         
             # Update window title
             self.setTitleForUnsavedChanges()
@@ -374,8 +374,8 @@ class MainWindow(QMainWindow):
                 json.dump(self.db, fw, indent=4)
                 fw.close()
         
-                # Mark database as unchanged
-                self.flagDBChanged = False
+                # Save original copy of database
+                self.dbOriginal = copy.deepcopy(self.db)
         
                 # Update window title
                 self.setTitleForUnsavedChanges()
@@ -459,19 +459,13 @@ class MainWindow(QMainWindow):
         When selected module name is changed.
         """
         
-        # Check any unsaved changes in the current module form
-        if (self.cancelForUnsavedModChanges()): 
+        # Save current form changes to self.db before switching
+        if (self.nameDropCurrentText and self.versionDrop.currentText()):
+            self.modSaveToDB()
         
-            # If choose to stay for unsaved changes, revert all
-            self.nameDrop.currentTextChanged.disconnect()
-            self.nameDrop.setCurrentText(self.nameDropCurrentText)
-            self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
-            
-        else:
-        
-            # Otherwise continue, update version dropdown menu
-            self.nameDropCurrentText = text
-            self.versionDropUpdateFromDB()
+        # Continue, update version dropdown menu
+        self.nameDropCurrentText = text
+        self.versionDropUpdateFromDB()
 
     def versionDropUpdateFromDB(self):
         """
@@ -498,19 +492,13 @@ class MainWindow(QMainWindow):
         When selected module version is changed.
         """
         
-        # Check any unsaved changes
-        if (self.cancelForUnsavedModChanges()): 
+        # Save current form changes to self.db before switching
+        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
+            self.modSaveToDB()
         
-            # If choose to stay for unsaved changes, revert all
-            self.versionDrop.currentTextChanged.disconnect()
-            self.versionDrop.setCurrentText(self.versionDropCurrentText)
-            self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
-            
-        else:
-        
-            # Otherwise continue, update module form to current selected module
-            self.versionDropCurrentText = text
-            self.modUpdateFromDB()
+        # Continue, update module form to current selected module
+        self.versionDropCurrentText = text
+        self.modUpdateFromDB()
 
 
     #============================================================
@@ -590,8 +578,9 @@ class MainWindow(QMainWindow):
         Add a module.
         """
         
-        # Check any unsaved changes
-        if (self.cancelForUnsavedModChanges()): return
+        # Save current form changes to self.db before adding
+        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
+            self.modSaveToDB()
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -629,9 +618,6 @@ class MainWindow(QMainWindow):
             self.versionDropUpdateFromDB()
             self.versionDropSetCurrentText(newModDial.modVersionText.text())
             self.modUpdateFromDB()
-            
-            # Mark database as changed
-            self.flagDBChanged = True
         
             # Update window title
             self.setTitleForUnsavedChanges()
@@ -641,8 +627,9 @@ class MainWindow(QMainWindow):
         Copy current module.
         """
         
-        # Check any unsaved changes
-        if (self.cancelForUnsavedModChanges()): return
+        # Save current form changes to self.db before copying
+        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
+            self.modSaveToDB()
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -680,9 +667,6 @@ class MainWindow(QMainWindow):
             self.versionDropUpdateFromDB()
             self.versionDropSetCurrentText(newModDial.modVersionText.text())
             self.modUpdateFromDB()
-            
-            # Mark database as changed
-            self.flagDBChanged = True
         
             # Update window title
             self.setTitleForUnsavedChanges()
@@ -717,9 +701,6 @@ class MainWindow(QMainWindow):
                 self.nameDropUpdateFromDB()
                 self.versionDropUpdateFromDB()
             
-            # Mark database as changed
-            self.flagDBChanged = True
-        
             # Update window title
             self.setTitleForUnsavedChanges()
             
@@ -846,6 +827,10 @@ class MainWindow(QMainWindow):
         """
         Generate module keys for current database. Must save first.
         """
+        
+        # Sync current form changes to self.db
+        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
+            self.modSaveToDB()
         
         # Check any unsaved changes
         if (self.cancelForUnsavedChanges()): return
@@ -1001,11 +986,14 @@ class MainWindow(QMainWindow):
         self.genBtn.setEnabled(isEnabled)
         self.exportBtn.setEnabled(isEnabled)
         
-    def isDBChanged(self):
+    def hasUnsavedChanges(self):
         """
-        Check if the database is changed (added / deleted module keys) from creation (new or open)
+        Check if there are any unsaved changes by comparing self.db with self.dbOriginal,
+        also considering any pending form changes in the current module.
         """
-        return(self.flagDBChanged)
+        if self.db != self.dbOriginal:
+            return True
+        return self.isModKeyChanged()
     
     def isModKeyChanged(self):
         """
@@ -1029,50 +1017,22 @@ class MainWindow(QMainWindow):
         Every time an unsaved change is present, add a "*" in front of the window title.
         """
         
-        if (self.isDBChanged() or self.isModKeyChanged()):
+        if (self.hasUnsavedChanges()):
             self.setWindowTitle("*" + TITLE)
         else:
             self.setWindowTitle(TITLE)
     
     def cancelForUnsavedChanges(self):
         """
-        Check if either the database or the current form is changed.
+        Check if the database has unsaved changes. If so, prompt user to save.
         """
         
-        # Only pop a confirmation if there is unsaved changes
-        if (self.isDBChanged() or self.isModKeyChanged()):
+        # Only pop a confirmation if there are unsaved changes
+        if (self.hasUnsavedChanges()):
             
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
                                      "You have unsaved changes! To avoid data loss, do you want to save the before continue?", 
-                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
-            
-            # Depending on the response:
-            #   "Yes":      Run "saveDB" method and continue
-            #   "No":       Do not save and continue
-            #   "Cancel":   Do not save and stay
-            if reply == QMessageBox.StandardButton.Yes:
-                # Return False (continue) if successfully saved, otherwise return True to stay
-                if (self.saveDB()):
-                    return(False)
-                else:
-                    return(True)
-            elif reply == QMessageBox.StandardButton.No:
-                return(False)
-            else:
-                return(True)
-    
-    def cancelForUnsavedModChanges(self):
-        """
-        Check only if the current form is changed.
-        """
-        
-        # Only pop a confirmation if there is unsaved changes
-        if (self.isModKeyChanged()):
-            
-            # Ask the user whether to continue
-            reply = QMessageBox.question(self, 'Confirmation', 
-                                     "You have unsaved changes in the form below! To avoid data loss, do you want to save the before continue?", 
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
             
             # Depending on the response:
