@@ -25,17 +25,11 @@ except ImportError:
                                  QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
     PYQT_VERSION = 5
 
-# Compatibility: Enum scoping differs between PyQt5 and PyQt6
+# Compatibility: QPalette enum scoping differs between PyQt5 and PyQt6
 if PYQT_VERSION == 6:
     PlaceholderTextColorRole = QtGui.QPalette.ColorRole.PlaceholderText
-    ButtonOk = QDialogButtonBox.StandardButton.Ok
-    ButtonSave = QDialogButtonBox.StandardButton.Save
-    ButtonCancel = QDialogButtonBox.StandardButton.Cancel
 else:
     PlaceholderTextColorRole = QtGui.QPalette.PlaceholderText
-    ButtonOk = QDialogButtonBox.Ok
-    ButtonSave = QDialogButtonBox.Save
-    ButtonCancel = QDialogButtonBox.Cancel
 
 # Main window
 class MainWindow(QMainWindow):
@@ -1115,7 +1109,7 @@ class NewModuleDialog(QDialog):
         self.formLayout.addRow("Module version:", self.modVersionText)
 
         # Create "Save" and "Cancel" buttons
-        self.btns = QDialogButtonBox(ButtonOk | ButtonCancel, self)
+        self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel, self)
         self.btns.accepted.connect(self.checkEmpty)
         self.btns.rejected.connect(self.reject)
         self.btns.setCenterButtons(True)
@@ -1192,7 +1186,7 @@ class PreferenceDialog(QDialog):
         self.formLayout.addRow("Default directory to generate module keys:", self.defaultModKeyPathLayout)
 
         # Create "Save" and "Cancel" buttons
-        self.btns = QDialogButtonBox(ButtonSave | ButtonCancel, self)
+        self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         self.btns.setCenterButtons(True)
