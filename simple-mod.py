@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
         self.db = {}                                # Loaded database dictionary (empty if it's new)
         self.dbOriginal = {}                        # Original copy of database (for unsaved changes detection)
         self.currentModule = self.retEmptyModule()  # Current opened module
+        self._updatingForm = False                  # Guard flag to prevent re-entrant saves during form updates
         
         #--------------------------------------------------------
         # Menu bar
@@ -167,15 +168,15 @@ class MainWindow(QMainWindow):
         pal.setColor(PlaceholderTextColorRole, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
-        self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.conflictText.textChanged.connect(self.onFormFieldChanged)
         
         # What-is
         self.whatisText = QLineEdit(self)
-        self.whatisText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.whatisText.textChanged.connect(self.onFormFieldChanged)
         
         # Singularity image path (editable text field and file picker button)
         self.singularityImageText = QLineEdit(self)
-        self.singularityImageText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.singularityImageText.textChanged.connect(self.onFormFieldChanged)
         self.singularityImagePickerBtn = QPushButton("Browse", self)
         self.singularityImagePickerBtn.clicked.connect(self.pickSingularityImageFile)
         self.singularityImageLayout = QHBoxLayout()
@@ -186,24 +187,24 @@ class MainWindow(QMainWindow):
         self.singularityBindText = QLineEdit(self)
         self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config['defaultBindingPath']})")
         self.singularityBindText.setPalette(pal)
-        self.singularityBindText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.singularityBindText.textChanged.connect(self.onFormFieldChanged)
         
         # Singularity flags
         self.singularityFlagsText = QLineEdit(self)
         self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config['defaultFlags']})")
         self.singularityFlagsText.setPalette(pal)
-        self.singularityFlagsText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.singularityFlagsText.textChanged.connect(self.onFormFieldChanged)
         
         # Commands to replace
         self.cmdsText = QTextEdit(self)
         self.cmdsText.setPlaceholderText("(Seperate by space or new line)")
         self.cmdsText.setPalette(pal)
-        self.cmdsText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.cmdsText.textChanged.connect(self.onFormFieldChanged)
         
         # Environment variables to set up
         self.envsTable = QTableWidget(1, 2, self)
         self.envsUpdateFromDB()
-        self.envsTable.itemChanged.connect(self.setTitleForUnsavedChanges)
+        self.envsTable.itemChanged.connect(self.onFormFieldChanged)
         
         # Environment variables add / delete entry
         self.envsAddBtn =  QPushButton("Add", self)
@@ -216,7 +217,7 @@ class MainWindow(QMainWindow):
         
         # Template file path (editable text field and file picker button)
         self.templateText = QLineEdit(self)
-        self.templateText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.templateText.textChanged.connect(self.onFormFieldChanged)
         self.templatePickerBtn = QPushButton("Browse", self)
         self.templatePickerBtn.clicked.connect(self.pickTemplate)
         self.templateLayout = QHBoxLayout()
@@ -364,9 +365,6 @@ class MainWindow(QMainWindow):
                     QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
                     return(False)
                 
-                # Set current form to currentModule
-                self.modSaveToDB()
-            
                 # Save currentModule to database
                 self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
                 
@@ -459,11 +457,6 @@ class MainWindow(QMainWindow):
         When selected module name is changed.
         """
         
-        # Save current form changes to self.db for the previous module before switching
-        # (self.nameDropCurrentText holds the old name, versionDrop still shows the old version)
-        if (self.nameDropCurrentText and self.versionDrop.currentText()):
-            self.modSaveToDB()
-        
         # Continue, update version dropdown menu
         self.nameDropCurrentText = text
         self.versionDropUpdateFromDB()
@@ -493,11 +486,6 @@ class MainWindow(QMainWindow):
         When selected module version is changed.
         """
         
-        # Save current form changes to self.db for the previous module before switching
-        # (self.currentModule still refers to the previous module at this point)
-        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
-            self.modSaveToDB()
-        
         # Continue, update module form to current selected module
         self.versionDropCurrentText = text
         self.modUpdateFromDB()
@@ -512,7 +500,8 @@ class MainWindow(QMainWindow):
         Update module form from database ("currentModule" dictionary)
         """
     
-        #global currentModule
+        # Guard against re-entrant saves during form updates
+        self._updatingForm = True
         
         # If a non-empty module is selected, update currentModule from database and enable all fields;
         # If not, meaning nothing is selected, disable all fields
@@ -532,7 +521,8 @@ class MainWindow(QMainWindow):
         self.envsUpdateFromDB()
         self.templateText.setText(self.currentModule["template"])
         
-        # Update window title
+        # Release guard and update window title
+        self._updatingForm = False
         self.setTitleForUnsavedChanges()
      
     def modSaveToDB(self):
@@ -549,6 +539,16 @@ class MainWindow(QMainWindow):
         self.currentModule["cmds"] = self.cmdsText.toPlainText()
         self.envsSaveToDB()
         self.currentModule["template"] = self.templateText.text()
+    
+    def onFormFieldChanged(self):
+        """
+        Called when any field in the current module form is changed.
+        Saves the form to the database and updates the window title.
+        """
+        if self._updatingForm:
+            return
+        self.modSaveToDB()
+        self.setTitleForUnsavedChanges()
         
     def pickSingularityImageFile(self):
         """
@@ -579,10 +579,6 @@ class MainWindow(QMainWindow):
         """
         Add a module.
         """
-        
-        # Save current form changes to self.db before adding
-        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
-            self.modSaveToDB()
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -628,10 +624,6 @@ class MainWindow(QMainWindow):
         """
         Copy current module.
         """
-        
-        # Save current form changes to self.db before copying
-        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
-            self.modSaveToDB()
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -729,8 +721,8 @@ class MainWindow(QMainWindow):
         for item in items:
             self.envsTable.removeRow(item.row())
         
-        # Update window title (Manually update because "itemChanged" signal is not triggered at deletion)
-        self.setTitleForUnsavedChanges()
+        # Manually update because "itemChanged" signal is not triggered at deletion
+        self.onFormFieldChanged()
      
     def envsTableToDict(self):
         """
@@ -829,10 +821,6 @@ class MainWindow(QMainWindow):
         """
         Generate module keys for current database. Must save first.
         """
-        
-        # Sync current form changes to self.db
-        if (self.nameDrop.currentText() and self.versionDrop.currentText()):
-            self.modSaveToDB()
         
         # Check any unsaved changes
         if (self.cancelForUnsavedChanges()): return
@@ -990,29 +978,9 @@ class MainWindow(QMainWindow):
         
     def hasUnsavedChanges(self):
         """
-        Check if there are any unsaved changes by comparing self.db with self.dbOriginal,
-        also considering any pending form changes in the current module.
+        Check if there are any unsaved changes by comparing self.db with self.dbOriginal.
         """
-        if self.db != self.dbOriginal:
-            return True
-        return self.isModKeyChanged()
-    
-    def isModKeyChanged(self):
-        """
-        Check if the current form (module key) is changed from currentModule
-        """
-        
-        if (self.currentModule["conflict"] != self.conflictText.text() or \
-            self.currentModule["module_whatis"] != self.whatisText.text() or \
-            self.currentModule["singularity_image"] != self.singularityImageText.text() or \
-            self.currentModule["singularity_bindpaths"] != self.singularityBindText.text() or \
-            self.currentModule["singularity_flags"] != self.singularityFlagsText.text() or \
-            self.currentModule["cmds"] != self.cmdsText.toPlainText() or \
-            self.currentModule["envs"] != self.envsTableToDict() or \
-            self.currentModule["template"] != self.templateText.text() ):
-            return(True)
-        else:
-            return(False)
+        return self.db != self.dbOriginal
             
     def setTitleForUnsavedChanges(self):
         """
