@@ -7,7 +7,7 @@ From: ubuntu:24.04
 ################################################################################
 
 Maintainer      Jason Li
-Version         1.0
+Version         1.1.0
 Description     SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
 
 ################################################################################

@@ -137,11 +137,11 @@ class MainWindow(QMainWindow):
         
         # Add / Delete buttons
         self.addBtn = QPushButton("Add a new module", self)
-        self.addBtn.clicked.connect(self.addMod)
+        self.addBtn.clicked.connect(self.modAdd)
         self.copyBtn = QPushButton("Copy current module", self)
-        self.copyBtn.clicked.connect(self.copyMod)
+        self.copyBtn.clicked.connect(self.modCopy)
         self.delBtn = QPushButton("Delete selected module", self)
-        self.delBtn.clicked.connect(self.delMod)
+        self.delBtn.clicked.connect(self.modDel)
         self.blk1BtnLayout = QHBoxLayout()
         self.blk1BtnLayout.addWidget(self.addBtn)
         self.blk1BtnLayout.addWidget(self.copyBtn)
@@ -168,17 +168,17 @@ class MainWindow(QMainWindow):
         pal.setColor(PlaceholderTextColorRole, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
-        self.conflictText.textChanged.connect(self.onFormFieldChanged)
+        self.conflictText.textChanged.connect(self.formOnFieldChanged)
         
         # What-is
         self.whatisText = QLineEdit(self)
-        self.whatisText.textChanged.connect(self.onFormFieldChanged)
+        self.whatisText.textChanged.connect(self.formOnFieldChanged)
         
         # Singularity image path (editable text field and file picker button)
         self.singularityImageText = QLineEdit(self)
-        self.singularityImageText.textChanged.connect(self.onFormFieldChanged)
+        self.singularityImageText.textChanged.connect(self.formOnFieldChanged)
         self.singularityImagePickerBtn = QPushButton("Browse", self)
-        self.singularityImagePickerBtn.clicked.connect(self.pickSingularityImageFile)
+        self.singularityImagePickerBtn.clicked.connect(self.formPickSingularityImageFile)
         self.singularityImageLayout = QHBoxLayout()
         self.singularityImageLayout.addWidget(self.singularityImageText)
         self.singularityImageLayout.addWidget(self.singularityImagePickerBtn)
@@ -187,24 +187,24 @@ class MainWindow(QMainWindow):
         self.singularityBindText = QLineEdit(self)
         self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config['defaultBindingPath']})")
         self.singularityBindText.setPalette(pal)
-        self.singularityBindText.textChanged.connect(self.onFormFieldChanged)
+        self.singularityBindText.textChanged.connect(self.formOnFieldChanged)
         
         # Singularity flags
         self.singularityFlagsText = QLineEdit(self)
         self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config['defaultFlags']})")
         self.singularityFlagsText.setPalette(pal)
-        self.singularityFlagsText.textChanged.connect(self.onFormFieldChanged)
+        self.singularityFlagsText.textChanged.connect(self.formOnFieldChanged)
         
         # Commands to replace
         self.cmdsText = QTextEdit(self)
         self.cmdsText.setPlaceholderText("(Seperate by space or new line)")
         self.cmdsText.setPalette(pal)
-        self.cmdsText.textChanged.connect(self.onFormFieldChanged)
+        self.cmdsText.textChanged.connect(self.formOnFieldChanged)
         
         # Environment variables to set up
         self.envsTable = QTableWidget(1, 2, self)
         self.envsUpdateFromDB()
-        self.envsTable.itemChanged.connect(self.onFormFieldChanged)
+        self.envsTable.itemChanged.connect(self.formOnFieldChanged)
         
         # Environment variables add / delete entry
         self.envsAddBtn =  QPushButton("Add", self)
@@ -217,9 +217,9 @@ class MainWindow(QMainWindow):
         
         # Template file path (editable text field and file picker button)
         self.templateText = QLineEdit(self)
-        self.templateText.textChanged.connect(self.onFormFieldChanged)
+        self.templateText.textChanged.connect(self.formOnFieldChanged)
         self.templatePickerBtn = QPushButton("Browse", self)
-        self.templatePickerBtn.clicked.connect(self.pickTemplate)
+        self.templatePickerBtn.clicked.connect(self.formPickTemplate)
         self.templateLayout = QHBoxLayout()
         self.templateLayout.addWidget(self.templateText)
         self.templateLayout.addWidget(self.templatePickerBtn)
@@ -469,7 +469,7 @@ class MainWindow(QMainWindow):
         self.versionDrop.clear()
         if (self.nameDrop.currentText()) :
             self.versionDrop.addItems(sorted(self.db[self.nameDrop.currentText()].keys(), reverse=True))
-        self.modUpdateFromDB()
+        self.formUpdateFromDB()
         self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
 
     def versionDropSetCurrentText(self, text):
@@ -488,14 +488,14 @@ class MainWindow(QMainWindow):
         
         # Continue, update module form to current selected module
         self.versionDropCurrentText = text
-        self.modUpdateFromDB()
+        self.formUpdateFromDB()
 
 
     #============================================================
     # Module form methods
     #============================================================
      
-    def modUpdateFromDB(self):
+    def formUpdateFromDB(self):
         """
         Update module form from database ("currentModule" dictionary)
         """
@@ -525,7 +525,7 @@ class MainWindow(QMainWindow):
         self._updatingForm = False
         self.setTitleForUnsavedChanges()
      
-    def modSaveToDB(self):
+    def formSaveToDB(self):
         """
         Save module form to database ("currentModule" dictionary)
         """
@@ -540,17 +540,18 @@ class MainWindow(QMainWindow):
         self.envsSaveToDB()
         self.currentModule["template"] = self.templateText.text()
     
-    def onFormFieldChanged(self):
+    def formOnFieldChanged(self):
         """
         Called when any field in the current module form is changed.
         Saves the form to the database and updates the window title.
         """
+        
         if self._updatingForm:
             return
-        self.modSaveToDB()
+        self.formSaveToDB()
         self.setTitleForUnsavedChanges()
         
-    def pickSingularityImageFile(self):
+    def formPickSingularityImageFile(self):
         """
         Pick Singularity image file in file browser.
         """
@@ -560,7 +561,7 @@ class MainWindow(QMainWindow):
         if fname:
             self.singularityImageText.setText(fname)
         
-    def pickTemplate(self):
+    def formPickTemplate(self):
         """
         Pick template file in file browser.
         """
@@ -575,7 +576,7 @@ class MainWindow(QMainWindow):
     # Add / Delete module
     #============================================================
 
-    def addMod(self):
+    def modAdd(self):
         """
         Add a module.
         """
@@ -615,12 +616,12 @@ class MainWindow(QMainWindow):
             self.nameDropSetCurrentText(newModDial.modNameText.text())
             self.versionDropUpdateFromDB()
             self.versionDropSetCurrentText(newModDial.modVersionText.text())
-            self.modUpdateFromDB()
+            self.formUpdateFromDB()
         
             # Update window title
             self.setTitleForUnsavedChanges()
 
-    def copyMod(self):
+    def modCopy(self):
         """
         Copy current module.
         """
@@ -660,12 +661,12 @@ class MainWindow(QMainWindow):
             self.nameDropSetCurrentText(newModDial.modNameText.text())
             self.versionDropUpdateFromDB()
             self.versionDropSetCurrentText(newModDial.modVersionText.text())
-            self.modUpdateFromDB()
+            self.formUpdateFromDB()
         
             # Update window title
             self.setTitleForUnsavedChanges()
 
-    def delMod(self):
+    def modDel(self):
         """
         Delete selected module.
         """
@@ -722,7 +723,7 @@ class MainWindow(QMainWindow):
             self.envsTable.removeRow(item.row())
         
         # Manually update because "itemChanged" signal is not triggered at deletion
-        self.onFormFieldChanged()
+        self.formOnFieldChanged()
      
     def envsTableToDict(self):
         """
@@ -916,7 +917,7 @@ class MainWindow(QMainWindow):
             self.config = {
                 "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
                 "defaultFlags": "",
-                "defaultImagePath": "/project/containers/images",
+                "defaultImagePath": "",
                 "defaultTemplate": "./template/template.tcl",
                 "defaultModKeyPath": "./modulekey"
             }
@@ -1166,5 +1167,5 @@ if __name__ == "__main__":
     mainWindow = MainWindow()
     mainWindow.show()
     mainWindow.resizeEnvsColumns()
-    mainWindow.modUpdateFromDB()
+    mainWindow.formUpdateFromDB()
     sys.exit(app.exec())
