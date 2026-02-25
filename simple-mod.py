@@ -7,7 +7,7 @@
 # =====================================================================
 
 
-import sys, json, os, tempfile
+import sys, json, os, tempfile, copy
 from string import Template
 
 # QT5/6 dual support (prefer QT6)
@@ -43,13 +43,33 @@ License: \tMIT License
     
 # Main window
 class MainWindow(QMainWindow):
+    """
+    Main window of SIMPLE-MOD.
+    
+    Architecture:
+    - self.db:             The working database dictionary (module name -> version -> module dict).
+    - self.dbOriginal:     Deep copy of the database taken at load/save time, used for unsaved changes detection.
+    - self.currentModule:  Reference to the currently selected module's dictionary inside self.db.
+    - self._updatingForm:  Guard flag to prevent re-entrant saves when formUpdateFromDB() populates fields.
+    
+    Form-DB synchronization:
+        All form field signals (textChanged, itemChanged) are connected to formOnFieldChanged(),
+        which calls formSaveToDB() and setTitleForUnsavedChanges() on every edit. This keeps self.db 
+        always in sync with the form, so explicit saves before switching modules are not needed.
+        
+    Naming convention:
+        - form*:  Methods related to the module details form (formUpdateFromDB, formSaveToDB, formOnFieldChanged, etc.)
+        - mod*:   Methods for module-level CRUD operations (modAdd, modCopy, modDel)
+        - envs*:  Methods for the environmental variable table (envsAdd, envsDel, envsUpdateFromDB, etc.)
+    """
 
     #============================================================
     # Constructor
     #============================================================
     def __init__(self):
         """
-        Constructor
+        Initialize the main window, menu bar, module list panel, module details form,
+        and module key generation buttons.
         """
         
         super().__init__()
@@ -58,9 +78,10 @@ class MainWindow(QMainWindow):
         self.loadPreferences()
         
         # Key attributes
-        self.flagDBChanged = False                  # Whether the database is changed from creation or opening
         self.db = {}                                # Loaded database dictionary (empty if it's new)
+        self.dbOriginal = {}                        # Original copy of database (for unsaved changes detection)
         self.currentModule = self.retEmptyModule()  # Current opened module
+        self._updatingForm = False                  # Guard flag to prevent re-entrant saves during form updates
         
         #--------------------------------------------------------
         # Menu bar
@@ -136,11 +157,11 @@ class MainWindow(QMainWindow):
         
         # Add / Delete buttons
         self.addBtn = QPushButton("Add a new module", self)
-        self.addBtn.clicked.connect(self.addMod)
+        self.addBtn.clicked.connect(self.modAdd)
         self.copyBtn = QPushButton("Copy current module", self)
-        self.copyBtn.clicked.connect(self.copyMod)
+        self.copyBtn.clicked.connect(self.modCopy)
         self.delBtn = QPushButton("Delete selected module", self)
-        self.delBtn.clicked.connect(self.delMod)
+        self.delBtn.clicked.connect(self.modDel)
         self.blk1BtnLayout = QHBoxLayout()
         self.blk1BtnLayout.addWidget(self.addBtn)
         self.blk1BtnLayout.addWidget(self.copyBtn)
@@ -167,17 +188,17 @@ class MainWindow(QMainWindow):
         pal.setColor(PlaceholderTextColorRole, QtGui.QColor("#BBBBBB"))
                 # Placeholder text color palette. Will be reused.
         self.conflictText.setPalette(pal)
-        self.conflictText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.conflictText.textChanged.connect(self.formOnFieldChanged)
         
         # What-is
         self.whatisText = QLineEdit(self)
-        self.whatisText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.whatisText.textChanged.connect(self.formOnFieldChanged)
         
         # Singularity image path (editable text field and file picker button)
         self.singularityImageText = QLineEdit(self)
-        self.singularityImageText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.singularityImageText.textChanged.connect(self.formOnFieldChanged)
         self.singularityImagePickerBtn = QPushButton("Browse", self)
-        self.singularityImagePickerBtn.clicked.connect(self.pickSingularityImageFile)
+        self.singularityImagePickerBtn.clicked.connect(self.formPickSingularityImageFile)
         self.singularityImageLayout = QHBoxLayout()
         self.singularityImageLayout.addWidget(self.singularityImageText)
         self.singularityImageLayout.addWidget(self.singularityImagePickerBtn)
@@ -186,24 +207,24 @@ class MainWindow(QMainWindow):
         self.singularityBindText = QLineEdit(self)
         self.singularityBindText.setPlaceholderText(f"(Already bound: /home,/tmp,{self.config['defaultBindingPath']})")
         self.singularityBindText.setPalette(pal)
-        self.singularityBindText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.singularityBindText.textChanged.connect(self.formOnFieldChanged)
         
         # Singularity flags
         self.singularityFlagsText = QLineEdit(self)
         self.singularityFlagsText.setPlaceholderText(f"(Already enabled: {self.config['defaultFlags']})")
         self.singularityFlagsText.setPalette(pal)
-        self.singularityFlagsText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.singularityFlagsText.textChanged.connect(self.formOnFieldChanged)
         
         # Commands to replace
         self.cmdsText = QTextEdit(self)
         self.cmdsText.setPlaceholderText("(Seperate by space or new line)")
         self.cmdsText.setPalette(pal)
-        self.cmdsText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.cmdsText.textChanged.connect(self.formOnFieldChanged)
         
         # Environment variables to set up
         self.envsTable = QTableWidget(1, 2, self)
         self.envsUpdateFromDB()
-        self.envsTable.itemChanged.connect(self.setTitleForUnsavedChanges)
+        self.envsTable.itemChanged.connect(self.formOnFieldChanged)
         
         # Environment variables add / delete entry
         self.envsAddBtn =  QPushButton("Add", self)
@@ -216,9 +237,9 @@ class MainWindow(QMainWindow):
         
         # Template file path (editable text field and file picker button)
         self.templateText = QLineEdit(self)
-        self.templateText.textChanged.connect(self.setTitleForUnsavedChanges)
+        self.templateText.textChanged.connect(self.formOnFieldChanged)
         self.templatePickerBtn = QPushButton("Browse", self)
-        self.templatePickerBtn.clicked.connect(self.pickTemplate)
+        self.templatePickerBtn.clicked.connect(self.formPickTemplate)
         self.templateLayout = QHBoxLayout()
         self.templateLayout.addWidget(self.templateText)
         self.templateLayout.addWidget(self.templatePickerBtn)
@@ -293,8 +314,8 @@ class MainWindow(QMainWindow):
         self.nameDropUpdateFromDB()
         self.versionDropUpdateFromDB()
         
-        # Mark database as unchanged
-        self.flagDBChanged = False
+        # Save original copy of database
+        self.dbOriginal = copy.deepcopy(self.db)
         
         # Update window title
         self.setTitleForUnsavedChanges()
@@ -329,8 +350,8 @@ class MainWindow(QMainWindow):
             self.nameDropUpdateFromDB()
             self.versionDropUpdateFromDB()
             
-            # Mark database as unchanged
-            self.flagDBChanged = False
+            # Save original copy of database
+            self.dbOriginal = copy.deepcopy(self.db)
         
             # Update window title
             self.setTitleForUnsavedChanges()
@@ -364,9 +385,6 @@ class MainWindow(QMainWindow):
                     QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
                     return(False)
                 
-                # Set current form to currentModule
-                self.modSaveToDB()
-            
                 # Save currentModule to database
                 self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
                 
@@ -374,8 +392,8 @@ class MainWindow(QMainWindow):
                 json.dump(self.db, fw, indent=4)
                 fw.close()
         
-                # Mark database as unchanged
-                self.flagDBChanged = False
+                # Save original copy of database
+                self.dbOriginal = copy.deepcopy(self.db)
         
                 # Update window title
                 self.setTitleForUnsavedChanges()
@@ -392,7 +410,8 @@ class MainWindow(QMainWindow):
 
     def preferencesDialog(self):
         """
-        Preferences settingsMenu
+        Open the Preferences dialog to edit default settings (binding paths, flags, 
+        image path, template, and module key output path). Saves to ~/.simple-modrc on confirm.
         """
         
         # Open a dialog
@@ -419,13 +438,13 @@ class MainWindow(QMainWindow):
 
     def aboutDialog(self):
         """
-        Show about information
+        Show the About SIMPLE-MOD dialog.
         """
         QMessageBox.about(self, "About", ABOUT)
 
     def aboutQtDialog(self):
         """
-        Show about information
+        Show the About QT dialog.
         """
         
         QMessageBox.aboutQt(self, "About QT")
@@ -437,7 +456,8 @@ class MainWindow(QMainWindow):
 
     def nameDropUpdateFromDB(self):
         """
-        Update module name dropdown menu.
+        Update the module name dropdown menu from self.db keys.
+        Temporarily disconnects the change signal to prevent triggering nameDropChanged.
         """
         self.nameDrop.currentTextChanged.disconnect()
         self.nameDrop.clear()
@@ -447,7 +467,7 @@ class MainWindow(QMainWindow):
 
     def nameDropSetCurrentText(self, text):
         """
-        Set (silently) current text for name dropdown menu.
+        Set the current text for the name dropdown without triggering nameDropChanged.
         """
         self.nameDrop.currentTextChanged.disconnect()
         self.nameDrop.setCurrentText(text)
@@ -456,37 +476,30 @@ class MainWindow(QMainWindow):
         
     def nameDropChanged(self, text):
         """
-        When selected module name is changed.
+        Slot for when the selected module name changes. Updates the version dropdown
+        to list versions of the newly selected module.
         """
         
-        # Check any unsaved changes in the current module form
-        if (self.cancelForUnsavedModChanges()): 
-        
-            # If choose to stay for unsaved changes, revert all
-            self.nameDrop.currentTextChanged.disconnect()
-            self.nameDrop.setCurrentText(self.nameDropCurrentText)
-            self.nameDrop.currentTextChanged.connect(self.nameDropChanged)
-            
-        else:
-        
-            # Otherwise continue, update version dropdown menu
-            self.nameDropCurrentText = text
-            self.versionDropUpdateFromDB()
+        # Continue, update version dropdown menu
+        self.nameDropCurrentText = text
+        self.versionDropUpdateFromDB()
 
     def versionDropUpdateFromDB(self):
         """
-        Update module version dropdown menu.
+        Update the module version dropdown menu from self.db for the currently selected module name.
+        Temporarily disconnects the change signal to prevent triggering versionDropChanged.
+        Also calls formUpdateFromDB() to refresh the form.
         """
         self.versionDrop.currentTextChanged.disconnect()
         self.versionDrop.clear()
         if (self.nameDrop.currentText()) :
             self.versionDrop.addItems(sorted(self.db[self.nameDrop.currentText()].keys(), reverse=True))
-        self.modUpdateFromDB()
+        self.formUpdateFromDB()
         self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
 
     def versionDropSetCurrentText(self, text):
         """
-        Set (silently) current text for version dropdown menu.
+        Set the current text for the version dropdown without triggering versionDropChanged.
         """
         self.versionDrop.currentTextChanged.disconnect()
         self.versionDrop.setCurrentText(text)
@@ -495,34 +508,28 @@ class MainWindow(QMainWindow):
         
     def versionDropChanged(self, text):
         """
-        When selected module version is changed.
+        Slot for when the selected module version changes.
+        Calls formUpdateFromDB() to load the newly selected module into the form.
         """
         
-        # Check any unsaved changes
-        if (self.cancelForUnsavedModChanges()): 
-        
-            # If choose to stay for unsaved changes, revert all
-            self.versionDrop.currentTextChanged.disconnect()
-            self.versionDrop.setCurrentText(self.versionDropCurrentText)
-            self.versionDrop.currentTextChanged.connect(self.versionDropChanged)
-            
-        else:
-        
-            # Otherwise continue, update module form to current selected module
-            self.versionDropCurrentText = text
-            self.modUpdateFromDB()
+        # Continue, update module form to current selected module
+        self.versionDropCurrentText = text
+        self.formUpdateFromDB()
 
 
     #============================================================
     # Module form methods
     #============================================================
      
-    def modUpdateFromDB(self):
+    def formUpdateFromDB(self):
         """
-        Update module form from database ("currentModule" dictionary)
+        Populate the module details form from the currently selected module in self.db.
+        Sets self._updatingForm to True during the update to prevent formOnFieldChanged()
+        from writing partially loaded data back to the database.
         """
     
-        #global currentModule
+        # Guard against re-entrant saves during form updates
+        self._updatingForm = True
         
         # If a non-empty module is selected, update currentModule from database and enable all fields;
         # If not, meaning nothing is selected, disable all fields
@@ -542,12 +549,14 @@ class MainWindow(QMainWindow):
         self.envsUpdateFromDB()
         self.templateText.setText(self.currentModule["template"])
         
-        # Update window title
+        # Release guard and update window title
+        self._updatingForm = False
         self.setTitleForUnsavedChanges()
      
-    def modSaveToDB(self):
+    def formSaveToDB(self):
         """
-        Save module form to database ("currentModule" dictionary)
+        Save all form field values into the self.currentModule dictionary,
+        which is a reference inside self.db. This keeps the database in sync with the form.
         """
         
         # Save all values to currentModule dict
@@ -559,10 +568,24 @@ class MainWindow(QMainWindow):
         self.currentModule["cmds"] = self.cmdsText.toPlainText()
         self.envsSaveToDB()
         self.currentModule["template"] = self.templateText.text()
-        
-    def pickSingularityImageFile(self):
+    
+    def formOnFieldChanged(self):
         """
-        Pick Singularity image file in file browser.
+        Slot connected to all form field change signals (textChanged, itemChanged).
+        Saves the form to self.db via formSaveToDB() and updates the window title
+        to reflect unsaved changes. Skipped when self._updatingForm is True (i.e.,
+        during formUpdateFromDB()) to avoid writing back partially loaded data.
+        """
+        
+        if self._updatingForm:
+            return
+        self.formSaveToDB()
+        self.setTitleForUnsavedChanges()
+        
+    def formPickSingularityImageFile(self):
+        """
+        Open a file browser to pick a Singularity image file (.sif or .img)
+        and set it in the Singularity image path field.
         """
         
         # Pick a database file to open
@@ -570,9 +593,10 @@ class MainWindow(QMainWindow):
         if fname:
             self.singularityImageText.setText(fname)
         
-    def pickTemplate(self):
+    def formPickTemplate(self):
         """
-        Pick template file in file browser.
+        Open a file browser to pick a module key template file
+        and set it in the template path field.
         """
         
         # Pick a database file to open
@@ -585,13 +609,11 @@ class MainWindow(QMainWindow):
     # Add / Delete module
     #============================================================
 
-    def addMod(self):
+    def modAdd(self):
         """
-        Add a module.
+        Open a dialog to add a new module. Creates a new empty module entry in self.db
+        and switches the form to the newly created module.
         """
-        
-        # Check any unsaved changes
-        if (self.cancelForUnsavedModChanges()): return
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -628,21 +650,16 @@ class MainWindow(QMainWindow):
             self.nameDropSetCurrentText(newModDial.modNameText.text())
             self.versionDropUpdateFromDB()
             self.versionDropSetCurrentText(newModDial.modVersionText.text())
-            self.modUpdateFromDB()
-            
-            # Mark database as changed
-            self.flagDBChanged = True
+            self.formUpdateFromDB()
         
             # Update window title
             self.setTitleForUnsavedChanges()
 
-    def copyMod(self):
+    def modCopy(self):
         """
-        Copy current module.
+        Open a dialog to copy the current module under a new name/version.
+        Creates a copy of self.currentModule in self.db and switches the form to the copy.
         """
-        
-        # Check any unsaved changes
-        if (self.cancelForUnsavedModChanges()): return
     
         # Open a dialog
         newModDial = NewModuleDialog(self)
@@ -679,17 +696,16 @@ class MainWindow(QMainWindow):
             self.nameDropSetCurrentText(newModDial.modNameText.text())
             self.versionDropUpdateFromDB()
             self.versionDropSetCurrentText(newModDial.modVersionText.text())
-            self.modUpdateFromDB()
-            
-            # Mark database as changed
-            self.flagDBChanged = True
+            self.formUpdateFromDB()
         
             # Update window title
             self.setTitleForUnsavedChanges()
 
-    def delMod(self):
+    def modDel(self):
         """
-        Delete selected module.
+        Delete the currently selected module after user confirmation.
+        If the module has multiple versions, only the selected version is deleted;
+        otherwise, the entire module entry is removed from self.db.
         """
         
         # Confirm whether to delete
@@ -717,9 +733,6 @@ class MainWindow(QMainWindow):
                 self.nameDropUpdateFromDB()
                 self.versionDropUpdateFromDB()
             
-            # Mark database as changed
-            self.flagDBChanged = True
-        
             # Update window title
             self.setTitleForUnsavedChanges()
             
@@ -730,7 +743,7 @@ class MainWindow(QMainWindow):
 
     def envsAdd(self):
         """
-        Add a new environmental variable.
+        Add a new row to the environmental variable table with a default name.
         """
         self.envsTable.setRowCount(self.envsTable.rowCount()+1)
         item = QTableWidgetItem(f"ENV_{self.envsTable.rowCount()}")
@@ -740,18 +753,20 @@ class MainWindow(QMainWindow):
 
     def envsDel(self):
         """
-        Delete the selected environmental variable(s).
+        Delete the selected row(s) from the environmental variable table.
+        Manually calls formOnFieldChanged() because the table's itemChanged signal
+        is not emitted on row deletion.
         """
         items = self.envsTable.selectedItems()
         for item in items:
             self.envsTable.removeRow(item.row())
         
-        # Update window title (Manually update because "itemChanged" signal is not triggered at deletion)
-        self.setTitleForUnsavedChanges()
+        # Manually update because "itemChanged" signal is not triggered at deletion
+        self.formOnFieldChanged()
      
     def envsTableToDict(self):
         """
-        Convert environmental variable table to dictionary and return.
+        Convert the environmental variable table contents to a dictionary and return it.
         """
     
         # Clear the current data in currentModule
@@ -767,7 +782,7 @@ class MainWindow(QMainWindow):
      
     def envsUpdateFromDB(self):
         """
-        Update environmental variable table from database ("currentModule" dictionary)
+        Populate the environmental variable table from self.currentModule["envs"].
         """
         
         # Clear current values
@@ -787,7 +802,7 @@ class MainWindow(QMainWindow):
      
     def envsSaveToDB(self):
         """
-        Save environmental variable table to database ("currentModule" dictionary)
+        Save the environmental variable table contents into self.currentModule["envs"].
         """
     
         # Save current values in the table to dictionary
@@ -800,7 +815,9 @@ class MainWindow(QMainWindow):
 
     def genModKey(self):
         """
-        Generate module key for current form. Saving is not assumed.
+        Generate a module key file for the currently displayed form contents.
+        Reads directly from the form fields so saving is not required.
+        Prompts the user to select an output directory.
         """
         
         # Asked the user to select a directory
@@ -844,7 +861,9 @@ class MainWindow(QMainWindow):
 
     def genAllModKeys(self):
         """
-        Generate module keys for current database. Must save first.
+        Generate module key files for all modules in the current database.
+        The database must be saved first (prompts for unsaved changes).
+        Prompts the user to select an output directory.
         """
         
         # Check any unsaved changes
@@ -890,7 +909,12 @@ class MainWindow(QMainWindow):
 
     def retModKey(self, modName=None , modVersion=None, dictModule=None):
         """
-        Return module key from a template.
+        Return a formatted module key string by substituting module values into a template.
+        
+        Args:
+            modName:     Module name (defaults to currently selected name).
+            modVersion:  Module version (defaults to currently selected version).
+            dictModule:  Module dictionary (defaults to self.currentModule).
         """
         
         # Default module name, version, and module dictionary to current if not given
@@ -941,7 +965,7 @@ class MainWindow(QMainWindow):
             self.config = {
                 "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
                 "defaultFlags": "",
-                "defaultImagePath": "/project/containers/images",
+                "defaultImagePath": "",
                 "defaultTemplate": "./template/template.tcl",
                 "defaultModKeyPath": "./modulekey"
             }
@@ -965,7 +989,7 @@ class MainWindow(QMainWindow):
     
     def closeEvent(self, event):
         """
-        Exit SIMPLE-MOD.
+        Handle window close event. Prompts for unsaved changes before exiting.
         """
         # Check any unsaved changes
         if (self.cancelForUnsavedChanges()): 
@@ -1001,46 +1025,36 @@ class MainWindow(QMainWindow):
         self.genBtn.setEnabled(isEnabled)
         self.exportBtn.setEnabled(isEnabled)
         
-    def isDBChanged(self):
+    def hasUnsavedChanges(self):
         """
-        Check if the database is changed (added / deleted module keys) from creation (new or open)
+        Check if there are unsaved changes by comparing self.db with self.dbOriginal.
+        Since formOnFieldChanged() keeps self.db in sync with the form at all times,
+        this comparison is sufficient to detect any pending changes.
         """
-        return(self.flagDBChanged)
-    
-    def isModKeyChanged(self):
-        """
-        Check if the current form (module key) is changed from currentModule
-        """
-        
-        if (self.currentModule["conflict"] != self.conflictText.text() or \
-            self.currentModule["module_whatis"] != self.whatisText.text() or \
-            self.currentModule["singularity_image"] != self.singularityImageText.text() or \
-            self.currentModule["singularity_bindpaths"] != self.singularityBindText.text() or \
-            self.currentModule["singularity_flags"] != self.singularityFlagsText.text() or \
-            self.currentModule["cmds"] != self.cmdsText.toPlainText() or \
-            self.currentModule["envs"] != self.envsTableToDict() or \
-            self.currentModule["template"] != self.templateText.text() ):
-            return(True)
-        else:
-            return(False)
+        return self.db != self.dbOriginal
             
     def setTitleForUnsavedChanges(self):
         """
         Every time an unsaved change is present, add a "*" in front of the window title.
         """
         
-        if (self.isDBChanged() or self.isModKeyChanged()):
+        if (self.hasUnsavedChanges()):
             self.setWindowTitle("*" + TITLE)
         else:
             self.setWindowTitle(TITLE)
     
     def cancelForUnsavedChanges(self):
         """
-        Check if either the database or the current form is changed.
+        If the database has unsaved changes, prompt the user to save, discard, or cancel.
+        
+        Returns:
+            True:   User chose to cancel, or save failed (caller should abort).
+            False:  User chose to continue (with or without saving).
+            None:   No unsaved changes detected (caller should continue).
         """
         
-        # Only pop a confirmation if there is unsaved changes
-        if (self.isDBChanged() or self.isModKeyChanged()):
+        # Only pop a confirmation if there are unsaved changes
+        if (self.hasUnsavedChanges()):
             
             # Ask the user whether to continue
             reply = QMessageBox.question(self, 'Confirmation', 
@@ -1061,38 +1075,13 @@ class MainWindow(QMainWindow):
                 return(False)
             else:
                 return(True)
-    
-    def cancelForUnsavedModChanges(self):
-        """
-        Check only if the current form is changed.
-        """
-        
-        # Only pop a confirmation if there is unsaved changes
-        if (self.isModKeyChanged()):
-            
-            # Ask the user whether to continue
-            reply = QMessageBox.question(self, 'Confirmation', 
-                                     "You have unsaved changes in the form below! To avoid data loss, do you want to save the before continue?", 
-                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
-            
-            # Depending on the response:
-            #   "Yes":      Run "saveDB" method and continue
-            #   "No":       Do not save and continue
-            #   "Cancel":   Do not save and stay
-            if reply == QMessageBox.StandardButton.Yes:
-                # Return False (continue) if successfully saved, otherwise return True to stay
-                if (self.saveDB()):
-                    return(False)
-                else:
-                    return(True)
-            elif reply == QMessageBox.StandardButton.No:
-                return(False)
-            else:
-                return(True)
 
 
 # New module dialog class
 class NewModuleDialog(QDialog):
+    """
+    Dialog for entering a new module's name and version, used by modAdd() and modCopy().
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -1136,6 +1125,10 @@ class NewModuleDialog(QDialog):
 
 # Preference dialog class
 class PreferenceDialog(QDialog):
+    """
+    Dialog for editing SIMPLE-MOD preferences (default paths, flags, template).
+    Settings are saved to ~/.simple-modrc as JSON.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -1232,5 +1225,5 @@ if __name__ == "__main__":
     mainWindow = MainWindow()
     mainWindow.show()
     mainWindow.resizeEnvsColumns()
-    mainWindow.modUpdateFromDB()
+    mainWindow.formUpdateFromDB()
     sys.exit(app.exec())
