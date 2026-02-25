@@ -84,7 +84,7 @@ Additional path binding may be required to save module databases and generate mo
 
 ## 3. User Interface
 
-The usage of SIMPLE-MOD shoul be straightforward and self-explanatory. Below is the GUI of SIMPLE-MOD:
+The usage of SIMPLE-MOD should be straightforward and self-explanatory. Below is the GUI of SIMPLE-MOD:
 
 ![README](https://raw.githubusercontent.com/lsuhpchelp/SIMPLE-MOD/master/README.png)
 
@@ -104,13 +104,15 @@ Menu Bar contains 3 menus:
 
 ### 3.3 Module Details
 
+All changes to the fields below are automatically saved to the in-memory database as you type. Unsaved changes (relative to the last saved file) are indicated by a `*` in the window title.
+
 - **_Conflicts_**: Conflicted modules that cannot be loaded together. (Itself is already added by default)
 - **_Software description_**: Software description.
 - **_Singularity image path_**: Path to Singularity image. Can use remote path if the host system supports.
 - **_Singularity binding paths_**: Binding paths ("-B"). Bound by default (can be changed in Settings): /home,/tmp,/work,/project,/usr/local/packages,/var/scratch.
 - **_Additional Singularity flags_**: Additional flags to add (e.g., "--nv").
-- **_Commands to map_**: Executables inside the container that need to be mapped as wrappers outside of the container. 
-- **_Set up environmental variable_**: Set up additional environmental variable for the module, if needed.
+- **_Commands to map_**: Executables inside the container that need to be mapped as wrappers outside of the container.
+- **_Set up environmental variable_**: Set up additional environmental variables for the module, if needed.
 - **_Module key template_**: Template to generate module keys. Default: ./template/template.tcl
 
 ### 3.4 Generate Module Key(s)
