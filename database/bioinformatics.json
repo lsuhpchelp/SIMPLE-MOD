@@ -436,5 +436,17 @@
             "envs": {},
             "template": "./template/template.tcl"
         }
+    },
+    "fastp": {
+        "1.1.0": {
+            "conflict": "",
+            "module_whatis": "An ultra-fast all-in-one FASTQ preprocessor (QC/adapters/trimming/filtering/splitting/merging...)",
+            "singularity_image": "docker://staphb/fastp:1.1.0",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "fastp",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
