@@ -493,9 +493,15 @@ class SimpleModCLI:
         else:
             # Delete entire module
             del self.db[self.current_module_name]
-            self.current_module_name = None
-            self.current_module_version = None
-            self.current_module = self.ret_empty_module()
+            # Select first module and version if database is not empty
+            if self.db:
+                first_name = sorted(self.db.keys())[0]
+                first_version = sorted(self.db[first_name].keys(), reverse=True)[0]
+                self.load_current_module(first_name, first_version)
+            else:
+                self.current_module_name = None
+                self.current_module_version = None
+                self.current_module = self.ret_empty_module()
 
         print_header("Module Deleted")
         print("Module has been deleted.")
