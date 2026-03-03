@@ -400,7 +400,6 @@ class SimpleModCLI:
         if name not in self.db:
             self.db[name] = {}
         self.db[name][version] = self.ret_empty_module()
-        self.db_original = copy.deepcopy(self.db)
 
         # Load the new module
         self.load_current_module(name, version)
@@ -453,7 +452,6 @@ class SimpleModCLI:
         if name not in self.db:
             self.db[name] = {}
         self.db[name][version] = copy.deepcopy(self.current_module)
-        self.db_original = copy.deepcopy(self.db)
 
         # Load the copy
         self.load_current_module(name, version)
@@ -488,7 +486,6 @@ class SimpleModCLI:
         if len(self.db[self.current_module_name]) > 1:
             # Delete only this version
             del self.db[self.current_module_name][self.current_module_version]
-            self.db_original = copy.deepcopy(self.db)
 
             # Find next version
             versions = sorted(self.db[self.current_module_name].keys(), reverse=True)
@@ -496,7 +493,6 @@ class SimpleModCLI:
         else:
             # Delete entire module
             del self.db[self.current_module_name]
-            self.db_original = copy.deepcopy(self.db)
             self.current_module_name = None
             self.current_module_version = None
             self.current_module = self.ret_empty_module()
@@ -629,7 +625,6 @@ class SimpleModCLI:
 
         # Save to database
         self.update_db_from_form()
-        self.db_original = copy.deepcopy(self.db)
 
     def edit_environment_variables(self):
         """Edit environment variables for the current module."""
