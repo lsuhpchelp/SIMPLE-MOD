@@ -268,7 +268,6 @@ class SimpleModCLI:
 
         print_header("New Database")
         print("New empty database created.")
-        input("Press Enter to continue...")
 
     def action_open_database(self):
         """Open an existing database file."""
@@ -280,7 +279,6 @@ class SimpleModCLI:
         if not json_files:
             print_header("Open Database")
             print(f"No JSON files found in {DATABASE_DIR}/")
-            input("Press Enter to continue...")
             return
 
         db_file = radiolist_dialog(
@@ -308,14 +306,12 @@ class SimpleModCLI:
         print_header("Database Loaded")
         print(f"Loaded: {db_path}")
         print(f"Modules: {len(self.db)}")
-        input("Press Enter to continue...")
 
     def action_save_database(self):
         """Save the current database to a file."""
         if not self.db:
             print_header("Save Database")
             print("Error: Database is empty. Nothing to save.")
-            input("Press Enter to continue...")
             return
 
         if self.current_db_path and os.path.exists(self.current_db_path):
@@ -341,11 +337,9 @@ class SimpleModCLI:
             self.db_original = copy.deepcopy(self.db)
             print_header("Database Saved")
             print(f"Saved to: {self.current_db_path}")
-            input("Press Enter to continue...")
         else:
             print_header("Save Failed")
             print("Could not save the database.")
-            input("Press Enter to continue...")
 
     def action_add_module(self):
         """Add a new module."""
@@ -394,14 +388,12 @@ class SimpleModCLI:
         print_header("Module Added")
         print(f"Created: {name} {version}")
         print("Edit the module details to configure it.")
-        input("Press Enter to continue...")
 
     def action_copy_module(self):
         """Copy the current module to a new name/version."""
         if not self.current_module_name:
             print_header("Copy Module")
             print("Error: No module selected.")
-            input("Press Enter to continue...")
             return
 
         print_header("Copy Module")
@@ -449,14 +441,12 @@ class SimpleModCLI:
         print_header("Module Copied")
         print(f"Copied {self.current_module_name} {self.current_module_version}")
         print(f"To: {name} {version}")
-        input("Press Enter to continue...")
 
     def action_delete_module(self):
         """Delete the current module."""
         if not self.current_module_name:
             print_header("Delete Module")
             print("Error: No module selected.")
-            input("Press Enter to continue...")
             return
 
         print_header("Delete Module")
@@ -485,14 +475,12 @@ class SimpleModCLI:
 
         print_header("Module Deleted")
         print("Module has been deleted.")
-        input("Press Enter to continue...")
 
     def action_edit_module(self):
         """Edit the current module's details."""
         if not self.current_module_name:
             print_header("Edit Module")
             print("Error: No module selected.")
-            input("Press Enter to continue...")
             return
 
         while True:
@@ -514,21 +502,28 @@ class SimpleModCLI:
                 print(f"  [8] Environment Vars: (none)")
             print()
 
-            choice = input_dialog(
+            choice = radiolist_dialog(
                 title="Edit Module",
-                text="Select field to edit (1-8), or 'q' to return:",
-                default="1"
+                text="Select field to edit (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'Conflicts'),
+                    ('2', 'Description'),
+                    ('3', 'Image Path'),
+                    ('4', 'Bind Paths'),
+                    ('5', 'Flags'),
+                    ('6', 'Commands'),
+                    ('7', 'Template'),
+                    ('8', 'Environment Vars'),
+                    ('q', 'Quit / Back'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
             ).run()
 
-            if choice is None or choice.lower() == 'q':
+            if choice is None or choice == 'q':
                 break
 
-            try:
-                choice = int(choice)
-            except ValueError:
-                continue
-
-            if choice == 1:
+            if choice == '1':
                 # Conflicts
                 value = input_dialog(
                     title="Edit Conflicts",
@@ -538,7 +533,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['conflict'] = value.strip()
 
-            elif choice == 2:
+            elif choice == '2':
                 # Description
                 value = input_dialog(
                     title="Edit Description",
@@ -548,7 +543,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['module_whatis'] = value.strip()
 
-            elif choice == 3:
+            elif choice == '3':
                 # Image Path
                 value = input_dialog(
                     title="Edit Image Path",
@@ -558,7 +553,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['singularity_image'] = value.strip()
 
-            elif choice == 4:
+            elif choice == '4':
                 # Bind Paths
                 default_bind = self.config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
                 value = input_dialog(
@@ -569,7 +564,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['singularity_bindpaths'] = value.strip()
 
-            elif choice == 5:
+            elif choice == '5':
                 # Flags
                 default_flags = self.config.get('defaultFlags', '')
                 value = input_dialog(
@@ -580,7 +575,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['singularity_flags'] = value.strip()
 
-            elif choice == 6:
+            elif choice == '6':
                 # Commands
                 value = input_dialog(
                     title="Edit Commands",
@@ -590,7 +585,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['cmds'] = value.strip()
 
-            elif choice == 7:
+            elif choice == '7':
                 # Template
                 value = input_dialog(
                     title="Edit Template",
@@ -600,7 +595,7 @@ class SimpleModCLI:
                 if value is not None:
                     self.current_module['template'] = value.strip()
 
-            elif choice == 8:
+            elif choice == '8':
                 # Environment Variables
                 self.edit_environment_variables()
 
@@ -626,33 +621,73 @@ class SimpleModCLI:
                 print("No environment variables set.")
                 print()
 
-            print("[A] Add new variable")
-            print("[D] Delete variable")
-            print("[Q] Return to edit module")
+            print()
 
-            choice = input("\nSelection: ").strip().upper()
+            if envs:
+                # Show available variables for selection
+                value_choices = [(str(i), f"{key} = {value}") for i, (key, value) in enumerate(envs.items(), 1)]
+                value_choices.extend([
+                    ('A', 'Add new variable'),
+                    ('D', 'Delete variable'),
+                    ('Q', 'Return to edit module')
+                ])
+            else:
+                value_choices = [
+                    ('A', 'Add new variable'),
+                    ('Q', 'Return to edit module')
+                ]
 
-            if choice == 'Q':
+            choice = radiolist_dialog(
+                title="Edit Environment Variables",
+                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
+                values=value_choices,
+                ok_text="Select",
+                cancel_text="Cancel"
+            ).run()
+
+            if choice is None or choice == 'Q':
                 self.current_module['envs'] = envs
                 break
             elif choice == 'A':
-                key = input("Variable name: ").strip()
+                key = input_dialog(
+                    title="Add Environment Variable",
+                    text="Variable name:",
+                ).run()
                 if key:
-                    value = input("Variable value: ").strip()
+                    value = input_dialog(
+                        title="Add Environment Variable",
+                        text="Variable value:",
+                    ).run()
                     if value:
                         envs[key] = value
             elif choice == 'D':
                 if envs:
-                    key = input("Enter variable name to delete: ").strip()
+                    key = radiolist_dialog(
+                        title="Delete Environment Variable",
+                        text="Select a variable to delete:",
+                        values=[(k, k) for k in envs.keys()],
+                        ok_text="Delete",
+                        cancel_text="Cancel"
+                    ).run()
                     if key in envs:
                         del envs[key]
+                else:
+                    message_dialog(
+                        title="No Variables",
+                        text="No environment variables to delete.",
+                        ok_text="OK"
+                    ).run()
             else:
                 try:
                     idx = int(choice) - 1
                     keys = list(envs.keys())
                     if 0 <= idx < len(keys):
                         key = keys[idx]
-                        value = input(f"New value for {key}: ").strip()
+                        value = input_dialog(
+                            title="Edit Environment Variable",
+                            text=f"New value for {key}:",
+                            default=envs.get(key, '')
+                        ).run()
                         if value:
                             envs[key] = value
                 except (ValueError, IndexError):
@@ -669,7 +704,6 @@ class SimpleModCLI:
         if not name_list:
             print_header("Select Module")
             print("No modules in database.")
-            input("Press Enter to continue...")
             return
 
         # Name selection
@@ -707,7 +741,6 @@ class SimpleModCLI:
         if not self.current_module_name:
             print_header("Generate Module Key")
             print("Error: No module selected.")
-            input("Press Enter to continue...")
             return
 
         output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
@@ -746,7 +779,6 @@ class SimpleModCLI:
         if not self.db:
             print_header("Generate All Module Keys")
             print("Error: Database is empty.")
-            input("Press Enter to continue...")
             return
 
         if self.has_unsaved_changes():
@@ -786,7 +818,6 @@ class SimpleModCLI:
         print(f"Successfully generated: {success_count} keys")
         print(f"Failed: {fail_count} keys")
         print(f"Output directory: {output_dir}")
-        input("Press Enter to continue...")
 
     def action_preferences(self):
         """Edit preferences."""
@@ -805,21 +836,25 @@ class SimpleModCLI:
             print(f"  [5] Default modkey path:     {config.get('defaultModKeyPath', MODULEKEY_DIR)}")
             print()
 
-            choice = input_dialog(
+            choice = radiolist_dialog(
                 title="Preferences",
-                text="Select setting to change (1-5), or 'q' to return:",
-                default="1"
+                text="Select setting to change (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'Default binding paths'),
+                    ('2', 'Default flags'),
+                    ('3', 'Default image directory'),
+                    ('4', 'Default template'),
+                    ('5', 'Default modkey path'),
+                    ('q', 'Quit / Back'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
             ).run()
 
-            if choice is None or choice.lower() == 'q':
+            if choice is None or choice == 'q':
                 break
 
-            try:
-                choice = int(choice)
-            except ValueError:
-                continue
-
-            if choice == 1:
+            if choice == '1':
                 value = input_dialog(
                     title="Edit Default Binding Paths",
                     text="Enter default paths to bind (comma-separated):",
@@ -828,7 +863,7 @@ class SimpleModCLI:
                 if value is not None:
                     config['defaultBindingPath'] = value.strip()
 
-            elif choice == 2:
+            elif choice == '2':
                 value = input_dialog(
                     title="Edit Default Flags",
                     text="Enter default Singularity flags:",
@@ -837,7 +872,7 @@ class SimpleModCLI:
                 if value is not None:
                     config['defaultFlags'] = value.strip()
 
-            elif choice == 3:
+            elif choice == '3':
                 value = input_dialog(
                     title="Edit Default Image Directory",
                     text="Enter default directory for Singularity images:",
@@ -846,7 +881,7 @@ class SimpleModCLI:
                 if value is not None:
                     config['defaultImagePath'] = value.strip()
 
-            elif choice == 4:
+            elif choice == '4':
                 value = input_dialog(
                     title="Edit Default Template",
                     text="Enter default template file path:",
@@ -855,7 +890,7 @@ class SimpleModCLI:
                 if value is not None:
                     config['defaultTemplate'] = value.strip()
 
-            elif choice == 5:
+            elif choice == '5':
                 value = input_dialog(
                     title="Edit Default Module Key Path",
                     text="Enter default directory for generated module keys:",
@@ -871,7 +906,6 @@ class SimpleModCLI:
             self.config = config
         except IOError as e:
             print(f"Error saving preferences: {e}")
-            input("Press Enter to continue...")
 
     # =================== Main Menu ================== ##
 
@@ -892,13 +926,22 @@ class SimpleModCLI:
                 print("[!] Unsaved changes detected")
             print()
 
-            print("  [1] File")
-            print("  [2] Module")
-            print("  [3] Generate")
-            print("  [4] Preferences")
-            print("  [5] Exit")
+            choice = radiolist_dialog(
+                title="Main Menu",
+                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'File'),
+                    ('2', 'Module'),
+                    ('3', 'Generate'),
+                    ('4', 'Preferences'),
+                    ('5', 'Exit'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
+            ).run()
 
-            choice = input("\nSelection: ").strip()
+            if choice is None:
+                continue
 
             if choice == '1':
                 self.file_menu()
@@ -922,13 +965,22 @@ class SimpleModCLI:
             print_header("File Menu")
             print()
 
-            print("  [1] New Database")
-            print("  [2] Open Database")
-            print("  [3] Save Database")
-            print("  [4] Save Database As...")
-            print("  [5] Back")
+            choice = radiolist_dialog(
+                title="File Menu",
+                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'New Database'),
+                    ('2', 'Open Database'),
+                    ('3', 'Save Database'),
+                    ('4', 'Save Database As...'),
+                    ('5', 'Back'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
+            ).run()
 
-            choice = input("\nSelection: ").strip()
+            if choice is None:
+                continue
 
             if choice == '1':
                 self.action_new_database()
@@ -961,14 +1013,23 @@ class SimpleModCLI:
                 print(f"Database contains {len(self.db)} module(s)")
                 print()
 
-            print("  [1] Select Module")
-            print("  [2] Add New Module")
-            print("  [3] Copy Current Module")
-            print("  [4] Delete Current Module")
-            print("  [5] Edit Current Module")
-            print("  [6] Back")
+            choice = radiolist_dialog(
+                title="Module Menu",
+                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'Select Module'),
+                    ('2', 'Add New Module'),
+                    ('3', 'Copy Current Module'),
+                    ('4', 'Delete Current Module'),
+                    ('5', 'Edit Current Module'),
+                    ('6', 'Back'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
+            ).run()
 
-            choice = input("\nSelection: ").strip()
+            if choice is None:
+                continue
 
             if choice == '1':
                 self.action_select_module()
@@ -996,11 +1057,20 @@ class SimpleModCLI:
                 print("No module selected")
             print()
 
-            print("  [1] Generate Current Module Key")
-            print("  [2] Generate All Module Keys")
-            print("  [3] Back")
+            choice = radiolist_dialog(
+                title="Generate Menu",
+                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'Generate Current Module Key'),
+                    ('2', 'Generate All Module Keys'),
+                    ('3', 'Back'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
+            ).run()
 
-            choice = input("\nSelection: ").strip()
+            if choice is None:
+                continue
 
             if choice == '1':
                 self.action_generate_key()
@@ -1024,8 +1094,6 @@ class SimpleModCLI:
             print("To use basic input mode, run:")
             print("  python simple-mod-cli.py")
             print()
-            print("Press Enter to exit...")
-            input()
             return
 
         # Load existing database if available
@@ -1054,10 +1122,6 @@ class SimpleModCLI:
                         first_version = sorted(self.db[first_name].keys(), reverse=True)[0]
                         self.load_current_module(first_name, first_version)
 
-        print()
-        print("Press Enter to continue to main menu...")
-        input()
-
         # Main menu loop
         while True:
             exit_app = self.main_menu()
@@ -1078,16 +1142,25 @@ class SimpleModCLI:
             print_header("SIMPLE-MOD CLI - Basic Mode")
             print()
 
-            print("1. New Database")
-            print("2. Open Database")
-            print("3. Save Database")
-            print("4. Add Module")
-            print("5. Edit Module")
-            print("6. Generate Key")
-            print("7. Generate All Keys")
-            print("8. Exit")
+            choice = radiolist_dialog(
+                title="SIMPLE-MOD CLI - Basic Mode",
+                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
+                values=[
+                    ('1', 'New Database'),
+                    ('2', 'Open Database'),
+                    ('3', 'Save Database'),
+                    ('4', 'Add Module'),
+                    ('5', 'Edit Module'),
+                    ('6', 'Generate Key'),
+                    ('7', 'Generate All Keys'),
+                    ('8', 'Exit'),
+                ],
+                ok_text="Select",
+                cancel_text="Cancel"
+            ).run()
 
-            choice = input("\nSelection: ").strip()
+            if choice is None:
+                continue
 
             if choice == '1':
                 self.action_new_database()
