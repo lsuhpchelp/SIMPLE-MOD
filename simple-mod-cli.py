@@ -326,7 +326,7 @@ class SimpleModCLI:
             user_path = input_dialog(
                 title="Save Database As",
                 text="Enter path to save database (must end with .json):",
-                value="database/new-database.json"
+                default="database/new-database.json"
             ).run()
 
             if user_path is None:
@@ -354,7 +354,7 @@ class SimpleModCLI:
         name = input_dialog(
             title="Add Module",
             text="Enter module name:",
-            value=""
+            default=""
         ).run()
 
         if name is None:
@@ -367,7 +367,7 @@ class SimpleModCLI:
         version = input_dialog(
             title="Add Module",
             text="Enter version:",
-            value=""
+            default=""
         ).run()
 
         if version is None:
@@ -409,7 +409,7 @@ class SimpleModCLI:
         name = input_dialog(
             title="Copy Module",
             text="Enter new module name:",
-            value=self.current_module_name
+            default=self.current_module_name
         ).run()
 
         if name is None:
@@ -422,7 +422,7 @@ class SimpleModCLI:
         version = input_dialog(
             title="Copy Module",
             text="Enter new version:",
-            value=self.current_module_version
+            default=self.current_module_version
         ).run()
 
         if version is None:
@@ -517,7 +517,7 @@ class SimpleModCLI:
             choice = input_dialog(
                 title="Edit Module",
                 text="Select field to edit (1-8), or 'q' to return:",
-                value="1"
+                default="1"
             ).run()
 
             if choice is None or choice.lower() == 'q':
@@ -533,7 +533,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Conflicts",
                     text="Enter conflict modules (space-separated):",
-                    value=self.current_module.get('conflict', '')
+                    default=self.current_module.get('conflict', '')
                 ).run()
                 if value is not None:
                     self.current_module['conflict'] = value.strip()
@@ -543,7 +543,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Description",
                     text="Enter software description:",
-                    value=self.current_module.get('module_whatis', '')
+                    default=self.current_module.get('module_whatis', '')
                 ).run()
                 if value is not None:
                     self.current_module['module_whatis'] = value.strip()
@@ -553,7 +553,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Image Path",
                     text="Enter Singularity image path:",
-                    value=self.current_module.get('singularity_image', '')
+                    default=self.current_module.get('singularity_image', '')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_image'] = value.strip()
@@ -564,7 +564,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Bind Paths",
                     text=f"Enter additional paths to bind (default: {default_bind}):",
-                    value=self.current_module.get('singularity_bindpaths', '')
+                    default=self.current_module.get('singularity_bindpaths', '')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_bindpaths'] = value.strip()
@@ -575,7 +575,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Flags",
                     text=f"Enter additional flags (default: {default_flags}):",
-                    value=self.current_module.get('singularity_flags', '')
+                    default=self.current_module.get('singularity_flags', '')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_flags'] = value.strip()
@@ -585,7 +585,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Commands",
                     text="Enter commands to map (space or newline separated):",
-                    value=self.current_module.get('cmds', '')
+                    default=self.current_module.get('cmds', '')
                 ).run()
                 if value is not None:
                     self.current_module['cmds'] = value.strip()
@@ -595,7 +595,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Template",
                     text="Enter template file path:",
-                    value=self.current_module.get('template', './template/template.tcl')
+                    default=self.current_module.get('template', './template/template.tcl')
                 ).run()
                 if value is not None:
                     self.current_module['template'] = value.strip()
@@ -716,7 +716,7 @@ class SimpleModCLI:
         custom_dir = input_dialog(
             title="Generate Module Key",
             text="Enter output directory (press Enter for default):",
-            value=output_dir
+            default=output_dir
         ).run()
 
         if custom_dir is None:
@@ -759,7 +759,7 @@ class SimpleModCLI:
         custom_dir = input_dialog(
             title="Generate All Module Keys",
             text="Enter output directory (press Enter for default):",
-            value=output_dir
+            default=output_dir
         ).run()
 
         if custom_dir is None:
@@ -808,7 +808,7 @@ class SimpleModCLI:
             choice = input_dialog(
                 title="Preferences",
                 text="Select setting to change (1-5), or 'q' to return:",
-                value="1"
+                default="1"
             ).run()
 
             if choice is None or choice.lower() == 'q':
@@ -823,7 +823,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Default Binding Paths",
                     text="Enter default paths to bind (comma-separated):",
-                    value=config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
+                    default=config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
                 ).run()
                 if value is not None:
                     config['defaultBindingPath'] = value.strip()
@@ -832,7 +832,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Default Flags",
                     text="Enter default Singularity flags:",
-                    value=config.get('defaultFlags', '')
+                    default=config.get('defaultFlags', '')
                 ).run()
                 if value is not None:
                     config['defaultFlags'] = value.strip()
@@ -841,7 +841,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Default Image Directory",
                     text="Enter default directory for Singularity images:",
-                    value=config.get('defaultImagePath', '')
+                    default=config.get('defaultImagePath', '')
                 ).run()
                 if value is not None:
                     config['defaultImagePath'] = value.strip()
@@ -850,7 +850,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Default Template",
                     text="Enter default template file path:",
-                    value=config.get('defaultTemplate', './template/template.tcl')
+                    default=config.get('defaultTemplate', './template/template.tcl')
                 ).run()
                 if value is not None:
                     config['defaultTemplate'] = value.strip()
@@ -859,7 +859,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Default Module Key Path",
                     text="Enter default directory for generated module keys:",
-                    value=config.get('defaultModKeyPath', MODULEKEY_DIR)
+                    default=config.get('defaultModKeyPath', MODULEKEY_DIR)
                 ).run()
                 if value is not None:
                     config['defaultModKeyPath'] = value.strip()
@@ -940,7 +940,7 @@ class SimpleModCLI:
                 custom_path = input_dialog(
                     title="Save Database As",
                     text="Enter path to save database (must end with .json):",
-                    value="database/new-database.json"
+                    default="database/new-database.json"
                 ).run()
                 if custom_path:
                     if not custom_path.endswith('.json'):
