@@ -157,6 +157,26 @@ class SimpleModCLI:
         """Check if there are unsaved changes."""
         return self.db != self.db_original
 
+    def confirm_save_before_continue(self, action_name="continue"):
+        """Show confirmation dialog for unsaved changes with Save/No/Cancel options."""
+        choice = button_dialog(
+            title="Unsaved Changes",
+            text="You have unsaved changes! To avoid data loss, do you want to save before continue?",
+            buttons=[
+                ("Yes", "save"),
+                ("No", "discard"),
+                ("Cancel", "cancel")
+            ]
+        ).run()
+        if choice == "cancel":
+            return False
+        if choice == "save":
+            self.action_save_database()
+            if self.has_unsaved_changes():
+                # User canceled save or save failed
+                return False
+        return True
+
     def refresh_module_list(self):
         """Refresh the current module list and version list."""
         if not self.current_module_name:
@@ -256,7 +276,7 @@ class SimpleModCLI:
     def action_new_database(self):
         """Create a new empty database."""
         if self.has_unsaved_changes():
-            if not confirm("You have unsaved changes. Discard them?"):
+            if not self.confirm_save_before_continue():
                 return
 
         self.db = {}
@@ -272,7 +292,7 @@ class SimpleModCLI:
     def action_open_database(self):
         """Open an existing database file."""
         if self.has_unsaved_changes():
-            if not confirm("You have unsaved changes. Discard them?"):
+            if not self.confirm_save_before_continue():
                 return
 
         json_files = list_json_files(DATABASE_DIR)
@@ -453,7 +473,15 @@ class SimpleModCLI:
         print(f"Module: {self.current_module_name} {self.current_module_version}")
         print()
 
-        if not confirm("Are you sure you want to delete this module?"):
+        choice = button_dialog(
+            title="Delete Module",
+            text="Are you sure you want to delete this module?",
+            buttons=[
+                ("Yes", "yes"),
+                ("No", "no")
+            ]
+        ).run()
+        if choice != "yes":
             return
 
         # Check for multiple versions
@@ -782,9 +810,8 @@ class SimpleModCLI:
             return
 
         if self.has_unsaved_changes():
-            if not confirm("You have unsaved changes. Save before generating?"):
+            if not self.confirm_save_before_continue():
                 return
-            self.action_save_database()
 
         output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
 
@@ -953,8 +980,9 @@ class SimpleModCLI:
                 self.action_preferences()
             elif choice == '5':
                 if self.has_unsaved_changes():
-                    if confirm("You have unsaved changes. Exit anyway?"):
-                        return True
+                    if not self.confirm_save_before_continue():
+                        continue
+                    return True
                 else:
                     return True
 
@@ -1152,8 +1180,9 @@ class SimpleModCLI:
                 self.action_generate_all_keys()
             elif choice == '8':
                 if self.has_unsaved_changes():
-                    if confirm("You have unsaved changes. Exit anyway?"):
-                        break
+                    if not self.confirm_save_before_continue():
+                        continue
+                    break
                 else:
                     break
 
