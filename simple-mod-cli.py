@@ -20,7 +20,7 @@ try:
     from prompt_toolkit import PromptSession
     from prompt_toolkit.formatted_text import HTML
     from prompt_toolkit.shortcuts import (
-        prompt, confirm, button_dialog, input_dialog,
+        prompt, button_dialog, input_dialog,
         progress_dialog, radiolist_dialog, checkboxlist_dialog, message_dialog
     )
     CLI_ENABLED = True
@@ -1095,32 +1095,6 @@ class SimpleModCLI:
             print("  python simple-mod-cli.py")
             print()
             return
-
-        # Load existing database if available
-        json_files = list_json_files(DATABASE_DIR)
-        if json_files:
-            print(f"Found {len(json_files)} database file(s) in {DATABASE_DIR}/")
-            load_existing = confirm("Load existing database?")
-
-            if load_existing:
-                db_file = radiolist_dialog(
-                    title="Load Database",
-                    text="Select a database to load:",
-                    values=[(f, f) for f in json_files],
-                    ok_text="Load",
-                    cancel_text="Skip"
-                ).run()
-
-                if db_file:
-                    db_path = os.path.join(DATABASE_DIR, db_file)
-                    self.db = load_database(db_path)
-                    self.db_original = copy.deepcopy(self.db)
-                    self.current_db_path = db_path
-
-                    if self.db:
-                        first_name = sorted(self.db.keys())[0]
-                        first_version = sorted(self.db[first_name].keys(), reverse=True)[0]
-                        self.load_current_module(first_name, first_version)
 
         # Main menu loop
         while True:
