@@ -21,7 +21,7 @@ try:
     from prompt_toolkit.formatted_text import HTML
     from prompt_toolkit.shortcuts import (
         prompt, button_dialog, input_dialog,
-        progress_dialog, radiolist_dialog, checkboxlist_dialog, message_dialog
+        progress_dialog, choice as prompt_choice, checkboxlist_dialog, message_dialog
     )
     CLI_ENABLED = True
 except ImportError:
@@ -301,15 +301,16 @@ class SimpleModCLI:
             print(f"No JSON files found in {DATABASE_DIR}/")
             return
 
-        db_file = radiolist_dialog(
-            title="Open Database",
-            text="Select a database file to open:",
-            values=[(f, f) for f in json_files],
-            ok_text="Open",
-            cancel_text="Back"
-        ).run()
+        options = [(f, f) for f in json_files] + [('__back__', '← Back')]
+        try:
+            db_file = prompt_choice(
+                "Open Database - Select a database file to open:",
+                options=options,
+            )
+        except KeyboardInterrupt:
+            db_file = '__back__'
 
-        if db_file is None:
+        if db_file == '__back__':
             return
 
         db_path = os.path.join(DATABASE_DIR, db_file)
@@ -532,25 +533,25 @@ class SimpleModCLI:
                 print(f"  [8] Environment Vars: (none)")
             print()
 
-            choice = radiolist_dialog(
-                title="Edit Module",
-                text="Select field to edit (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Conflicts'),
-                    ('2', 'Description'),
-                    ('3', 'Image Path'),
-                    ('4', 'Bind Paths'),
-                    ('5', 'Flags'),
-                    ('6', 'Commands'),
-                    ('7', 'Template'),
-                    ('8', 'Environment Vars'),
-                    ('q', 'Quit / Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
+            try:
+                choice = prompt_choice(
+                    "Edit Module - Select field to edit:",
+                    options=[
+                        ('1', 'Conflicts'),
+                        ('2', 'Description'),
+                        ('3', 'Image Path'),
+                        ('4', 'Bind Paths'),
+                        ('5', 'Flags'),
+                        ('6', 'Commands'),
+                        ('7', 'Template'),
+                        ('8', 'Environment Vars'),
+                        ('q', 'Quit / Back'),
+                    ],
+                )
+            except KeyboardInterrupt:
+                choice = 'q'
 
-            if choice is None or choice == 'q':
+            if choice == 'q':
                 break
 
             if choice == '1':
@@ -666,15 +667,15 @@ class SimpleModCLI:
                     ('Q', 'Return to edit module')
                 ]
 
-            choice = radiolist_dialog(
-                title="Edit Environment Variables",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=value_choices,
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
+            try:
+                choice = prompt_choice(
+                    "Edit Environment Variables - Select an option:",
+                    options=value_choices,
+                )
+            except KeyboardInterrupt:
+                choice = 'Q'
 
-            if choice is None or choice == 'Q':
+            if choice == 'Q':
                 self.current_module['envs'] = envs
                 break
             elif choice == 'A':
@@ -691,14 +692,15 @@ class SimpleModCLI:
                         envs[key] = value
             elif choice == 'D':
                 if envs:
-                    key = radiolist_dialog(
-                        title="Delete Environment Variable",
-                        text="Select a variable to delete:",
-                        values=[(k, k) for k in envs.keys()],
-                        ok_text="Delete",
-                        cancel_text="Cancel"
-                    ).run()
-                    if key in envs:
+                    del_options = [(k, k) for k in envs.keys()] + [('__cancel__', '← Cancel')]
+                    try:
+                        key = prompt_choice(
+                            "Delete Environment Variable - Select a variable to delete:",
+                            options=del_options,
+                        )
+                    except KeyboardInterrupt:
+                        key = '__cancel__'
+                    if key != '__cancel__':
                         del envs[key]
                 else:
                     message_dialog(
@@ -736,15 +738,16 @@ class SimpleModCLI:
             return
 
         # Name selection
-        name = radiolist_dialog(
-            title="Select Module",
-            text="Choose a module to work with:",
-            values=[(n, n) for n in name_list],
-            ok_text="Select",
-            cancel_text="Back"
-        ).run()
+        name_options = [(n, n) for n in name_list] + [('__back__', '← Back')]
+        try:
+            name = prompt_choice(
+                "Select Module - Choose a module to work with:",
+                options=name_options,
+            )
+        except KeyboardInterrupt:
+            name = '__back__'
 
-        if name is None:
+        if name == '__back__':
             return
 
         # Version selection
@@ -752,15 +755,16 @@ class SimpleModCLI:
         if len(versions) == 1:
             version = versions[0]
         else:
-            version = radiolist_dialog(
-                title=f"Select Version for {name}",
-                text="Choose a version:",
-                values=[(v, v) for v in versions],
-                ok_text="Select",
-                cancel_text="Back"
-            ).run()
+            ver_options = [(v, v) for v in versions] + [('__back__', '← Back')]
+            try:
+                version = prompt_choice(
+                    f"Select Version for {name} - Choose a version:",
+                    options=ver_options,
+                )
+            except KeyboardInterrupt:
+                version = '__back__'
 
-        if version is None:
+        if version == '__back__':
             return
 
         self.load_current_module(name, version)
@@ -864,22 +868,22 @@ class SimpleModCLI:
             print(f"  [5] Default modkey path:     {config.get('defaultModKeyPath', MODULEKEY_DIR)}")
             print()
 
-            choice = radiolist_dialog(
-                title="Preferences",
-                text="Select setting to change (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Default binding paths'),
-                    ('2', 'Default flags'),
-                    ('3', 'Default image directory'),
-                    ('4', 'Default template'),
-                    ('5', 'Default modkey path'),
-                    ('q', 'Quit / Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
+            try:
+                choice = prompt_choice(
+                    "Preferences - Select setting to change:",
+                    options=[
+                        ('1', 'Default binding paths'),
+                        ('2', 'Default flags'),
+                        ('3', 'Default image directory'),
+                        ('4', 'Default template'),
+                        ('5', 'Default modkey path'),
+                        ('q', 'Quit / Back'),
+                    ],
+                )
+            except KeyboardInterrupt:
+                choice = 'q'
 
-            if choice is None or choice == 'q':
+            if choice == 'q':
                 break
 
             if choice == '1':
@@ -954,21 +958,18 @@ class SimpleModCLI:
                 print("[!] Unsaved changes detected")
             print()
 
-            choice = radiolist_dialog(
-                title="Main Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'File'),
-                    ('2', 'Module'),
-                    ('3', 'Generate'),
-                    ('4', 'Preferences'),
-                    ('5', 'Exit'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
+            try:
+                choice = prompt_choice(
+                    "Main Menu - Select an option:",
+                    options=[
+                        ('1', 'File'),
+                        ('2', 'Module'),
+                        ('3', 'Generate'),
+                        ('4', 'Preferences'),
+                        ('5', 'Exit'),
+                    ],
+                )
+            except KeyboardInterrupt:
                 continue
 
             if choice == '1':
@@ -994,21 +995,18 @@ class SimpleModCLI:
             print_header("File Menu")
             print()
 
-            choice = radiolist_dialog(
-                title="File Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'New Database'),
-                    ('2', 'Open Database'),
-                    ('3', 'Save Database'),
-                    ('4', 'Save Database As...'),
-                    ('5', 'Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
+            try:
+                choice = prompt_choice(
+                    "File Menu - Select an option:",
+                    options=[
+                        ('1', 'New Database'),
+                        ('2', 'Open Database'),
+                        ('3', 'Save Database'),
+                        ('4', 'Save Database As...'),
+                        ('5', 'Back'),
+                    ],
+                )
+            except KeyboardInterrupt:
                 continue
 
             if choice == '1':
@@ -1042,22 +1040,19 @@ class SimpleModCLI:
                 print(f"Database contains {len(self.db)} module(s)")
                 print()
 
-            choice = radiolist_dialog(
-                title="Module Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Select Module'),
-                    ('2', 'Add New Module'),
-                    ('3', 'Copy Current Module'),
-                    ('4', 'Delete Current Module'),
-                    ('5', 'Edit Current Module'),
-                    ('6', 'Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
+            try:
+                choice = prompt_choice(
+                    "Module Menu - Select an option:",
+                    options=[
+                        ('1', 'Select Module'),
+                        ('2', 'Add New Module'),
+                        ('3', 'Copy Current Module'),
+                        ('4', 'Delete Current Module'),
+                        ('5', 'Edit Current Module'),
+                        ('6', 'Back'),
+                    ],
+                )
+            except KeyboardInterrupt:
                 continue
 
             if choice == '1':
@@ -1086,19 +1081,16 @@ class SimpleModCLI:
                 print("No module selected")
             print()
 
-            choice = radiolist_dialog(
-                title="Generate Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Generate Current Module Key'),
-                    ('2', 'Generate All Module Keys'),
-                    ('3', 'Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
+            try:
+                choice = prompt_choice(
+                    "Generate Menu - Select an option:",
+                    options=[
+                        ('1', 'Generate Current Module Key'),
+                        ('2', 'Generate All Module Keys'),
+                        ('3', 'Back'),
+                    ],
+                )
+            except KeyboardInterrupt:
                 continue
 
             if choice == '1':
@@ -1145,24 +1137,21 @@ class SimpleModCLI:
             print_header("SIMPLE-MOD CLI - Basic Mode")
             print()
 
-            choice = radiolist_dialog(
-                title="SIMPLE-MOD CLI - Basic Mode",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'New Database'),
-                    ('2', 'Open Database'),
-                    ('3', 'Save Database'),
-                    ('4', 'Add Module'),
-                    ('5', 'Edit Module'),
-                    ('6', 'Generate Key'),
-                    ('7', 'Generate All Keys'),
-                    ('8', 'Exit'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
+            try:
+                choice = prompt_choice(
+                    "SIMPLE-MOD CLI - Select an option:",
+                    options=[
+                        ('1', 'New Database'),
+                        ('2', 'Open Database'),
+                        ('3', 'Save Database'),
+                        ('4', 'Add Module'),
+                        ('5', 'Edit Module'),
+                        ('6', 'Generate Key'),
+                        ('7', 'Generate All Keys'),
+                        ('8', 'Exit'),
+                    ],
+                )
+            except KeyboardInterrupt:
                 continue
 
             if choice == '1':
