@@ -27,7 +27,8 @@ try:
     from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
     from prompt_toolkit.key_binding.defaults import load_key_bindings
     from prompt_toolkit.layout import Layout
-    from prompt_toolkit.widgets import Dialog, RadioList
+    from prompt_toolkit.layout.containers import HSplit
+    from prompt_toolkit.widgets import Dialog, Label, RadioList
     CLI_ENABLED = True
 except ImportError:
     CLI_ENABLED = False
@@ -42,19 +43,26 @@ TEMPLATE_DIR = "template"
 
 # =============== Customized Fullscreen Choice ============== ##
 
-def full_screen_choice(title, options):
+def full_screen_choice(title, options, body_text=None):
     """
     Full-screen radio list selection consistent with dialog components.
 
     Uses Dialog with background fill (full_screen=True) and accepts the
     selection on Enter without requiring a button click.
     Returns "esc" when Esc or Ctrl+C is pressed.
+
+    Optional body_text is displayed as a label above the radio list.
     """
     radio_list = RadioList(values=options,select_on_focus=True)
 
+    if body_text is not None:
+        body = HSplit([Label(body_text), radio_list])
+    else:
+        body = radio_list
+
     dialog = Dialog(
         title=title,
-        body=radio_list,
+        body=body,
         with_background=True,
     )
 
@@ -305,7 +313,7 @@ class SimpleModCLI:
         """Create a new empty database."""
         if self.has_unsaved_changes():
             if not self.confirm_save_before_continue():
-                return
+                return False
 
         self.db = {}
         self.db_original = {}
@@ -313,12 +321,13 @@ class SimpleModCLI:
         self.current_module_version = None
         self.current_module = self.ret_empty_module()
         self.current_db_path = None
+        return True
 
     def action_open_database(self):
         """Open an existing database file."""
         if self.has_unsaved_changes():
             if not self.confirm_save_before_continue():
-                return
+                return False
 
         json_files = list_json_files(DATABASE_DIR)
         if not json_files:
@@ -326,7 +335,7 @@ class SimpleModCLI:
                 title="Open Database",
                 text=f"No JSON files found in {DATABASE_DIR}/"
             ).run()
-            return
+            return False
 
         options = [(f, f) for f in json_files] + [('esc', 'Back (Esc)')]
         db_file = full_screen_choice(
@@ -335,7 +344,7 @@ class SimpleModCLI:
         )
 
         if db_file == 'esc':
-            return
+            return False
 
         db_path = os.path.join(DATABASE_DIR, db_file)
         self.db = load_database(db_path)
@@ -348,6 +357,8 @@ class SimpleModCLI:
             first_version = sorted(self.db[first_name].keys(), reverse=True)[0]
             self.load_current_module(first_name, first_version)
 
+        return True
+
     def action_save_database(self):
         """Save the current database to a file."""
         if not self.db:
@@ -355,12 +366,9 @@ class SimpleModCLI:
                 title="Save Database",
                 text="Error: Database is empty. Nothing to save."
             ).run()
-            return
+            return False
 
-        if self.current_db_path and os.path.exists(self.current_db_path):
-            # Auto-save to current path
-            confirm_save = True
-        else:
+        if not (self.current_db_path and os.path.exists(self.current_db_path)):
             # Let user choose path
             user_path = input_dialog(
                 title="Save Database As",
@@ -369,7 +377,7 @@ class SimpleModCLI:
             ).run()
 
             if user_path is None:
-                return
+                return False
 
             if not user_path.endswith('.json'):
                 user_path += '.json'
@@ -378,11 +386,13 @@ class SimpleModCLI:
 
         if save_database(self.current_db_path, self.db):
             self.db_original = copy.deepcopy(self.db)
+            return True
         else:
             message_dialog(
                 title="Save Failed",
                 text="Could not save the database."
             ).run()
+            return False
 
     def action_add_module(self):
         """Add a new module."""
@@ -943,17 +953,17 @@ class SimpleModCLI:
                 )
 
             if choice == '1':
-                self.action_new_database()
-                self.module_menu()
-                break
+                if self.action_new_database():
+                    self.module_menu()
+                    break
             elif choice == '2':
-                self.action_open_database()
-                self.module_menu()
-                break
+                if self.action_open_database():
+                    self.module_menu()
+                    break
             elif choice == '3':
-                self.action_save_database()
-                self.module_menu()
-                break
+                if self.action_save_database():
+                    self.module_menu()
+                    break
             elif choice == '4':
                 custom_path = input_dialog(
                     title="Save Database As",
@@ -964,9 +974,9 @@ class SimpleModCLI:
                     if not custom_path.endswith('.json'):
                         custom_path += '.json'
                     self.current_db_path = custom_path
-                    self.action_save_database()
-                    self.module_menu()
-                    break
+                    if self.action_save_database():
+                        self.module_menu()
+                        break
             elif choice == 'esc':
                 break
 
@@ -975,7 +985,7 @@ class SimpleModCLI:
         while True:
             db_path_display = self.current_db_path if self.current_db_path else ""
             choice = full_screen_choice(
-                    f"Module Menu:\nDatabase: {db_path_display}",
+                    "Module Menu:",
                     options=[
                         ('1', 'Select Module'),
                         ('2', 'Add New Module'),
@@ -984,6 +994,7 @@ class SimpleModCLI:
                         ('5', 'Edit Current Module'),
                         ('esc', 'Back (Esc)'),
                     ],
+                    body_text=f"Database: {db_path_display}",
                 )
 
             if choice == '1':
