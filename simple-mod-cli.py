@@ -47,7 +47,7 @@ TEMPLATE_DIR = "template"
 
 # Helper: attach Esc and Ctrl+C bindings to any dialog Application,
 # exiting with the given esc_result (mimics full_screen_choice behaviour).
-def _add_esc_to_dialog(app, esc_result):
+def add_esc_to_dialog(app, esc_result):
     kb = KeyBindings()
 
     @kb.add("escape", eager=True)
@@ -61,7 +61,7 @@ def _add_esc_to_dialog(app, esc_result):
 
 # Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)
 def input_dialog(*args, **kwargs):
-    return _add_esc_to_dialog(input_dialog_origin(*args, **kwargs), None)
+    return add_esc_to_dialog(input_dialog_origin(*args, **kwargs), None)
 
 def full_screen_choice(title, options, body_text=None):
     """
@@ -215,7 +215,7 @@ class SimpleModCLI:
 
     def confirm_save_before_continue(self, action_name="continue"):
         """Show confirmation dialog for unsaved changes with Save/No/Cancel options."""
-        choice = _add_esc_to_dialog(button_dialog(
+        choice = add_esc_to_dialog(button_dialog(
             title="Unsaved Changes",
             text="You have unsaved changes! To avoid data loss, do you want to save before continue?",
             buttons=[
@@ -517,7 +517,7 @@ class SimpleModCLI:
             ).run()
             return
 
-        choice = _add_esc_to_dialog(button_dialog(
+        choice = add_esc_to_dialog(button_dialog(
             title="Delete Module",
             text="Are you sure you want to delete this module?",
             buttons=[
@@ -755,14 +755,11 @@ class SimpleModCLI:
 
         # Version selection
         versions = sorted(self.db[name].keys(), reverse=True)
-        if len(versions) == 1:
-            version = versions[0]
-        else:
-            ver_options = [(v, v) for v in versions] + [('esc', 'Back (Esc)')]
-            version = full_screen_choice(
-                    f"Select Version for {name}:",
-                    options=ver_options,
-                )
+        ver_options = [(v, v) for v in versions] + [('esc', 'Back (Esc)')]
+        version = full_screen_choice(
+                f"Select Version for {name}:",
+                options=ver_options,
+            )
 
         if version == 'esc':
             return
@@ -999,18 +996,19 @@ class SimpleModCLI:
     def module_menu(self):
         """Display the module menu."""
         while True:
-            db_path_display = self.current_db_path if self.current_db_path else ""
+            current_db_display = self.current_db_path if self.current_db_path else "(None)"
+            module_display = f"{self.current_module_name} ({self.current_module_version})" if self.current_module_name and self.current_module_version else "(None)"
             choice = full_screen_choice(
                     "Module Menu",
                     options=[
-                        ('1', 'Select Module'),
-                        ('2', 'Add New Module'),
+                        ('1', 'Select a Module'),
+                        ('2', 'Add a Module'),
                         ('3', 'Copy Current Module'),
                         ('4', 'Delete Current Module'),
                         ('5', 'Edit Current Module'),
                         ('esc', 'Back (Esc)'),
                     ],
-                    body_text=f"Opened database: {db_path_display or "(None)"}",
+                    body_text=f"Current database: {current_db_display}\nCurrent module: {module_display}"
                 )
 
             if choice == '1':
