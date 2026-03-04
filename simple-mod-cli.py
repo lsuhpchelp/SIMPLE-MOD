@@ -20,7 +20,7 @@ try:
     from prompt_toolkit import PromptSession
     from prompt_toolkit.formatted_text import HTML
     from prompt_toolkit.shortcuts import (
-        prompt, button_dialog, input_dialog,
+        prompt, button_dialog, input_dialog as input_dialog_origin,
         progress_dialog, checkboxlist_dialog, message_dialog
     )
     from prompt_toolkit.application import Application
@@ -31,23 +31,8 @@ try:
     from prompt_toolkit.widgets import Dialog, Label, RadioList
     CLI_ENABLED = True
 
-    # Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None),
-    # consistent with the behaviour of full_screen_choice.
-    _orig_input_dialog = input_dialog
-
-    def input_dialog(*args, **kwargs):
-        app = _orig_input_dialog(*args, **kwargs)
-        kb = KeyBindings()
-
-        @kb.add("escape", eager=True)
-        @kb.add("c-c", eager=True)
-        def _cancel(event):
-            event.app.exit(result=None)
-
-        app.key_bindings = merge_key_bindings([app.key_bindings, kb])
-        return app
-
 except ImportError:
+    
     CLI_ENABLED = False
 
 # Constants
@@ -59,6 +44,19 @@ TEMPLATE_DIR = "template"
 
 
 # =============== Customized Fullscreen Choice ============== ##
+
+# Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)
+def input_dialog(*args, **kwargs):
+    app = input_dialog_origin(*args, **kwargs)
+    kb = KeyBindings()
+
+    @kb.add("escape", eager=True)
+    @kb.add("c-c", eager=True)
+    def _cancel(event):
+        event.app.exit(result=None)
+
+    app.key_bindings = merge_key_bindings([app.key_bindings, kb])
+    return app
 
 def full_screen_choice(title, options, body_text=None):
     """
