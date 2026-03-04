@@ -48,7 +48,7 @@ def full_screen_choice(title, options):
 
     Uses Dialog with background fill (full_screen=True) and accepts the
     selection on Enter without requiring a button click.
-    Raises KeyboardInterrupt on Ctrl+C.
+    Returns "esc" when Esc or Ctrl+C is pressed.
     """
     radio_list = RadioList(values=options,select_on_focus=True)
 
@@ -67,7 +67,7 @@ def full_screen_choice(title, options):
     @kb.add("escape")
     @kb.add("c-c")
     def _cancel(event):
-        raise KeyboardInterrupt
+        event.app.exit(result="esc")
 
     app = Application(
         layout=Layout(dialog),
@@ -344,16 +344,13 @@ class SimpleModCLI:
             print(f"No JSON files found in {DATABASE_DIR}/")
             return
 
-        options = [(f, f) for f in json_files] + [('__back__', '← Back')]
-        try:
-            db_file = full_screen_choice(
-                "Open Database - Select a database file to open:",
-                options=options,
-            )
-        except KeyboardInterrupt:
-            db_file = '__back__'
+        options = [(f, f) for f in json_files] + [('esc', 'Back (Esc)')]
+        db_file = full_screen_choice(
+            "Open Database - Select a database file to open:",
+            options=options,
+        )
 
-        if db_file == '__back__':
+        if db_file == 'esc':
             return
 
         db_path = os.path.join(DATABASE_DIR, db_file)
@@ -576,8 +573,7 @@ class SimpleModCLI:
                 print(f"  [8] Environment Vars: (none)")
             print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "Edit Module - Select field to edit:",
                     options=[
                         ('1', 'Conflicts'),
@@ -588,13 +584,11 @@ class SimpleModCLI:
                         ('6', 'Commands'),
                         ('7', 'Template'),
                         ('8', 'Environment Vars'),
-                        ('q', 'Quit / Back'),
+                        ('esc', 'Back (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                choice = 'q'
 
-            if choice == 'q':
+            if choice == 'esc':
                 break
 
             if choice == '1':
@@ -702,23 +696,20 @@ class SimpleModCLI:
                 value_choices.extend([
                     ('A', 'Add new variable'),
                     ('D', 'Delete variable'),
-                    ('Q', 'Return to edit module')
+                    ('esc', 'Back (Esc)')
                 ])
             else:
                 value_choices = [
                     ('A', 'Add new variable'),
-                    ('Q', 'Return to edit module')
+                    ('esc', 'Back (Esc)')
                 ]
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "Edit Environment Variables - Select an option:",
                     options=value_choices,
                 )
-            except KeyboardInterrupt:
-                choice = 'Q'
 
-            if choice == 'Q':
+            if choice == 'esc':
                 self.current_module['envs'] = envs
                 break
             elif choice == 'A':
@@ -735,15 +726,12 @@ class SimpleModCLI:
                         envs[key] = value
             elif choice == 'D':
                 if envs:
-                    del_options = [(k, k) for k in envs.keys()] + [('__cancel__', '← Cancel')]
-                    try:
-                        key = full_screen_choice(
+                    del_options = [(k, k) for k in envs.keys()] + [('esc', 'Back (Esc)')]
+                    key = full_screen_choice(
                             "Delete Environment Variable - Select a variable to delete:",
                             options=del_options,
                         )
-                    except KeyboardInterrupt:
-                        key = '__cancel__'
-                    if key != '__cancel__':
+                    if key != 'esc':
                         del envs[key]
                 else:
                     message_dialog(
@@ -781,16 +769,13 @@ class SimpleModCLI:
             return
 
         # Name selection
-        name_options = [(n, n) for n in name_list] + [('__back__', '← Back')]
-        try:
-            name = full_screen_choice(
-                "Select Module - Choose a module to work with:",
-                options=name_options,
-            )
-        except KeyboardInterrupt:
-            name = '__back__'
+        name_options = [(n, n) for n in name_list] + [('esc', 'Back (Esc)')]
+        name = full_screen_choice(
+            "Select Module - Choose a module to work with:",
+            options=name_options,
+        )
 
-        if name == '__back__':
+        if name == 'esc':
             return
 
         # Version selection
@@ -798,16 +783,13 @@ class SimpleModCLI:
         if len(versions) == 1:
             version = versions[0]
         else:
-            ver_options = [(v, v) for v in versions] + [('__back__', '← Back')]
-            try:
-                version = full_screen_choice(
+            ver_options = [(v, v) for v in versions] + [('esc', 'Back (Esc)')]
+            version = full_screen_choice(
                     f"Select Version for {name} - Choose a version:",
                     options=ver_options,
                 )
-            except KeyboardInterrupt:
-                version = '__back__'
 
-        if version == '__back__':
+        if version == 'esc':
             return
 
         self.load_current_module(name, version)
@@ -911,8 +893,7 @@ class SimpleModCLI:
             print(f"  [5] Default modkey path:     {config.get('defaultModKeyPath', MODULEKEY_DIR)}")
             print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "Preferences - Select setting to change:",
                     options=[
                         ('1', 'Default binding paths'),
@@ -920,13 +901,11 @@ class SimpleModCLI:
                         ('3', 'Default image directory'),
                         ('4', 'Default template'),
                         ('5', 'Default modkey path'),
-                        ('q', 'Quit / Back'),
+                        ('esc', 'Back (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                choice = 'q'
 
-            if choice == 'q':
+            if choice == 'esc':
                 break
 
             if choice == '1':
@@ -1001,19 +980,16 @@ class SimpleModCLI:
                 print("[!] Unsaved changes detected")
             print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "Main Menu - Select an option:",
                     options=[
                         ('1', 'File'),
                         ('2', 'Module'),
                         ('3', 'Generate'),
                         ('4', 'Preferences'),
-                        ('5', 'Exit'),
+                        ('esc', 'Exit (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                continue
 
             if choice == '1':
                 self.file_menu()
@@ -1023,7 +999,7 @@ class SimpleModCLI:
                 self.generate_menu()
             elif choice == '4':
                 self.action_preferences()
-            elif choice == '5':
+            elif choice == 'esc':
                 if self.has_unsaved_changes():
                     if not self.confirm_save_before_continue():
                         continue
@@ -1038,19 +1014,16 @@ class SimpleModCLI:
             print_header("File Menu")
             print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "File Menu - Select an option:",
                     options=[
                         ('1', 'New Database'),
                         ('2', 'Open Database'),
                         ('3', 'Save Database'),
                         ('4', 'Save Database As...'),
-                        ('5', 'Back (Esc)'),
+                        ('esc', 'Back (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                continue
 
             if choice == '1':
                 self.action_new_database()
@@ -1069,7 +1042,7 @@ class SimpleModCLI:
                         custom_path += '.json'
                     self.current_db_path = custom_path
                     self.action_save_database()
-            elif choice == '5':
+            elif choice == 'esc':
                 break
 
     def module_menu(self):
@@ -1083,8 +1056,7 @@ class SimpleModCLI:
                 print(f"Database contains {len(self.db)} module(s)")
                 print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "Module Menu - Select an option:",
                     options=[
                         ('1', 'Select Module'),
@@ -1092,11 +1064,9 @@ class SimpleModCLI:
                         ('3', 'Copy Current Module'),
                         ('4', 'Delete Current Module'),
                         ('5', 'Edit Current Module'),
-                        ('6', 'Back'),
+                        ('esc', 'Back (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                continue
 
             if choice == '1':
                 self.action_select_module()
@@ -1108,7 +1078,7 @@ class SimpleModCLI:
                 self.action_delete_module()
             elif choice == '5':
                 self.action_edit_module()
-            elif choice == '6':
+            elif choice == 'esc':
                 break
 
     def generate_menu(self):
@@ -1124,23 +1094,20 @@ class SimpleModCLI:
                 print("No module selected")
             print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "Generate Menu - Select an option:",
                     options=[
                         ('1', 'Generate Current Module Key'),
                         ('2', 'Generate All Module Keys'),
-                        ('3', 'Back'),
+                        ('esc', 'Back (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                continue
 
             if choice == '1':
                 self.action_generate_key()
             elif choice == '2':
                 self.action_generate_all_keys()
-            elif choice == '3':
+            elif choice == 'esc':
                 break
 
     def run(self):
@@ -1180,8 +1147,7 @@ class SimpleModCLI:
             print_header("SIMPLE-MOD CLI - Basic Mode")
             print()
 
-            try:
-                choice = full_screen_choice(
+            choice = full_screen_choice(
                     "SIMPLE-MOD CLI - Select an option:",
                     options=[
                         ('1', 'New Database'),
@@ -1191,11 +1157,9 @@ class SimpleModCLI:
                         ('5', 'Edit Module'),
                         ('6', 'Generate Key'),
                         ('7', 'Generate All Keys'),
-                        ('8', 'Exit'),
+                        ('esc', 'Exit (Esc)'),
                     ],
                 )
-            except KeyboardInterrupt:
-                continue
 
             if choice == '1':
                 self.action_new_database()
@@ -1211,7 +1175,7 @@ class SimpleModCLI:
                 self.action_generate_key()
             elif choice == '7':
                 self.action_generate_all_keys()
-            elif choice == '8':
+            elif choice == 'esc':
                 if self.has_unsaved_changes():
                     if not self.confirm_save_before_continue():
                         continue
