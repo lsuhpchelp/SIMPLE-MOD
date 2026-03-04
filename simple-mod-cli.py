@@ -40,6 +40,8 @@ MODULEKEY_DIR = "modulekey"
 TEMPLATE_DIR = "template"
 
 
+# =============== Customized Fullscreen Choice ============== ##
+
 def full_screen_choice(title, options):
     """
     Full-screen radio list selection consistent with dialog components.
@@ -48,7 +50,7 @@ def full_screen_choice(title, options):
     selection on Enter without requiring a button click.
     Raises KeyboardInterrupt on Ctrl+C.
     """
-    radio_list = RadioList(values=options)
+    radio_list = RadioList(values=options,select_on_focus=True)
 
     dialog = Dialog(
         title=title,
@@ -62,6 +64,7 @@ def full_screen_choice(title, options):
     def _accept(event):
         event.app.exit(result=radio_list.current_value)
 
+    @kb.add("escape")
     @kb.add("c-c")
     def _cancel(event):
         raise KeyboardInterrupt
@@ -1043,7 +1046,7 @@ class SimpleModCLI:
                         ('2', 'Open Database'),
                         ('3', 'Save Database'),
                         ('4', 'Save Database As...'),
-                        ('5', 'Back'),
+                        ('5', 'Back (Esc)'),
                     ],
                 )
             except KeyboardInterrupt:
