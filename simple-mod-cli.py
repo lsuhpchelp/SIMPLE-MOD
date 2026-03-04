@@ -45,18 +45,23 @@ TEMPLATE_DIR = "template"
 
 # =============== Customized Fullscreen Choice ============== ##
 
-# Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)
-def input_dialog(*args, **kwargs):
-    app = input_dialog_origin(*args, **kwargs)
+# Helper: attach Esc and Ctrl+C bindings to any dialog Application,
+# exiting with the given esc_result (mimics full_screen_choice behaviour).
+def _add_esc_to_dialog(app, esc_result):
     kb = KeyBindings()
 
     @kb.add("escape", eager=True)
     @kb.add("c-c", eager=True)
     def _cancel(event):
-        event.app.exit(result=None)
+        event.app.exit(result=esc_result)
 
     app.key_bindings = merge_key_bindings([app.key_bindings, kb])
     return app
+
+
+# Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)
+def input_dialog(*args, **kwargs):
+    return _add_esc_to_dialog(input_dialog_origin(*args, **kwargs), None)
 
 def full_screen_choice(title, options, body_text=None):
     """
@@ -210,7 +215,7 @@ class SimpleModCLI:
 
     def confirm_save_before_continue(self, action_name="continue"):
         """Show confirmation dialog for unsaved changes with Save/No/Cancel options."""
-        choice = button_dialog(
+        choice = _add_esc_to_dialog(button_dialog(
             title="Unsaved Changes",
             text="You have unsaved changes! To avoid data loss, do you want to save before continue?",
             buttons=[
@@ -218,7 +223,7 @@ class SimpleModCLI:
                 ("No", "discard"),
                 ("Cancel", "cancel")
             ]
-        ).run()
+        ), "cancel").run()
         if choice == "cancel":
             return False
         if choice == "save":
@@ -512,14 +517,14 @@ class SimpleModCLI:
             ).run()
             return
 
-        choice = button_dialog(
+        choice = _add_esc_to_dialog(button_dialog(
             title="Delete Module",
             text="Are you sure you want to delete this module?",
             buttons=[
                 ("Yes", "yes"),
                 ("No", "no")
             ]
-        ).run()
+        ), "no").run()
         if choice != "yes":
             return
 
