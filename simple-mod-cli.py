@@ -56,7 +56,7 @@ def full_screen_choice(title, options, body_text=None):
     radio_list = RadioList(values=options,select_on_focus=True)
 
     if body_text is not None:
-        body = HSplit([Label(body_text), radio_list])
+        body = HSplit([Label(f"\n{body_text}\n"), radio_list])
     else:
         body = radio_list
 
@@ -339,7 +339,7 @@ class SimpleModCLI:
 
         options = [(f, f) for f in json_files] + [('esc', 'Back (Esc)')]
         db_file = full_screen_choice(
-            "Open Database:",
+            "Open Database",
             options=options,
         )
 
@@ -372,8 +372,7 @@ class SimpleModCLI:
             # Let user choose path
             user_path = input_dialog(
                 title="Save Database As",
-                text="Enter path to save database (must end with .json):",
-                default="database/new-database.json"
+                text="Enter path to save database (must end with .json):"
             ).run()
 
             if user_path is None:
@@ -836,7 +835,7 @@ class SimpleModCLI:
 
         while True:
             choice = full_screen_choice(
-                    "Preferences:",
+                    "Preferences",
                     options=[
                         ('1', 'Default binding paths'),
                         ('2', 'Default flags'),
@@ -912,7 +911,7 @@ class SimpleModCLI:
         """Display the main menu."""
         while True:
             choice = full_screen_choice(
-                    "Main Menu:",
+                    "Main Menu",
                     options=[
                         ('1', 'File'),
                         ('2', 'Module'),
@@ -942,7 +941,7 @@ class SimpleModCLI:
         """Display the file menu."""
         while True:
             choice = full_screen_choice(
-                    "File Menu:",
+                    "File Menu",
                     options=[
                         ('1', 'New Database'),
                         ('2', 'Open Database'),
@@ -967,8 +966,7 @@ class SimpleModCLI:
             elif choice == '4':
                 custom_path = input_dialog(
                     title="Save Database As",
-                    text="Enter path to save database (must end with .json):",
-                    default="database/new-database.json"
+                    text="Enter path to save database (must end with .json):"
                 ).run()
                 if custom_path:
                     if not custom_path.endswith('.json'):
@@ -985,7 +983,7 @@ class SimpleModCLI:
         while True:
             db_path_display = self.current_db_path if self.current_db_path else ""
             choice = full_screen_choice(
-                    "Module Menu:",
+                    "Module Menu",
                     options=[
                         ('1', 'Select Module'),
                         ('2', 'Add New Module'),
@@ -994,7 +992,7 @@ class SimpleModCLI:
                         ('5', 'Edit Current Module'),
                         ('esc', 'Back (Esc)'),
                     ],
-                    body_text=f"Database: {db_path_display}",
+                    body_text=f"Opened database: {db_path_display or "(None)"}",
                 )
 
             if choice == '1':
@@ -1014,7 +1012,7 @@ class SimpleModCLI:
         """Display the generate menu."""
         while True:
             choice = full_screen_choice(
-                    "Generate Menu:",
+                    "Generate Menu",
                     options=[
                         ('1', 'Generate Current Module Key'),
                         ('2', 'Generate All Module Keys'),
