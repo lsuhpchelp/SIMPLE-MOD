@@ -30,6 +30,23 @@ try:
     from prompt_toolkit.layout.containers import HSplit
     from prompt_toolkit.widgets import Dialog, Label, RadioList
     CLI_ENABLED = True
+
+    # Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None),
+    # consistent with the behaviour of full_screen_choice.
+    _orig_input_dialog = input_dialog
+
+    def input_dialog(*args, **kwargs):
+        app = _orig_input_dialog(*args, **kwargs)
+        kb = KeyBindings()
+
+        @kb.add("escape", eager=True)
+        @kb.add("c-c", eager=True)
+        def _cancel(event):
+            event.app.exit(result=None)
+
+        app.key_bindings = merge_key_bindings([app.key_bindings, kb])
+        return app
+
 except ImportError:
     CLI_ENABLED = False
 
