@@ -157,21 +157,6 @@ def save_database(db_path, db):
         return False
 
 
-def clear_screen():
-    """Clear the terminal screen."""
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
-def print_header(title=""):
-    """Print a formatted header."""
-    clear_screen()
-    print("=" * 60)
-    if title:
-        print(f"  {title}")
-    print(f"  {TITLE}CLI v{VERSION}")
-    print("=" * 60)
-    print()
-
 
 # =================== Main CLI Application ================== ##
 
@@ -329,9 +314,6 @@ class SimpleModCLI:
         self.current_module = self.ret_empty_module()
         self.current_db_path = None
 
-        print_header("New Database")
-        print("New empty database created.")
-
     def action_open_database(self):
         """Open an existing database file."""
         if self.has_unsaved_changes():
@@ -340,8 +322,10 @@ class SimpleModCLI:
 
         json_files = list_json_files(DATABASE_DIR)
         if not json_files:
-            print_header("Open Database")
-            print(f"No JSON files found in {DATABASE_DIR}/")
+            message_dialog(
+                title="Open Database",
+                text=f"No JSON files found in {DATABASE_DIR}/"
+            ).run()
             return
 
         options = [(f, f) for f in json_files] + [('esc', 'Back (Esc)')]
@@ -364,15 +348,13 @@ class SimpleModCLI:
             first_version = sorted(self.db[first_name].keys(), reverse=True)[0]
             self.load_current_module(first_name, first_version)
 
-        print_header("Database Loaded")
-        print(f"Loaded: {db_path}")
-        print(f"Modules: {len(self.db)}")
-
     def action_save_database(self):
         """Save the current database to a file."""
         if not self.db:
-            print_header("Save Database")
-            print("Error: Database is empty. Nothing to save.")
+            message_dialog(
+                title="Save Database",
+                text="Error: Database is empty. Nothing to save."
+            ).run()
             return
 
         if self.current_db_path and os.path.exists(self.current_db_path):
@@ -396,16 +378,14 @@ class SimpleModCLI:
 
         if save_database(self.current_db_path, self.db):
             self.db_original = copy.deepcopy(self.db)
-            print_header("Database Saved")
-            print(f"Saved to: {self.current_db_path}")
         else:
-            print_header("Save Failed")
-            print("Could not save the database.")
+            message_dialog(
+                title="Save Failed",
+                text="Could not save the database."
+            ).run()
 
     def action_add_module(self):
         """Add a new module."""
-        print_header("Add New Module")
-
         name = input_dialog(
             title="Add Module",
             text="Enter module name:",
@@ -445,18 +425,14 @@ class SimpleModCLI:
         # Load the new module
         self.load_current_module(name, version)
 
-        print_header("Module Added")
-        print(f"Created: {name} {version}")
-        print("Edit the module details to configure it.")
-
     def action_copy_module(self):
         """Copy the current module to a new name/version."""
         if not self.current_module_name:
-            print_header("Copy Module")
-            print("Error: No module selected.")
+            message_dialog(
+                title="Copy Module",
+                text="Error: No module selected."
+            ).run()
             return
-
-        print_header("Copy Module")
 
         name = input_dialog(
             title="Copy Module",
@@ -497,20 +473,14 @@ class SimpleModCLI:
         # Load the copy
         self.load_current_module(name, version)
 
-        print_header("Module Copied")
-        print(f"Copied {self.current_module_name} {self.current_module_version}")
-        print(f"To: {name} {version}")
-
     def action_delete_module(self):
         """Delete the current module."""
         if not self.current_module_name:
-            print_header("Delete Module")
-            print("Error: No module selected.")
+            message_dialog(
+                title="Delete Module",
+                text="Error: No module selected."
+            ).run()
             return
-
-        print_header("Delete Module")
-        print(f"Module: {self.current_module_name} {self.current_module_version}")
-        print()
 
         choice = button_dialog(
             title="Delete Module",
@@ -544,34 +514,17 @@ class SimpleModCLI:
                 self.current_module_version = None
                 self.current_module = self.ret_empty_module()
 
-        print_header("Module Deleted")
-        print("Module has been deleted.")
-
     def action_edit_module(self):
         """Edit the current module's details."""
         if not self.current_module_name:
-            print_header("Edit Module")
-            print("Error: No module selected.")
+            message_dialog(
+                title="Edit Module",
+                text="Error: No module selected."
+            ).run()
             return
 
         while True:
-            print_header(f"Edit Module: {self.current_module_name} {self.current_module_version}")
-
-            # Display current values
-            print("Current settings:")
-            print(f"  [1] Conflicts:        {self.current_module.get('conflict', '')}")
-            print(f"  [2] Description:      {self.current_module.get('module_whatis', '')}")
-            print(f"  [3] Image Path:       {self.current_module.get('singularity_image', '')}")
-            print(f"  [4] Bind Paths:       {self.current_module.get('singularity_bindpaths', '')}")
-            print(f"  [5] Flags:            {self.current_module.get('singularity_flags', '')}")
-            print(f"  [6] Commands:         {self.current_module.get('cmds', '')}")
-            print(f"  [7] Template:         {self.current_module.get('template', './template/template.tcl')}")
             envs = self.current_module.get('envs', {})
-            if envs:
-                print(f"  [8] Environment Vars: {', '.join(envs.keys())}")
-            else:
-                print(f"  [8] Environment Vars: (none)")
-            print()
 
             choice = full_screen_choice(
                     "Edit Module - Select field to edit:",
@@ -675,21 +628,6 @@ class SimpleModCLI:
         envs = copy.deepcopy(self.current_module.get('envs', {}))
 
         while True:
-            clear_screen()
-            print_header(f"Edit Environment Variables: {self.current_module_name} {self.current_module_version}")
-            print()
-
-            if envs:
-                print("Current environment variables:")
-                for i, (key, value) in enumerate(envs.items(), 1):
-                    print(f"  [{i}] {key} = {value}")
-                print()
-            else:
-                print("No environment variables set.")
-                print()
-
-            print()
-
             if envs:
                 # Show available variables for selection
                 value_choices = [(str(i), f"{key} = {value}") for i, (key, value) in enumerate(envs.items(), 1)]
@@ -764,8 +702,10 @@ class SimpleModCLI:
         name_list, version_list = self.refresh_module_list()
 
         if not name_list:
-            print_header("Select Module")
-            print("No modules in database.")
+            message_dialog(
+                title="Select Module",
+                text="No modules in database."
+            ).run()
             return
 
         # Name selection
@@ -797,8 +737,10 @@ class SimpleModCLI:
     def action_generate_key(self):
         """Generate a module key for the current module."""
         if not self.current_module_name:
-            print_header("Generate Module Key")
-            print("Error: No module selected.")
+            message_dialog(
+                title="Generate Module Key",
+                text="Error: No module selected."
+            ).run()
             return
 
         output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
@@ -835,8 +777,10 @@ class SimpleModCLI:
     def action_generate_all_keys(self):
         """Generate module keys for all modules in the database."""
         if not self.db:
-            print_header("Generate All Module Keys")
-            print("Error: Database is empty.")
+            message_dialog(
+                title="Generate All Module Keys",
+                text="Error: Database is empty."
+            ).run()
             return
 
         if self.has_unsaved_changes():
@@ -871,28 +815,16 @@ class SimpleModCLI:
                 else:
                     fail_count += 1
 
-        print_header("Generation Complete")
-        print(f"Successfully generated: {success_count} keys")
-        print(f"Failed: {fail_count} keys")
-        print(f"Output directory: {output_dir}")
+        message_dialog(
+            title="Generation Complete",
+            text=f"Successfully generated: {success_count} keys\nFailed: {fail_count} keys\nOutput directory: {output_dir}"
+        ).run()
 
     def action_preferences(self):
         """Edit preferences."""
         config = self.config
 
         while True:
-            clear_screen()
-            print_header("Preferences")
-            print()
-
-            print("Current preferences:")
-            print(f"  [1] Default binding paths:   {config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')}")
-            print(f"  [2] Default flags:           {config.get('defaultFlags', '')}")
-            print(f"  [3] Default image directory: {config.get('defaultImagePath', '')}")
-            print(f"  [4] Default template:        {config.get('defaultTemplate', './template/template.tcl')}")
-            print(f"  [5] Default modkey path:     {config.get('defaultModKeyPath', MODULEKEY_DIR)}")
-            print()
-
             choice = full_screen_choice(
                     "Preferences - Select setting to change:",
                     options=[
@@ -959,27 +891,16 @@ class SimpleModCLI:
                 json.dump(config, f, indent=4)
             self.config = config
         except IOError as e:
-            print(f"Error saving preferences: {e}")
+            message_dialog(
+                title="Error",
+                text=f"Error saving preferences: {e}"
+            ).run()
 
     # =================== Main Menu ================== ##
 
     def main_menu(self):
         """Display the main menu."""
         while True:
-            clear_screen()
-            print_header("SIMPLE-MOD CLI Main Menu")
-            print()
-
-            if self.current_module_name:
-                print(f"Current: {self.current_module_name} {self.current_module_version}")
-            else:
-                print("No module selected")
-            print()
-
-            if self.has_unsaved_changes():
-                print("[!] Unsaved changes detected")
-            print()
-
             choice = full_screen_choice(
                     "Main Menu - Select an option:",
                     options=[
@@ -1010,10 +931,6 @@ class SimpleModCLI:
     def file_menu(self):
         """Display the file menu."""
         while True:
-            clear_screen()
-            print_header("File Menu")
-            print()
-
             choice = full_screen_choice(
                     "File Menu - Select an option:",
                     options=[
@@ -1048,14 +965,6 @@ class SimpleModCLI:
     def module_menu(self):
         """Display the module menu."""
         while True:
-            clear_screen()
-            print_header("Module Menu")
-            print()
-
-            if self.db:
-                print(f"Database contains {len(self.db)} module(s)")
-                print()
-
             choice = full_screen_choice(
                     "Module Menu - Select an option:",
                     options=[
@@ -1084,16 +993,6 @@ class SimpleModCLI:
     def generate_menu(self):
         """Display the generate menu."""
         while True:
-            clear_screen()
-            print_header("Generate Menu")
-            print()
-
-            if self.current_module_name:
-                print(f"Current module: {self.current_module_name} {self.current_module_version}")
-            else:
-                print("No module selected")
-            print()
-
             choice = full_screen_choice(
                     "Generate Menu - Select an option:",
                     options=[
@@ -1111,77 +1010,14 @@ class SimpleModCLI:
                 break
 
     def run(self):
-        """Run the CLI application."""
-        print_header("Welcome to SIMPLE-MOD CLI")
-        print()
-        print("Loading configuration...")
-        print()
-
-        # Check for prompt_toolkit
+        """Run the CLI application. Requires prompt_toolkit (CLI_ENABLED)."""
         if not CLI_ENABLED:
-            print("ERROR: prompt_toolkit is not installed!")
-            print("Please install it with: pip install prompt_toolkit")
-            print()
-            print("To use basic input mode, run:")
-            print("  python simple-mod-cli.py")
-            print()
             return
-
         # Main menu loop
         while True:
             exit_app = self.main_menu()
             if exit_app:
                 break
-
-        print_header("Goodbye!")
-
-    def run_basic_mode(self):
-        """Run the CLI in basic input mode (without prompt_toolkit)."""
-        print_header("SIMPLE-MOD CLI - Basic Mode")
-        print()
-        print("Note: This is basic input mode without interactive selection.")
-        print()
-
-        while True:
-            clear_screen()
-            print_header("SIMPLE-MOD CLI - Basic Mode")
-            print()
-
-            choice = full_screen_choice(
-                    "SIMPLE-MOD CLI - Select an option:",
-                    options=[
-                        ('1', 'New Database'),
-                        ('2', 'Open Database'),
-                        ('3', 'Save Database'),
-                        ('4', 'Add Module'),
-                        ('5', 'Edit Module'),
-                        ('6', 'Generate Key'),
-                        ('7', 'Generate All Keys'),
-                        ('esc', 'Exit (Esc)'),
-                    ],
-                )
-
-            if choice == '1':
-                self.action_new_database()
-            elif choice == '2':
-                self.action_open_database()
-            elif choice == '3':
-                self.action_save_database()
-            elif choice == '4':
-                self.action_add_module()
-            elif choice == '5' and self.current_module_name:
-                self.action_edit_module()
-            elif choice == '6' and self.current_module_name:
-                self.action_generate_key()
-            elif choice == '7':
-                self.action_generate_all_keys()
-            elif choice == 'esc':
-                if self.has_unsaved_changes():
-                    if not self.confirm_save_before_continue():
-                        continue
-                    break
-                else:
-                    break
 
 
 # =================== Command Line Interface ================== ##
@@ -1277,9 +1113,7 @@ def main():
         if not CLI_ENABLED:
             print("ERROR: prompt_toolkit is not installed!")
             print("Please install it with: pip install prompt_toolkit")
-            print()
-            print("To use basic input mode without prompt_toolkit:")
-            print("  python -c \"import simple_mod_cli; cli = simple_mod_cli.SimpleModCLI(); cli.run_basic_mode()\"")
+            print("The application requires prompt_toolkit and cannot run without it.")
             sys.exit(1)
 
         try:
