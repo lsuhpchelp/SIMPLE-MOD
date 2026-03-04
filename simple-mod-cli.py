@@ -359,8 +359,13 @@ class SimpleModCLI:
 
         return True
 
-    def action_save_database(self):
-        """Save the current database to a file."""
+    def action_save_database(self, save_as=False):
+        """Save the current database to a file.
+
+        When save_as is True, always prompt for a new file path (Save As
+        behaviour), pre-filling with the current path when available.
+        When save_as is False, prompt only if no valid path is already set.
+        """
         if not self.db:
             message_dialog(
                 title="Save Database",
@@ -368,11 +373,12 @@ class SimpleModCLI:
             ).run()
             return False
 
-        if not (self.current_db_path and os.path.exists(self.current_db_path)):
-            # Let user choose path
+        if save_as or not (self.current_db_path and os.path.exists(self.current_db_path)):
+            # Prompt user for a (new) path
             user_path = input_dialog(
                 title="Save Database As",
-                text="Enter path to save database (must end with .json):"
+                text="Enter path to save database (must end with .json):",
+                default=self.current_db_path or "database/new-database.json"
             ).run()
 
             if user_path is None:
@@ -964,17 +970,9 @@ class SimpleModCLI:
                     self.module_menu()
                     break
             elif choice == '4':
-                custom_path = input_dialog(
-                    title="Save Database As",
-                    text="Enter path to save database (must end with .json):"
-                ).run()
-                if custom_path:
-                    if not custom_path.endswith('.json'):
-                        custom_path += '.json'
-                    self.current_db_path = custom_path
-                    if self.action_save_database():
-                        self.module_menu()
-                        break
+                if self.action_save_database(save_as=True):
+                    self.module_menu()
+                    break
             elif choice == 'esc':
                 break
 
