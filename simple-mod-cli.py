@@ -21,8 +21,13 @@ try:
     from prompt_toolkit.formatted_text import HTML
     from prompt_toolkit.shortcuts import (
         prompt, button_dialog, input_dialog,
-        progress_dialog, choice as prompt_choice, checkboxlist_dialog, message_dialog
+        progress_dialog, checkboxlist_dialog, message_dialog
     )
+    from prompt_toolkit.application import Application
+    from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
+    from prompt_toolkit.key_binding.defaults import load_key_bindings
+    from prompt_toolkit.layout import Layout
+    from prompt_toolkit.widgets import Dialog, RadioList
     CLI_ENABLED = True
 except ImportError:
     CLI_ENABLED = False
@@ -33,6 +38,41 @@ VERSION = "1.1.0"
 DATABASE_DIR = "database"
 MODULEKEY_DIR = "modulekey"
 TEMPLATE_DIR = "template"
+
+
+def full_screen_choice(title, options):
+    """
+    Full-screen radio list selection consistent with dialog components.
+
+    Uses Dialog with background fill (full_screen=True) and accepts the
+    selection on Enter without requiring a button click.
+    Raises KeyboardInterrupt on Ctrl+C.
+    """
+    radio_list = RadioList(values=options)
+
+    dialog = Dialog(
+        title=title,
+        body=radio_list,
+        with_background=True,
+    )
+
+    kb = KeyBindings()
+
+    @kb.add("enter", eager=True)
+    def _accept(event):
+        event.app.exit(result=radio_list.current_value)
+
+    @kb.add("c-c")
+    def _cancel(event):
+        raise KeyboardInterrupt
+
+    app = Application(
+        layout=Layout(dialog),
+        key_bindings=merge_key_bindings([load_key_bindings(), kb]),
+        mouse_support=True,
+        full_screen=True,
+    )
+    return app.run()
 
 
 # =================== Utility Functions ================== ##
@@ -303,7 +343,7 @@ class SimpleModCLI:
 
         options = [(f, f) for f in json_files] + [('__back__', '← Back')]
         try:
-            db_file = prompt_choice(
+            db_file = full_screen_choice(
                 "Open Database - Select a database file to open:",
                 options=options,
             )
@@ -534,7 +574,7 @@ class SimpleModCLI:
             print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "Edit Module - Select field to edit:",
                     options=[
                         ('1', 'Conflicts'),
@@ -668,7 +708,7 @@ class SimpleModCLI:
                 ]
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "Edit Environment Variables - Select an option:",
                     options=value_choices,
                 )
@@ -694,7 +734,7 @@ class SimpleModCLI:
                 if envs:
                     del_options = [(k, k) for k in envs.keys()] + [('__cancel__', '← Cancel')]
                     try:
-                        key = prompt_choice(
+                        key = full_screen_choice(
                             "Delete Environment Variable - Select a variable to delete:",
                             options=del_options,
                         )
@@ -740,7 +780,7 @@ class SimpleModCLI:
         # Name selection
         name_options = [(n, n) for n in name_list] + [('__back__', '← Back')]
         try:
-            name = prompt_choice(
+            name = full_screen_choice(
                 "Select Module - Choose a module to work with:",
                 options=name_options,
             )
@@ -757,7 +797,7 @@ class SimpleModCLI:
         else:
             ver_options = [(v, v) for v in versions] + [('__back__', '← Back')]
             try:
-                version = prompt_choice(
+                version = full_screen_choice(
                     f"Select Version for {name} - Choose a version:",
                     options=ver_options,
                 )
@@ -869,7 +909,7 @@ class SimpleModCLI:
             print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "Preferences - Select setting to change:",
                     options=[
                         ('1', 'Default binding paths'),
@@ -959,7 +999,7 @@ class SimpleModCLI:
             print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "Main Menu - Select an option:",
                     options=[
                         ('1', 'File'),
@@ -996,7 +1036,7 @@ class SimpleModCLI:
             print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "File Menu - Select an option:",
                     options=[
                         ('1', 'New Database'),
@@ -1041,7 +1081,7 @@ class SimpleModCLI:
                 print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "Module Menu - Select an option:",
                     options=[
                         ('1', 'Select Module'),
@@ -1082,7 +1122,7 @@ class SimpleModCLI:
             print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "Generate Menu - Select an option:",
                     options=[
                         ('1', 'Generate Current Module Key'),
@@ -1138,7 +1178,7 @@ class SimpleModCLI:
             print()
 
             try:
-                choice = prompt_choice(
+                choice = full_screen_choice(
                     "SIMPLE-MOD CLI - Select an option:",
                     options=[
                         ('1', 'New Database'),
