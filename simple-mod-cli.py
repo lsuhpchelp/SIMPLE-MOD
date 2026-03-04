@@ -330,7 +330,7 @@ class SimpleModCLI:
 
         options = [(f, f) for f in json_files] + [('esc', 'Back (Esc)')]
         db_file = full_screen_choice(
-            "Open Database - Select a database file to open:",
+            "Open Database:",
             options=options,
         )
 
@@ -527,7 +527,7 @@ class SimpleModCLI:
             envs = self.current_module.get('envs', {})
 
             choice = full_screen_choice(
-                    "Edit Module - Select field to edit:",
+                    "Edit Module:",
                     options=[
                         ('1', 'Conflicts'),
                         ('2', 'Description'),
@@ -643,7 +643,7 @@ class SimpleModCLI:
                 ]
 
             choice = full_screen_choice(
-                    "Edit Environment Variables - Select an option:",
+                    "Edit Environment Variables:",
                     options=value_choices,
                 )
 
@@ -666,7 +666,7 @@ class SimpleModCLI:
                 if envs:
                     del_options = [(k, k) for k in envs.keys()] + [('esc', 'Back (Esc)')]
                     key = full_screen_choice(
-                            "Delete Environment Variable - Select a variable to delete:",
+                            "Delete Environment Variable:",
                             options=del_options,
                         )
                     if key != 'esc':
@@ -711,7 +711,7 @@ class SimpleModCLI:
         # Name selection
         name_options = [(n, n) for n in name_list] + [('esc', 'Back (Esc)')]
         name = full_screen_choice(
-            "Select Module - Choose a module to work with:",
+            "Select Module:",
             options=name_options,
         )
 
@@ -725,7 +725,7 @@ class SimpleModCLI:
         else:
             ver_options = [(v, v) for v in versions] + [('esc', 'Back (Esc)')]
             version = full_screen_choice(
-                    f"Select Version for {name} - Choose a version:",
+                    f"Select Version for {name}:",
                     options=ver_options,
                 )
 
@@ -826,7 +826,7 @@ class SimpleModCLI:
 
         while True:
             choice = full_screen_choice(
-                    "Preferences - Select setting to change:",
+                    "Preferences:",
                     options=[
                         ('1', 'Default binding paths'),
                         ('2', 'Default flags'),
@@ -902,7 +902,7 @@ class SimpleModCLI:
         """Display the main menu."""
         while True:
             choice = full_screen_choice(
-                    "Main Menu - Select an option:",
+                    "Main Menu:",
                     options=[
                         ('1', 'File'),
                         ('2', 'Module'),
@@ -932,7 +932,7 @@ class SimpleModCLI:
         """Display the file menu."""
         while True:
             choice = full_screen_choice(
-                    "File Menu - Select an option:",
+                    "File Menu:",
                     options=[
                         ('1', 'New Database'),
                         ('2', 'Open Database'),
@@ -944,10 +944,16 @@ class SimpleModCLI:
 
             if choice == '1':
                 self.action_new_database()
+                self.module_menu()
+                break
             elif choice == '2':
                 self.action_open_database()
+                self.module_menu()
+                break
             elif choice == '3':
                 self.action_save_database()
+                self.module_menu()
+                break
             elif choice == '4':
                 custom_path = input_dialog(
                     title="Save Database As",
@@ -959,14 +965,17 @@ class SimpleModCLI:
                         custom_path += '.json'
                     self.current_db_path = custom_path
                     self.action_save_database()
+                    self.module_menu()
+                    break
             elif choice == 'esc':
                 break
 
     def module_menu(self):
         """Display the module menu."""
         while True:
+            db_path_display = self.current_db_path if self.current_db_path else ""
             choice = full_screen_choice(
-                    "Module Menu - Select an option:",
+                    f"Module Menu:\nDatabase: {db_path_display}",
                     options=[
                         ('1', 'Select Module'),
                         ('2', 'Add New Module'),
@@ -994,7 +1003,7 @@ class SimpleModCLI:
         """Display the generate menu."""
         while True:
             choice = full_screen_choice(
-                    "Generate Menu - Select an option:",
+                    "Generate Menu:",
                     options=[
                         ('1', 'Generate Current Module Key'),
                         ('2', 'Generate All Module Keys'),
