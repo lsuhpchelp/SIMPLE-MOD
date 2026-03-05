@@ -977,8 +977,7 @@ class SimpleModCLI:
                     options=[
                         ('1', 'File'),
                         ('2', 'Module'),
-                        ('3', 'Generate'),
-                        ('4', 'Preferences'),
+                        ('3', 'Preferences'),
                         ('esc', 'Exit (Esc)'),
                     ],
                 )
@@ -988,8 +987,6 @@ class SimpleModCLI:
             elif choice == '2':
                 self.module_menu()
             elif choice == '3':
-                self.generate_menu()
-            elif choice == '4':
                 self.action_preferences()
             elif choice == 'esc':
                 if self.has_unsaved_changes():
@@ -1045,6 +1042,8 @@ class SimpleModCLI:
                         ('3', 'Copy Current Module'),
                         ('4', 'Delete Current Module'),
                         ('5', 'Edit Current Module'),
+                        ('6', 'Generate Current Module Key'),
+                        ('7', 'Generate All Module Keys'),
                         ('esc', 'Back (Esc)'),
                     ],
                     body_text=f"Current database: {current_db_display}\nCurrent module: {module_display}"
@@ -1060,24 +1059,9 @@ class SimpleModCLI:
                 self.action_delete_module()
             elif choice == '5':
                 self.action_edit_module()
-            elif choice == 'esc':
-                break
-
-    def generate_menu(self):
-        """Display the generate menu."""
-        while True:
-            choice = full_screen_choice(
-                    "Generate Menu",
-                    options=[
-                        ('1', 'Generate Current Module Key'),
-                        ('2', 'Generate All Module Keys'),
-                        ('esc', 'Back (Esc)'),
-                    ],
-                )
-
-            if choice == '1':
+            elif choice == '6':
                 self.action_generate_key()
-            elif choice == '2':
+            elif choice == '7':
                 self.action_generate_all_keys()
             elif choice == 'esc':
                 break
