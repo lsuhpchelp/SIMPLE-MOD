@@ -428,11 +428,11 @@ class SimpleModCLI:
         ).run()
 
         if name is None:
-            return
+            return False
         name = name.strip()
         if not name:
             message_dialog(title="Error", text="Module name cannot be empty.").run()
-            return
+            return False
 
         version = input_dialog(
             title="Add Module",
@@ -441,16 +441,16 @@ class SimpleModCLI:
         ).run()
 
         if version is None:
-            return
+            return False
         version = version.strip()
         if not version:
             message_dialog(title="Error", text="Version cannot be empty.").run()
-            return
+            return False
 
         # Check if module already exists
         if name in self.db and version in self.db[name]:
             message_dialog(title="Error", text=f"Module {name} {version} already exists.").run()
-            return
+            return False
 
         # Create new module
         if name not in self.db:
@@ -459,6 +459,7 @@ class SimpleModCLI:
 
         # Load the new module
         self.load_current_module(name, version)
+        return True
 
     def action_copy_module(self):
         """Copy the current module to a new name/version."""
@@ -467,7 +468,7 @@ class SimpleModCLI:
                 title="Copy Module",
                 text="Error: No module selected."
             ).run()
-            return
+            return False
 
         name = input_dialog(
             title="Copy Module",
@@ -476,11 +477,11 @@ class SimpleModCLI:
         ).run()
 
         if name is None:
-            return
+            return False
         name = name.strip()
         if not name:
             message_dialog(title="Error", text="Module name cannot be empty.").run()
-            return
+            return False
 
         version = input_dialog(
             title="Copy Module",
@@ -489,16 +490,16 @@ class SimpleModCLI:
         ).run()
 
         if version is None:
-            return
+            return False
         version = version.strip()
         if not version:
             message_dialog(title="Error", text="Version cannot be empty.").run()
-            return
+            return False
 
         # Check if module already exists
         if name in self.db and version in self.db[name]:
             message_dialog(title="Error", text=f"Module {name} {version} already exists.").run()
-            return
+            return False
 
         # Create copy
         if name not in self.db:
@@ -507,6 +508,7 @@ class SimpleModCLI:
 
         # Load the copy
         self.load_current_module(name, version)
+        return True
 
     def action_delete_module(self):
         """Delete the current module."""
@@ -515,7 +517,7 @@ class SimpleModCLI:
                 title="Delete Module",
                 text="Error: No module selected."
             ).run()
-            return
+            return False
 
         choice = add_esc_to_dialog(button_dialog(
             title="Delete Module",
@@ -526,7 +528,7 @@ class SimpleModCLI:
             ]
         ), "no").run()
         if choice != "yes":
-            return
+            return False
 
         # Check for multiple versions
         if len(self.db[self.current_module_name]) > 1:
@@ -549,6 +551,8 @@ class SimpleModCLI:
                 self.current_module_version = None
                 self.current_module = self.ret_empty_module()
 
+        return True
+
     def action_edit_module(self):
         """Edit the current module's details."""
         if not self.current_module_name:
@@ -556,7 +560,7 @@ class SimpleModCLI:
                 title="Edit Module",
                 text="Error: No module selected."
             ).run()
-            return
+            return False
 
         # Format display values with space alignment
         # Find the longest label for consistent alignment
@@ -696,6 +700,7 @@ class SimpleModCLI:
 
         # Save to database
         self.update_db_from_form()
+        return True
 
     def edit_environment_variables(self):
         """Edit environment variables for the current module."""
@@ -780,7 +785,7 @@ class SimpleModCLI:
                 title="Select Module",
                 text="No modules in database."
             ).run()
-            return
+            return False
 
         # Name selection
         name_options = [(n, n) for n in name_list] + [('esc', 'Back (Esc)')]
@@ -790,7 +795,7 @@ class SimpleModCLI:
         )
 
         if name == 'esc':
-            return
+            return False
 
         # Version selection
         versions = sorted(self.db[name].keys(), reverse=True)
@@ -801,9 +806,10 @@ class SimpleModCLI:
             )
 
         if version == 'esc':
-            return
+            return False
 
         self.load_current_module(name, version)
+        return True
 
     def action_generate_key(self):
         """Generate a module key for the current module."""
@@ -812,7 +818,7 @@ class SimpleModCLI:
                 title="Generate Module Key",
                 text="Error: No module selected."
             ).run()
-            return
+            return False
 
         output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
 
@@ -890,6 +896,7 @@ class SimpleModCLI:
             title="Generation Complete",
             text=f"Successfully generated: {success_count} keys\nFailed: {fail_count} keys\nOutput directory: {output_dir}"
         ).run()
+        return fail_count == 0
 
     def action_preferences(self):
         """Edit preferences."""
@@ -969,7 +976,7 @@ class SimpleModCLI:
 
     # =================== Main Menu ================== ##
 
-    def main_menu(self):
+    def menu_main(self):
         """Display the main menu."""
         while True:
             choice = full_screen_choice(
@@ -983,9 +990,9 @@ class SimpleModCLI:
                 )
 
             if choice == '1':
-                self.file_menu()
+                self.menu_file()
             elif choice == '2':
-                self.module_menu()
+                self.menu_module()
             elif choice == '3':
                 self.action_preferences()
             elif choice == 'esc':
@@ -996,7 +1003,7 @@ class SimpleModCLI:
                 else:
                     return True
 
-    def file_menu(self):
+    def menu_file(self):
         """Display the file menu."""
         while True:
             choice = full_screen_choice(
@@ -1012,59 +1019,81 @@ class SimpleModCLI:
 
             if choice == '1':
                 if self.action_new_database():
-                    self.module_menu()
+                    self.menu_module()
                     break
             elif choice == '2':
                 if self.action_open_database():
-                    self.module_menu()
+                    self.menu_module()
                     break
             elif choice == '3':
                 if self.action_save_database():
-                    self.module_menu()
+                    self.menu_module()
                     break
             elif choice == '4':
                 if self.action_save_database(save_as=True):
-                    self.module_menu()
+                    self.menu_module()
                     break
             elif choice == 'esc':
                 break
 
-    def module_menu(self):
-        """Display the module menu."""
+    def menu_module(self):
+        """Display the module database menu (first level)."""
         while True:
             current_db_display = self.current_db_path if self.current_db_path else "(None)"
-            module_display = f"{self.current_module_name} ({self.current_module_version})" if self.current_module_name and self.current_module_version else "(None)"
             choice = full_screen_choice(
                     "Module Menu",
                     options=[
-                        ('1', 'Select a Module'),
-                        ('2', 'Add a Module'),
-                        ('3', 'Copy Current Module'),
-                        ('4', 'Delete Current Module'),
-                        ('5', 'Edit Current Module'),
-                        ('6', 'Generate Current Module Key'),
-                        ('7', 'Generate All Module Keys'),
+                        ('1', 'Select Module'),
+                        ('2', 'Add New Module'),
+                        ('3', 'Generate All Module Keys from Database'),
                         ('esc', 'Back (Esc)'),
                     ],
-                    body_text=f"Current database: {current_db_display}\nCurrent module: {module_display}"
+                    body_text=f"Current database: {current_db_display}"
                 )
 
             if choice == '1':
-                self.action_select_module()
+                if self.action_select_module():
+                    self.menu_module_edit()
             elif choice == '2':
-                self.action_add_module()
+                if self.action_add_module():
+                    self.menu_module_edit()
             elif choice == '3':
-                self.action_copy_module()
-            elif choice == '4':
-                self.action_delete_module()
-            elif choice == '5':
-                self.action_edit_module()
-            elif choice == '6':
-                self.action_generate_key()
-            elif choice == '7':
                 self.action_generate_all_keys()
             elif choice == 'esc':
                 break
+
+    def menu_module_edit(self):
+        """Display the module edit menu (second level, shown after selecting/adding a module)."""
+        if not self.current_module_name:
+            return False
+
+        while True:
+            module_display = f"{self.current_module_name} ({self.current_module_version})"
+            choice = full_screen_choice(
+                    "Module Edit Menu",
+                    options=[
+                        ('1', 'Edit Current Module'),
+                        ('2', 'Copy Current Module'),
+                        ('3', 'Delete Current Module'),
+                        ('4', 'Generate Current Module Key'),
+                        ('esc', 'Back (Esc)'),
+                    ],
+                    body_text=f"Current module: {module_display}"
+                )
+
+            if choice == '1':
+                self.action_edit_module()
+            elif choice == '2':
+                self.action_copy_module()
+            elif choice == '3':
+                self.action_delete_module()
+                # After deletion, return to module database menu
+                return False
+            elif choice == '4':
+                self.action_generate_key()
+            elif choice == 'esc':
+                return False
+        return True
 
     def run(self):
         """Run the CLI application. Requires prompt_toolkit (CLI_ENABLED)."""
@@ -1072,7 +1101,7 @@ class SimpleModCLI:
             return
         # Main menu loop
         while True:
-            exit_app = self.main_menu()
+            exit_app = self.menu_main()
             if exit_app:
                 break
 
