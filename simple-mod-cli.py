@@ -788,7 +788,7 @@ class SimpleModCLI:
             return False
 
         # Name selection
-        name_options = [(n, n) for n in name_list] + [('esc', 'Back (Esc)')]
+        name_options = [(n, n) for n in sorted(name_list)] + [('esc', 'Back (Esc)')]
         name = full_screen_choice(
             "Select Module:",
             options=name_options,
