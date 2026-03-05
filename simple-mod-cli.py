@@ -13,6 +13,7 @@ import os
 import json
 import copy
 import argparse
+import textwrap
 from string import Template
 
 # Check for prompt_toolkit (for interactive CLI)
@@ -28,7 +29,7 @@ try:
     from prompt_toolkit.key_binding.defaults import load_key_bindings
     from prompt_toolkit.layout import Layout
     from prompt_toolkit.layout.containers import HSplit
-    from prompt_toolkit.widgets import Dialog, Label, RadioList
+    from prompt_toolkit.widgets import Dialog, Label, RadioList, TextArea, Button
     CLI_ENABLED = True
 
 except ImportError:
@@ -45,22 +46,21 @@ TEMPLATE_DIR = "template"
 
 # =============== Customized Fullscreen Choice ============== ##
 
-# Helper: attach Esc and Ctrl+C bindings to any dialog Application,
-# exiting with the given esc_result (mimics full_screen_choice behaviour).
 def add_esc_to_dialog(app, esc_result):
+    """
+    Helper: attach Esc and Ctrl+C bindings to any dialog Application,
+    exiting with the given esc_result (mimics full_screen_choice behaviour).
+    """
     kb = KeyBindings()
-
     @kb.add("escape", eager=True)
     @kb.add("c-c", eager=True)
     def _cancel(event):
         event.app.exit(result=esc_result)
-
     app.key_bindings = merge_key_bindings([app.key_bindings, kb])
     return app
 
-
-# Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)
 def input_dialog(*args, **kwargs):
+    """Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)"""
     return add_esc_to_dialog(input_dialog_origin(*args, **kwargs), None)
 
 def full_screen_choice(title, options, body_text=None):
@@ -558,22 +558,61 @@ class SimpleModCLI:
             ).run()
             return
 
+        # Format display values with space alignment
+        # Find the longest label for consistent alignment
+        label_width = max(len("Conflicts"), len("Description"), len("Image Path"),
+                        len("Bind Paths"), len("Flags"), len("Commands"),
+                        len("Template"), len("Environment Vars")) + 4
+
+        # Wrap long values for display (limit to 60 chars per line
+        def wrap_value(val):
+            if len(val) > 60:
+                return '\n'.join(textwrap.wrap(val, width=60, replace_whitespace=False))
+            return val
+        
+        # Format each option and its content
+        def format_option(label, value):
+            wrapped = wrap_value(value)
+            # If wrapped has multiple lines, indent them
+            if '\n' in wrapped:
+                lines = [f"{label:<{label_width}}{wrapped.split(chr(10))[0]}"]
+                lines.extend([' ' * (label_width + 4) + line for line in wrapped.split(chr(10))[1:]])
+                return '\n'.join(lines)
+            return f"{label:<{label_width}}{wrapped}"
+
         while True:
             envs = self.current_module.get('envs', {})
+
+            # Get current values for display
+            disp_conflicts = self.current_module.get('conflict', '')
+            disp_description = self.current_module.get('module_whatis', '')
+            disp_image_path = self.current_module.get('singularity_image', '')
+            disp_bind_paths = self.current_module.get('singularity_bindpaths', '')
+            disp_flags = self.current_module.get('singularity_flags', '')
+            disp_commands = self.current_module.get('cmds', '')
+            disp_template = self.current_module.get('template', './template/template.tcl')
+
+            # Format environment variables display
+            if envs:
+                disp_env_vars = ', '.join(f"{k}={v}" for k, v in envs.items())
+                disp_env_vars = wrap_value(disp_env_vars)
+            else:
+                disp_env_vars = '(none)'
 
             choice = full_screen_choice(
                     "Edit Module:",
                     options=[
-                        ('1', 'Conflicts'),
-                        ('2', 'Description'),
-                        ('3', 'Image Path'),
-                        ('4', 'Bind Paths'),
-                        ('5', 'Flags'),
-                        ('6', 'Commands'),
-                        ('7', 'Template'),
-                        ('8', 'Environment Vars'),
+                        ('1', format_option("Conflicts", disp_conflicts)),
+                        ('2', format_option("Description", disp_description)),
+                        ('3', format_option("Image Path", disp_image_path)),
+                        ('4', format_option("Bind Paths", disp_bind_paths)),
+                        ('5', format_option("Flags", disp_flags)),
+                        ('6', format_option("Commands", disp_commands)),
+                        ('7', format_option("Template", disp_template)),
+                        ('8', format_option("Environment Vars", disp_env_vars)),
                         ('esc', 'Back (Esc)'),
                     ],
+                    body_text="Select a field to edit:",
                 )
 
             if choice == 'esc':
