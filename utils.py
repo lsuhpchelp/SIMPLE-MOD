@@ -95,10 +95,8 @@ def load_database(db_path):
     try:
         with open(db_path, 'r') as f:
             return json.load(f)
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in {db_path}: {e}")
+    except Exception as e:
+        print(f"Error loading database: {e}")
         return {}
 
 
@@ -108,6 +106,6 @@ def save_database(db_path, db):
         with open(db_path, 'w') as f:
             json.dump(db, f, indent=4)
         return True
-    except IOError as e:
+    except Exception as e:
         print(f"Error saving database: {e}")
         return False

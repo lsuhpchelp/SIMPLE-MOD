@@ -332,7 +332,7 @@ class MainWindow(QMainWindow):
             # Load database using utility function
             self.db = load_database(fname)
             if not self.db:
-                # Database is empty (file not found or invalid JSON)
+                QMessageBox.critical(self, 'Error!', 'Failed to open database! See standard output for error message!')
                 return False
 
             # Update currrent form
