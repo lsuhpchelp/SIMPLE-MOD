@@ -10,6 +10,9 @@
 import sys, json, os, tempfile, copy
 from string import Template
 
+# Import shared utilities
+from utils import *
+
 # QT5/6 dual support (prefer QT6)
 try:
     from PyQt6 import QtGui
@@ -26,20 +29,6 @@ except ImportError:
                                  QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
     PYQT_VERSION = 5
     PlaceholderTextColorRole = QtGui.QPalette.PlaceholderText
-    
-# Software Information
-TITLE = "SIMPLE-MOD "   # Window title
-VERSION="1.1.0"         # Version
-ABOUT = f"""{TITLE}
-(Singularity Integrated Module-key Producer for Loadable Environment MODules)
-
-SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
-            
-Version: \t{VERSION}
-Author: \tJason Li
-Home: \thttps://github.com/lsuhpchelp/SIMPLE-MOD
-License: \tMIT License
-"""
     
 # Main window
 class MainWindow(QMainWindow):
@@ -74,13 +63,13 @@ class MainWindow(QMainWindow):
         
         super().__init__()
         
-        # Load preferences
-        self.loadPreferences()
-        
+        # Load preferences (store in self.config for class methods)
+        self.config = load_preferences()
+
         # Key attributes
         self.db = {}                                # Loaded database dictionary (empty if it's new)
         self.dbOriginal = {}                        # Original copy of database (for unsaved changes detection)
-        self.currentModule = self.retEmptyModule()  # Current opened module
+        self.currentModule = ret_empty_module(self.config)  # Current opened module
         self._updatingForm = False                  # Guard flag to prevent re-entrant saves during form updates
         self.currentDbPath = None                   # Path of currently open database file
         
@@ -314,7 +303,7 @@ class MainWindow(QMainWindow):
         
         # Reset database to empty
         self.db = {}
-        self.currentModule = self.retEmptyModule()
+        self.currentModule = ret_empty_module(self.config)
         self.currentDbPath = None
 
         # Update current form
@@ -331,35 +320,28 @@ class MainWindow(QMainWindow):
         """
         Select and open database file.
         """
-        
+
         # Check any unsaved changes
         if (self.cancelForUnsavedChanges()): return
-        
+
         # Pick a database file to open
         fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
-        
+
         # If successfully picked a file...
         if fname:
-            
-            # Try if this file is writable:
-            # If writable, continue saving; if not, return False
-            try:
-                f = open(fname)
-            except:
-                QMessageBox.critical(self, 'Error!', 'You cannot read this file!')
-                return(False)
-        
-            # Read to "db" dictionary
-            self.db = json.load(f)
-            f.close()
-                
+            # Load database using utility function
+            self.db = load_database(fname)
+            if not self.db:
+                # Database is empty (file not found or invalid JSON)
+                return False
+
             # Update currrent form
             self.nameDropUpdateFromDB()
             self.versionDropUpdateFromDB()
-            
+
             # Save original copy of database
             self.dbOriginal = copy.deepcopy(self.db)
-        
+
             # Update window title
             self.setTitleForUnsavedChanges()
 
@@ -385,32 +367,22 @@ class MainWindow(QMainWindow):
             return False
 
         if save_as or not self.currentDbPath:
+            
             # Prompt for file path (Save As or first save)
             fname, _ = QFileDialog.getSaveFileName(self, 'Save Database As', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
+            
             if not fname:
                 return False
+
+            if not fname.endswith('.json'):
+                fname += '.json'
+            
             self.currentDbPath = fname
-        else:
-            # Use current path for save (overwrite)
-            fname = self.currentDbPath
 
-        # Add ".json" extension if not already added
-        if (fname.split(".")[-1] != "json"):
-            fname += ".json"
-
-        # Try if this file is writable:
-        try:
-            fw = open(fname, "w")
-        except:
+        # Save database to file using utility function
+        if not save_database(self.currentDbPath, self.db):
             QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
             return False
-
-        # Save currentModule to database
-        self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-
-        # Save database to file
-        json.dump(self.db, fw, indent=4)
-        fw.close()
 
         # Save original copy of database
         self.dbOriginal = copy.deepcopy(self.db)
@@ -647,15 +619,15 @@ class MainWindow(QMainWindow):
                     return
                     
                 else:
-                
+
                     # If the module name is found but version is not, add a new version to existing module name
-                    self.db[modName][modVersion] = self.retEmptyModule()
-                    
+                    self.db[modName][modVersion] = ret_empty_module(self.config)
+
             else:
-            
+
                 # If the module name is not found, add a new module name
-                self.db[modName] = { 
-                    modVersion : self.retEmptyModule()
+                self.db[modName] = {
+                    modVersion : ret_empty_module(self.config)
                 }
                 
             # Update dropdown menu
@@ -962,45 +934,7 @@ class MainWindow(QMainWindow):
     #============================================================
     # Misc
     #============================================================
-    
-    def loadPreferences(self):
-        """
-        Load preferences from "~/.simple-modrc". Create the file if it does not exist.
-        """
-        
-        # Check if "~/.simple-modrc" exist. 
-        #   If exists, open and read preference settings.
-        #   If not, create it with default settings.
-        if os.path.exists(os.path.expanduser('~/.simple-modrc')):
-            with open(os.path.expanduser('~/.simple-modrc')) as f:
-                self.config = json.load(f)
-        else:
-            self.config = {
-                "defaultDatabasePath": "./database",
-                "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
-                "defaultFlags": "",
-                "defaultImagePath": "",
-                "defaultTemplate": "./template/template.tcl",
-                "defaultModKeyPath": "./modulekey"
-            }
-            with open(os.path.expanduser('~/.simple-modrc'), "w") as fw:
-                json.dump(self.config, fw, indent=4)
-                
-    def retEmptyModule(self):
-        """
-        Return an empty module dictionary.
-        """
-        return {
-            "conflict":                 "",
-            "module_whatis":            "",
-            "singularity_image":        "",
-            "singularity_bindpaths":    "",
-            "singularity_flags":        "",
-            "cmds":                     "",
-            "envs":                     {  },
-            "template":                 self.config["defaultTemplate"]
-        }
-    
+
     def closeEvent(self, event):
         """
         Handle window close event. Prompts for unsaved changes before exiting.
