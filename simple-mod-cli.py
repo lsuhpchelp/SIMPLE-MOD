@@ -39,9 +39,6 @@ except ImportError:
 # Constants
 TITLE = "SIMPLE-MOD "
 VERSION = "1.1.0"
-DATABASE_DIR = "database"
-MODULEKEY_DIR = "modulekey"
-TEMPLATE_DIR = "template"
 
 
 # =============== Customized Fullscreen Choice ============== ##
@@ -123,11 +120,12 @@ def load_preferences():
 
     # Default configuration
     config = {
+        "defaultDatabasePath": "./database",
+        "defaultImagePath": "",
+        "defaultModKeyPath": "./modulekey",
+        "defaultTemplate": "./template/template.tcl",
         "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
         "defaultFlags": "",
-        "defaultImagePath": "",
-        "defaultTemplate": "./template/template.tcl",
-        "defaultModKeyPath": "./modulekey"
     }
     try:
         with open(config_path, "w") as fw:
@@ -200,10 +198,6 @@ class SimpleModCLI:
         self.current_module = None
         self.current_db_path = None
         self._updating_form = False
-
-        # Ensure default directories exist
-        os.makedirs(DATABASE_DIR, exist_ok=True)
-        os.makedirs(MODULEKEY_DIR, exist_ok=True)
 
     def ret_empty_module(self):
         """Return an empty module dictionary."""
@@ -349,11 +343,12 @@ class SimpleModCLI:
             if not self.confirm_save_before_continue():
                 return False
 
-        json_files = list_json_files(DATABASE_DIR)
+        database_path = self.config.get('defaultDatabasePath')
+        json_files = list_json_files(database_path)
         if not json_files:
             message_dialog(
                 title="Open Database",
-                text=f"No JSON files found in {DATABASE_DIR}/"
+                text=f"No JSON files found in {database_path}/"
             ).run()
             return False
 
@@ -366,7 +361,7 @@ class SimpleModCLI:
         if db_file == 'esc':
             return False
 
-        db_path = os.path.join(DATABASE_DIR, db_file)
+        db_path = os.path.join(database_path, db_file)
         self.db = load_database(db_path)
         self.db_original = copy.deepcopy(self.db)
         self.current_db_path = db_path
@@ -820,7 +815,7 @@ class SimpleModCLI:
             ).run()
             return False
 
-        output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
+        output_dir = self.config.get('defaultModKeyPath')
 
         # Ask for output directory
         custom_dir = input_dialog(
@@ -864,7 +859,7 @@ class SimpleModCLI:
             if not self.confirm_save_before_continue():
                 return
 
-        output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
+        output_dir = self.config.get('defaultModKeyPath')
 
         custom_dir = input_dialog(
             title="Generate All Module Keys",
@@ -906,11 +901,12 @@ class SimpleModCLI:
             choice = full_screen_choice(
                     "Preferences",
                     options=[
-                        ('1', 'Default binding paths'),
-                        ('2', 'Default flags'),
-                        ('3', 'Default image directory'),
-                        ('4', 'Default template'),
-                        ('5', 'Default modkey path'),
+                        ('1', 'Default database path'),
+                        ('2', 'Default Singularity image directory'),
+                        ('3', 'Default module key output directory'),
+                        ('4', 'Default module key template'),
+                        ('5', 'Always bind these paths'),
+                        ('6', 'Always enable these flags'),
                         ('esc', 'Back (Esc)'),
                     ],
                 )
@@ -920,48 +916,57 @@ class SimpleModCLI:
 
             if choice == '1':
                 value = input_dialog(
-                    title="Edit Default Binding Paths",
-                    text="Enter default paths to bind (comma-separated):",
-                    default=config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
+                    title="Edit Default Database Path",
+                    text="Enter default directory for database files:",
+                    default=config.get('defaultDatabasePath')
                 ).run()
                 if value is not None:
-                    config['defaultBindingPath'] = value.strip()
+                    config['defaultDatabasePath'] = value.strip()
 
             elif choice == '2':
                 value = input_dialog(
-                    title="Edit Default Flags",
-                    text="Enter default Singularity flags:",
-                    default=config.get('defaultFlags', '')
-                ).run()
-                if value is not None:
-                    config['defaultFlags'] = value.strip()
-
-            elif choice == '3':
-                value = input_dialog(
-                    title="Edit Default Image Directory",
+                    title="Edit Default Singularity Image Directory",
                     text="Enter default directory for Singularity images:",
-                    default=config.get('defaultImagePath', '')
+                    default=config.get('defaultImagePath')
                 ).run()
                 if value is not None:
                     config['defaultImagePath'] = value.strip()
 
+            elif choice == '3':
+                value = input_dialog(
+                    title="Edit Default Module Key Output Directory",
+                    text="Enter default directory for generated module keys:",
+                    default=config.get('defaultModKeyPath')
+                ).run()
+                if value is not None:
+                    config['defaultModKeyPath'] = value.strip()
+
             elif choice == '4':
                 value = input_dialog(
-                    title="Edit Default Template",
-                    text="Enter default template file path:",
-                    default=config.get('defaultTemplate', './template/template.tcl')
+                    title="Edit Default Module Key Template",
+                    text="Enter default module key template file path:",
+                    default=config.get('defaultTemplate')
                 ).run()
                 if value is not None:
                     config['defaultTemplate'] = value.strip()
 
             elif choice == '5':
                 value = input_dialog(
-                    title="Edit Default Module Key Path",
-                    text="Enter default directory for generated module keys:",
-                    default=config.get('defaultModKeyPath', MODULEKEY_DIR)
+                    title="Always Bind These Paths",
+                    text="Always bind these paths (comma-separated):",
+                    default=config.get('defaultBindingPath')
                 ).run()
                 if value is not None:
-                    config['defaultModKeyPath'] = value.strip()
+                    config['defaultBindingPath'] = value.strip()
+
+            elif choice == '6':
+                value = input_dialog(
+                    title="Always Enable These Flags",
+                    text="Always enable these Singularity flags:",
+                    default=config.get('defaultFlags')
+                ).run()
+                if value is not None:
+                    config['defaultFlags'] = value.strip()
 
         # Save preferences
         try:
@@ -1124,7 +1129,7 @@ def run_command_mode(cli, args):
         # Get module
         if args.name in cli.db and args.version in cli.db[args.name]:
             module = cli.db[args.name][args.version]
-            output = args.output or cli.config.get('defaultModKeyPath', MODULEKEY_DIR)
+            output = args.output or cli.config.get('defaultModKeyPath')
 
             if cli.generate_module_key(module, args.name, args.version, output):
                 print(f"Generated: {os.path.join(output, args.name, args.version)}")
@@ -1142,7 +1147,7 @@ def run_command_mode(cli, args):
             cli.db = load_database(db_path)
             cli.db_original = copy.deepcopy(cli.db)
 
-        output = args.output or cli.config.get('defaultModKeyPath', MODULEKEY_DIR)
+        output = args.output or cli.config.get('defaultModKeyPath')
 
         success = 0
         fail = 0
