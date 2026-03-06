@@ -183,56 +183,15 @@ class SimpleModCLI:
         if not module_data or not output_dir:
             return False
 
-        template_path = module_data.get('template', './template/template.tcl')
-        if not os.path.exists(template_path):
-            print(f"Error: Template not found: {template_path}")
-            return False
-
-        # Parse environment variables
-        envs_str = ""
-        for key, value in module_data.get('envs', {}).items():
-            envs_str += f'setenv {key} "{value}"\n'
-
-        # Process bind paths
-        default_bind = self.config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
-        custom_bind = module_data.get('singularity_bindpaths', '')
-        bind_paths = ','.join(filter(None, [default_bind, custom_bind]))
-
-        # Process flags
-        default_flags = self.config.get('defaultFlags', '')
-        custom_flags = module_data.get('singularity_flags', '')
-        flags = ' '.join(filter(None, [default_flags, custom_flags]))
-
-        # Read template
-        try:
-            with open(template_path) as f:
-                template = Template(f.read())
-        except IOError as e:
-            print(f"Error reading template: {e}")
-            return False
-
-        # Substitute values
-        try:
-            key_content = template.safe_substitute(
-                modName=name,
-                modVersion=version,
-                conflict=module_data.get('conflict', ''),
-                whatis=module_data.get('module_whatis', ''),
-                singularity_image=module_data.get('singularity_image', ''),
-                singularity_bindpaths=bind_paths,
-                singularity_flags=flags,
-                cmds_dummy=module_data.get('cmds', ''),
-                envs=envs_str
-            )
-        except Exception as e:
-            print(f"Error substituting template: {e}")
+        key_content = generate_module_key(module_data, name, version, self.config)
+        if not key_content:
+            print(f"Error: Failed to generate module key content")
             return False
 
         # Write output
         output_path = os.path.join(output_dir, name, version)
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
         try:
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
             with open(output_path, 'w') as f:
                 f.write(key_content)
             return True

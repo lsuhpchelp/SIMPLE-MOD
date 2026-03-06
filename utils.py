@@ -109,3 +109,59 @@ def save_database(db_path, db):
     except Exception as e:
         print(f"Error saving database: {e}")
         return False
+
+
+def generate_module_key(module_data, name, version, config):
+    """
+    Generate a module key string from template.
+
+    Args:
+        module_data: Dictionary containing module configuration data
+        name: Module name
+        version: Module version
+        config: Configuration dictionary with default settings
+
+    Returns:
+        Formatted module key string, or None if template not found or on error
+    """
+    if not module_data:
+        return None
+
+    template_path = module_data.get('template')
+    if not template_path or not os.path.exists(template_path):
+        return None
+
+    # Parse environment variables
+    envs_str = ""
+    for key, value in module_data['envs'].items():
+        envs_str += f"setenv {key} \"{value}\"\n"
+
+    # Process bind paths using config's default
+    bind_paths = ','.join(filter(None, [config['defaultBindingPath'], module_data['singularity_bindpaths']]))
+
+    # Process flags using config's default
+    flags = ' '.join(filter(None, [config['defaultFlags'], module_data['singularity_flags']]))
+
+    # Read template
+    try:
+        with open(template_path) as f:
+            template = Template(f.read())
+    except IOError:
+        return None
+
+    # Substitute values
+    try:
+        key_content = template.safe_substitute(
+            modName=name,
+            modVersion=version,
+            conflict=module_data['conflict'],
+            whatis=module_data['module_whatis'],
+            singularity_image=module_data['singularity_image'],
+            singularity_bindpaths=bind_paths,
+            singularity_flags=flags,
+            cmds_dummy=module_data['cmds'],
+            envs=envs_str
+        )
+        return key_content
+    except Exception:
+        return None

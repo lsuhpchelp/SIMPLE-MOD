@@ -836,10 +836,12 @@ class MainWindow(QMainWindow):
             dir = os.path.dirname(pathModKey)
             if not os.path.exists(dir):
                 os.makedirs(dir)
-            
+
             # Export module file
-            with open(pathModKey, "w") as fw:
-                fw.write(self.retModKey(dictModule=tmpModule))
+            key_content = generate_module_key(tmpModule, self.nameDrop.currentText(), self.versionDrop.currentText(), self.config)
+            if key_content:
+                with open(pathModKey, "w") as fw:
+                    fw.write(key_content)
             
             # Pop a successful message
             QMessageBox.information(self, 'Success!', 'You have successfully generated the current module key!')
@@ -881,55 +883,14 @@ class MainWindow(QMainWindow):
                         os.makedirs(dir)
             
                     # Export module file
-                    with open(pathModKey, "w") as fw:
-                        fw.write(self.retModKey(modName, modVersion, self.db[modName][modVersion]))
+                    key_content = generate_module_key(self.db[modName][modVersion], modName, modVersion, self.config)
+                    if key_content:
+                        with open(pathModKey, "w") as fw:
+                            fw.write(key_content)
             
             # Pop a successful message
             QMessageBox.information(self, 'Success!', 'You have successfully generated all module keys from the current database!')
         
-
-    #============================================================
-    # Module key template
-    #============================================================
-
-    def retModKey(self, modName=None , modVersion=None, dictModule=None):
-        """
-        Return a formatted module key string by substituting module values into a template.
-        
-        Args:
-            modName:     Module name (defaults to currently selected name).
-            modVersion:  Module version (defaults to currently selected version).
-            dictModule:  Module dictionary (defaults to self.currentModule).
-        """
-        
-        # Default module name, version, and module dictionary to current if not given
-        modName = modName or self.nameDrop.currentText()
-        modVersion = modVersion or self.versionDrop.currentText()
-        dictModule = dictModule or self.currentModule
-    
-        # Parse environmental variable dictionary into a single string
-        envsStr = ""
-        for key, value in dictModule["envs"].items():
-            envsStr += f"setenv {key} \"{value}\"\n"
-        
-        # Set up module key template
-        with open(dictModule["template"]) as f:
-            tmpModKey = Template(f.read())
-        
-        # Return formatted module key string based on the template
-        return tmpModKey.safe_substitute(
-            modName = modName,
-            #modNameCap = modName.upper(),
-            conflict = dictModule["conflict"],
-            whatis = dictModule["module_whatis"],
-            modVersion = modVersion,
-            singularity_image = dictModule["singularity_image"],
-            singularity_bindpaths = ",".join((self.config["defaultBindingPath"], dictModule["singularity_bindpaths"])),
-            singularity_flags = " ".join((self.config["defaultFlags"], dictModule["singularity_flags"])),
-            cmds_dummy = dictModule["cmds"],
-            envs = envsStr
-        )
-
 
     #============================================================
     # Misc
