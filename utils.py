@@ -16,10 +16,10 @@ ABOUT = f"""{TITLE}
 
 SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
 
-Version: \t{VERSION}
-Author: \tJason Li
-Home: \thttps://github.com/lsuhpchelp/SIMPLE-MOD
-License: \tMIT License
+Version: \t  {VERSION}
+Author:  \t  Jason Li
+Home:    \t  https://github.com/lsuhpchelp/SIMPLE-MOD
+License: \t  MIT License
 """
 
 

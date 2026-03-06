@@ -857,6 +857,13 @@ class SimpleModCLI:
                 text=f"Error saving preferences: {e}"
             ).run()
 
+    def action_about(self):
+        """Display the About dialog."""
+        message_dialog(
+            title="About",
+            text=ABOUT
+        ).run()
+
     # =================== Main Menu ================== ##
 
     def menu_main(self):
@@ -868,6 +875,7 @@ class SimpleModCLI:
                         ('1', 'File'),
                         ('2', 'Module'),
                         ('3', 'Preferences'),
+                        ('4', 'About'),
                         ('esc', 'Exit (Esc)'),
                     ],
                 )
@@ -878,6 +886,8 @@ class SimpleModCLI:
                 self.menu_module()
             elif choice == '3':
                 self.action_preferences()
+            elif choice == '4':
+                self.action_about()
             elif choice == 'esc':
                 if self.has_unsaved_changes():
                     if not self.confirm_save_before_continue():
