@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         self.dbOriginal = {}                        # Original copy of database (for unsaved changes detection)
         self.currentModule = self.retEmptyModule()  # Current opened module
         self._updatingForm = False                  # Guard flag to prevent re-entrant saves during form updates
+        self.currentDbPath = None                   # Path of currently open database file
         
         #--------------------------------------------------------
         # Menu bar
@@ -104,9 +105,14 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.openDBAct)
         
         self.saveDBAct = QAction('Save Database...', self)
-        self.saveDBAct.triggered.connect(self.saveDB)
+        self.saveDBAct.triggered.connect(lambda: self.saveDB(save_as=False))
         self.saveDBAct.setShortcut("Ctrl+S")
         self.fileMenu.addAction(self.saveDBAct)
+
+        self.saveDBAsAct = QAction('Save Database As...', self)
+        self.saveDBAsAct.triggered.connect(lambda: self.saveDB(save_as=True))
+        self.saveDBAsAct.setShortcut("Ctrl+Shift+S")
+        self.fileMenu.addAction(self.saveDBAsAct)
         
         self.fileMenu.addSeparator()
         
@@ -309,7 +315,8 @@ class MainWindow(QMainWindow):
         # Reset database to empty
         self.db = {}
         self.currentModule = self.retEmptyModule()
-        
+        self.currentDbPath = None
+
         # Update current form
         self.nameDropUpdateFromDB()
         self.versionDropUpdateFromDB()
@@ -356,57 +363,62 @@ class MainWindow(QMainWindow):
             # Update window title
             self.setTitleForUnsavedChanges()
 
-    def saveDB(self):
+            # Set current database path
+            self.currentDbPath = fname
+
+    def saveDB(self, save_as=False):
         """
-        Save database to file. To avoid data loss, always ask for confirmation.
+        Save database to file.
+        When save_as is True, always prompt for a new file path (Save As behavior).
+        When save_as is False, overwrite the opened file if available.
         Return:
             True:   Successfully saved
             False:  Not saved
         """
-        
+        if not self.db:
+            QMessageBox.critical(self, 'Save Database', 'Error: Database is empty. Nothing to save.')
+            return False
+
         # At least one module (current) must exist, or return error:
-        if (self.nameDrop.currentText() and self.nameDrop.currentText()):
-            
-            # Pick a database file to save
-            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
-                
-            # If successfully picked a file...
-            if fname:
-        
-                # Add ".json" extension of not already added
-                if (fname.split(".")[-1] != "json"):
-                    fname += ".json"
-            
-                # Try if this file is writable:
-                # If writable, continue saving; if not, return False
-                try:
-                    fw = open(fname, "w")
-                except:
-                    QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
-                    return(False)
-                
-                # Save currentModule to database
-                self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-                
-                # Save database to file
-                json.dump(self.db, fw, indent=4)
-                fw.close()
-        
-                # Save original copy of database
-                self.dbOriginal = copy.deepcopy(self.db)
-        
-                # Update window title
-                self.setTitleForUnsavedChanges()
-                
-                # Return successful
-                return(True)
-                
-        else:
-        
+        if not (self.nameDrop.currentText() and self.nameDrop.currentText()):
             QMessageBox.critical(self, 'Error!', 'At least one module must exist to save!')
-        
-        # If has not successfully returned at this point, return False
-        return(False)
+            return False
+
+        if save_as or not self.currentDbPath:
+            # Prompt for file path (Save As or first save)
+            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database As', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
+            if not fname:
+                return False
+            self.currentDbPath = fname
+        else:
+            # Use current path for save (overwrite)
+            fname = self.currentDbPath
+
+        # Add ".json" extension if not already added
+        if (fname.split(".")[-1] != "json"):
+            fname += ".json"
+
+        # Try if this file is writable:
+        try:
+            fw = open(fname, "w")
+        except:
+            QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
+            return False
+
+        # Save currentModule to database
+        self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
+
+        # Save database to file
+        json.dump(self.db, fw, indent=4)
+        fw.close()
+
+        # Save original copy of database
+        self.dbOriginal = copy.deepcopy(self.db)
+
+        # Update window title
+        self.setTitleForUnsavedChanges()
+
+        return True
 
     def preferencesDialog(self):
         """
@@ -1010,6 +1022,7 @@ class MainWindow(QMainWindow):
         Enable/Disable current module form.
         """
         self.saveDBAct.setEnabled(isEnabled)
+        self.saveDBAsAct.setEnabled(isEnabled)
         self.conflictText.setEnabled(isEnabled)
         self.whatisText.setEnabled(isEnabled)
         self.singularityImageText.setEnabled(isEnabled)
