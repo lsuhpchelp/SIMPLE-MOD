@@ -329,7 +329,7 @@ class MainWindow(QMainWindow):
         if (self.cancelForUnsavedChanges()): return
         
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', "database/", filter="JSON Files (*.json)")
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
         
         # If successfully picked a file...
         if fname:
@@ -368,7 +368,7 @@ class MainWindow(QMainWindow):
         if (self.nameDrop.currentText() and self.nameDrop.currentText()):
             
             # Pick a database file to save
-            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', "database/", filter="JSON Files (*.json)")
+            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
                 
             # If successfully picked a file...
             if fname:
@@ -426,7 +426,8 @@ class MainWindow(QMainWindow):
             self.config["defaultImagePath"] = prefDial.defaultImagePathText.text()
             self.config["defaultTemplate"] = prefDial.defaultTemplateText.text()
             self.config["defaultModKeyPath"] = prefDial.defaultModKeyPathText.text()
-        
+            self.config["defaultDatabasePath"] = prefDial.defaultDatabasePathText.text()
+
             # Write to configuration file
             with open(os.path.expanduser('~/.simple-modrc'), "w") as fw:
                 json.dump(self.config, fw, indent=4)
@@ -963,6 +964,7 @@ class MainWindow(QMainWindow):
                 self.config = json.load(f)
         else:
             self.config = {
+                "defaultDatabasePath": "./database",
                 "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
                 "defaultFlags": "",
                 "defaultImagePath": "",
@@ -1134,17 +1136,17 @@ class PreferenceDialog(QDialog):
         
         # Create form layout
         self.formLayout = QFormLayout()
-        
-        # Set default binding paths
-        self.defaultBindingPathText = QLineEdit(self)
-        self.defaultBindingPathText.setText(parent.config["defaultBindingPath"])
-        self.formLayout.addRow("Always bind these paths: ", self.defaultBindingPathText)
-        
-        # Set default flags
-        self.defaultFlagsText = QLineEdit(self)
-        self.defaultFlagsText.setText(parent.config["defaultFlags"])
-        self.formLayout.addRow("Always enable these flags:", self.defaultFlagsText)
-        
+
+        # Set default database directory (editable text field and file picker button)
+        self.defaultDatabasePathText = QLineEdit(self)
+        self.defaultDatabasePathText.setText(parent.config["defaultDatabasePath"])
+        self.defaultDatabasePathPickerBtn = QPushButton("Browse", self)
+        self.defaultDatabasePathPickerBtn.clicked.connect(self.pickDefaultDatabasePath)
+        self.defaultDatabasePathLayout = QHBoxLayout()
+        self.defaultDatabasePathLayout.addWidget(self.defaultDatabasePathText)
+        self.defaultDatabasePathLayout.addWidget(self.defaultDatabasePathPickerBtn)
+        self.formLayout.addRow("Default database directory:", self.defaultDatabasePathLayout)
+
         # Set default image directory (editable text field and file picker button)
         self.defaultImagePathText = QLineEdit(self)
         self.defaultImagePathText.setText(parent.config["defaultImagePath"])
@@ -1154,18 +1156,8 @@ class PreferenceDialog(QDialog):
         self.defaultImagePathLayout.addWidget(self.defaultImagePathText)
         self.defaultImagePathLayout.addWidget(self.defaultImagePathPickerBtn)
         self.formLayout.addRow("Default Singularity images directory:", self.defaultImagePathLayout)
-        
-        # Set default module template (editable text field and file picker button)
-        self.defaultTemplateText = QLineEdit(self)
-        self.defaultTemplateText.setText(parent.config["defaultTemplate"])
-        self.defaultTemplatePickerBtn = QPushButton("Browse", self)
-        self.defaultTemplatePickerBtn.clicked.connect(self.pickDefaultTemplate)
-        self.defaultTemplateLayout = QHBoxLayout()
-        self.defaultTemplateLayout.addWidget(self.defaultTemplateText)
-        self.defaultTemplateLayout.addWidget(self.defaultTemplatePickerBtn)
-        self.formLayout.addRow("Default module template:", self.defaultTemplateLayout)
-        
-        # Set default module key generation path (editable text field and file picker button)
+
+        # Set default module key output directory (editable text field and file picker button)
         self.defaultModKeyPathText = QLineEdit(self)
         self.defaultModKeyPathText.setText(parent.config["defaultModKeyPath"])
         self.defaultModKeyPathPickerBtn = QPushButton("Browse", self)
@@ -1173,7 +1165,27 @@ class PreferenceDialog(QDialog):
         self.defaultModKeyPathLayout = QHBoxLayout()
         self.defaultModKeyPathLayout.addWidget(self.defaultModKeyPathText)
         self.defaultModKeyPathLayout.addWidget(self.defaultModKeyPathPickerBtn)
-        self.formLayout.addRow("Default directory to generate module keys:", self.defaultModKeyPathLayout)
+        self.formLayout.addRow("Default module key output directory:", self.defaultModKeyPathLayout)
+
+        # Set default module key template (editable text field and file picker button)
+        self.defaultTemplateText = QLineEdit(self)
+        self.defaultTemplateText.setText(parent.config["defaultTemplate"])
+        self.defaultTemplatePickerBtn = QPushButton("Browse", self)
+        self.defaultTemplatePickerBtn.clicked.connect(self.pickDefaultTemplate)
+        self.defaultTemplateLayout = QHBoxLayout()
+        self.defaultTemplateLayout.addWidget(self.defaultTemplateText)
+        self.defaultTemplateLayout.addWidget(self.defaultTemplatePickerBtn)
+        self.formLayout.addRow("Default module key template:", self.defaultTemplateLayout)
+
+        # Set default binding paths
+        self.defaultBindingPathText = QLineEdit(self)
+        self.defaultBindingPathText.setText(parent.config["defaultBindingPath"])
+        self.formLayout.addRow("Always bind these paths:", self.defaultBindingPathText)
+
+        # Set default flags
+        self.defaultFlagsText = QLineEdit(self)
+        self.defaultFlagsText.setText(parent.config["defaultFlags"])
+        self.formLayout.addRow("Always enable these flags:", self.defaultFlagsText)
 
         # Create "Save" and "Cancel" buttons
         self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
@@ -1213,11 +1225,21 @@ class PreferenceDialog(QDialog):
         """
         Pick default default module key generation path in file browser.
         """
-        
+
         # Pick a directory
         directory = QFileDialog.getExistingDirectory(self, 'Select Default Directory to Generate Module Keys', self.defaultModKeyPathText.text().strip())
         if directory:
             self.defaultModKeyPathText.setText(directory)
+
+    def pickDefaultDatabasePath(self):
+        """
+        Pick default database directory in file browser.
+        """
+
+        # Pick a directory
+        directory = QFileDialog.getExistingDirectory(self, 'Select Default Database Directory', self.defaultDatabasePathText.text().strip())
+        if directory:
+            self.defaultDatabasePathText.setText(directory)
 
 # Main function
 if __name__ == "__main__":
