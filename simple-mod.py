@@ -83,25 +83,25 @@ class MainWindow(QMainWindow):
         # Menu 1
         self.fileMenu = self.menubar.addMenu('\n File ')
         
-        self.newDBAct = QAction('New Database', self)
-        self.newDBAct.triggered.connect(self.newDB)
-        self.newDBAct.setShortcut("Ctrl+N")
-        self.fileMenu.addAction(self.newDBAct)
+        self.dbNewAct = QAction('New Database', self)
+        self.dbNewAct.triggered.connect(self.dbNew)
+        self.dbNewAct.setShortcut("Ctrl+N")
+        self.fileMenu.addAction(self.dbNewAct)
         
-        self.openDBAct = QAction('Open Database...', self)
-        self.openDBAct.triggered.connect(self.openDB)
-        self.openDBAct.setShortcut("Ctrl+O")
-        self.fileMenu.addAction(self.openDBAct)
+        self.dbOpenAct = QAction('Open Database...', self)
+        self.dbOpenAct.triggered.connect(self.dbOpen)
+        self.dbOpenAct.setShortcut("Ctrl+O")
+        self.fileMenu.addAction(self.dbOpenAct)
         
-        self.saveDBAct = QAction('Save Database...', self)
-        self.saveDBAct.triggered.connect(lambda: self.saveDB(save_as=False))
-        self.saveDBAct.setShortcut("Ctrl+S")
-        self.fileMenu.addAction(self.saveDBAct)
+        self.dbSaveAct = QAction('Save Database...', self)
+        self.dbSaveAct.triggered.connect(lambda: self.dbSave(save_as=False))
+        self.dbSaveAct.setShortcut("Ctrl+S")
+        self.fileMenu.addAction(self.dbSaveAct)
 
-        self.saveDBAsAct = QAction('Save Database As...', self)
-        self.saveDBAsAct.triggered.connect(lambda: self.saveDB(save_as=True))
-        self.saveDBAsAct.setShortcut("Ctrl+Shift+S")
-        self.fileMenu.addAction(self.saveDBAsAct)
+        self.dbSaveAsAct = QAction('Save Database As...', self)
+        self.dbSaveAsAct.triggered.connect(lambda: self.dbSave(save_as=True))
+        self.dbSaveAsAct.setShortcut("Ctrl+Shift+S")
+        self.fileMenu.addAction(self.dbSaveAsAct)
         
         self.fileMenu.addSeparator()
         
@@ -293,7 +293,7 @@ class MainWindow(QMainWindow):
     # Menu methods
     #============================================================
     
-    def newDB(self):
+    def dbNew(self):
         """
         Create a new empty database.
         """
@@ -316,7 +316,7 @@ class MainWindow(QMainWindow):
         # Update window title
         self.setTitleForUnsavedChanges()
     
-    def openDB(self):
+    def dbOpen(self):
         """
         Select and open database file.
         """
@@ -348,7 +348,7 @@ class MainWindow(QMainWindow):
             # Set current database path
             self.currentDbPath = fname
 
-    def saveDB(self, save_as=False):
+    def dbSave(self, save_as=False):
         """
         Save database to file.
         When save_as is True, always prompt for a new file path (Save As behavior).
@@ -916,8 +916,8 @@ class MainWindow(QMainWindow):
         """
         Enable/Disable current module form.
         """
-        self.saveDBAct.setEnabled(isEnabled)
-        self.saveDBAsAct.setEnabled(isEnabled)
+        self.dbSaveAct.setEnabled(isEnabled)
+        self.dbSaveAsAct.setEnabled(isEnabled)
         self.conflictText.setEnabled(isEnabled)
         self.whatisText.setEnabled(isEnabled)
         self.singularityImageText.setEnabled(isEnabled)
@@ -972,12 +972,12 @@ class MainWindow(QMainWindow):
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
             
             # Depending on the response:
-            #   "Yes":      Run "saveDB" method and continue
+            #   "Yes":      Run "dbSave" method and continue
             #   "No":       Do not save and continue
             #   "Cancel":   Do not save and stay
             if reply == QMessageBox.StandardButton.Yes:
                 # Return False (continue) if successfully saved, otherwise return True to stay
-                if (self.saveDB()):
+                if (self.dbSave()):
                     return(False)
                 else:
                     return(True)
