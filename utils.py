@@ -38,18 +38,13 @@ from string import Template
 def load_preferences():
     """
     Load preferences from "~/.simple-modrc". Create the file if it does not exist.
+    If the config file is from an older version missing some settings, missing
+    keys will be filled in with default values.
     """
     config_path = os.path.expanduser('~/.simple-modrc')
 
-    if os.path.exists(config_path):
-        try:
-            with open(config_path) as f:
-                return json.load(f)
-        except (IOError, json.JSONDecodeError):
-            pass
-
     # Default configuration
-    config = {
+    default_config = {
         "defaultDatabasePath": "./database",
         "defaultImagePath": "",
         "defaultModKeyPath": "./modulekey",
@@ -57,13 +52,24 @@ def load_preferences():
         "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
         "defaultFlags": "",
     }
+
+    if os.path.exists(config_path):
+        try:
+            with open(config_path) as f:
+                loaded_config = json.load(f)
+            # Merge loaded config with defaults to handle missing keys from older versions
+            config = {**default_config, **loaded_config}
+            return config
+        except (IOError, json.JSONDecodeError):
+            pass
+
     try:
         with open(config_path, "w") as fw:
-            json.dump(config, fw, indent=4)
+            json.dump(default_config, fw, indent=4)
     except IOError:
         pass
 
-    return config
+    return default_config
 
 
 def ret_empty_module(config):
