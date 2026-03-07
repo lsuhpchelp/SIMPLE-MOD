@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 # ==================================================================##
 # SIMPLE-MOD CLI
 #   (Singularity Integrated Module-key Producer for Loadable
 #    Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
-# Dependency: Python 3, prompt_toolkit
+# Dependency: prompt_toolkit
 # =================================================================##
 
 
@@ -1055,7 +1054,7 @@ def run_command_mode(cli, args):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="SIMPLE-MOD CLI - Singularity Module Key Generator"
+        description=f"{TITLE} (Singularity Integrated Module-key Producer for Loadable Environment MODules)"
     )
     parser.add_argument(
         '-d', '--database',
@@ -1077,6 +1076,11 @@ def main():
     parser.add_argument(
         '--version',
         help='Module version for command mode'
+    )
+    parser.add_argument(
+        '--nodisplay',
+        action='store_true',
+        help='Force to run in terminal instead of GUI.'
     )
 
     args = parser.parse_args()

@@ -1,7 +1,7 @@
 # =====================================================================
 # SIMPLE-MOD 
-#  (Singularity Integrated Module-key Producer for Loadable 
-#   Environment MODules)
+#   (Singularity Integrated Module-key Producer for Loadable 
+#    Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
 # Dependency: PyQt5 or PyQt6
 # =====================================================================
