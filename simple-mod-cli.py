@@ -457,16 +457,16 @@ class SimpleModCLI:
             return f"{label:<{label_width}}{wrapped}"
 
         while True:
-            envs = self.current_module.get('envs', {})
+            envs = self.current_module.get('envs')
 
             # Get current values for display
-            disp_conflicts = self.current_module.get('conflict', '')
-            disp_description = self.current_module.get('module_whatis', '')
-            disp_image_path = self.current_module.get('singularity_image', '')
-            disp_bind_paths = self.current_module.get('singularity_bindpaths', '')
-            disp_flags = self.current_module.get('singularity_flags', '')
-            disp_commands = self.current_module.get('cmds', '')
-            disp_template = self.current_module.get('template', './template/template.tcl')
+            disp_conflicts = self.current_module.get('conflict')
+            disp_description = self.current_module.get('module_whatis')
+            disp_image_path = self.current_module.get('singularity_image')
+            disp_bind_paths = self.current_module.get('singularity_bindpaths')
+            disp_flags = self.current_module.get('singularity_flags')
+            disp_commands = self.current_module.get('cmds')
+            disp_template = self.current_module.get('template')
 
             # Format environment variables display
             if envs:
@@ -499,7 +499,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Conflicts",
                     text="Enter conflict modules (space-separated):",
-                    default=self.current_module.get('conflict', '')
+                    default=self.current_module.get('conflict')
                 ).run()
                 if value is not None:
                     self.current_module['conflict'] = value.strip()
@@ -509,7 +509,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Description",
                     text="Enter software description:",
-                    default=self.current_module.get('module_whatis', '')
+                    default=self.current_module.get('module_whatis')
                 ).run()
                 if value is not None:
                     self.current_module['module_whatis'] = value.strip()
@@ -519,29 +519,29 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Image Path",
                     text="Enter Singularity image path:",
-                    default=self.current_module.get('singularity_image', '')
+                    default=self.current_module.get('singularity_image')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_image'] = value.strip()
 
             elif choice == '4':
                 # Bind Paths
-                default_bind = self.config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
+                default_bind = self.config.get('defaultBindingPath')
                 value = input_dialog(
                     title="Edit Bind Paths",
                     text=f"Enter additional paths to bind (default: {default_bind}):",
-                    default=self.current_module.get('singularity_bindpaths', '')
+                    default=self.current_module.get('singularity_bindpaths')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_bindpaths'] = value.strip()
 
             elif choice == '5':
                 # Flags
-                default_flags = self.config.get('defaultFlags', '')
+                default_flags = self.config.get('defaultFlags')
                 value = input_dialog(
                     title="Edit Flags",
                     text=f"Enter additional flags (default: {default_flags}):",
-                    default=self.current_module.get('singularity_flags', '')
+                    default=self.current_module.get('singularity_flags')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_flags'] = value.strip()
@@ -551,7 +551,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Commands",
                     text="Enter commands to map (space or newline separated):",
-                    default=self.current_module.get('cmds', '')
+                    default=self.current_module.get('cmds')
                 ).run()
                 if value is not None:
                     self.current_module['cmds'] = value.strip()
@@ -561,7 +561,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Template",
                     text="Enter template file path:",
-                    default=self.current_module.get('template', './template/template.tcl')
+                    default=self.current_module.get('template')
                 ).run()
                 if value is not None:
                     self.current_module['template'] = value.strip()
@@ -576,7 +576,7 @@ class SimpleModCLI:
 
     def edit_environment_variables(self):
         """Edit environment variables for the current module."""
-        envs = copy.deepcopy(self.current_module.get('envs', {}))
+        envs = copy.deepcopy(self.current_module.get('envs'))
 
         while True:
             if envs:
@@ -637,7 +637,7 @@ class SimpleModCLI:
                         value = input_dialog(
                             title="Edit Environment Variable",
                             text=f"New value for {key}:",
-                            default=envs.get(key, '')
+                            default=envs.get(key)
                         ).run()
                         if value:
                             envs[key] = value
