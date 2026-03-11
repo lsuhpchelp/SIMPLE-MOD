@@ -30,7 +30,7 @@ WARNING: This recipe must be built in the repository's root directory!"
 # Install dependencies
 
 apt update
-apt install -y python3 python3-pyqt6 qt6-base-dev qmake6
+apt install -y python3 python3-pyqt6 python3-prompt_toolkit qt6-base-dev qmake6
 apt clean
 
 ################################################################################
@@ -38,7 +38,7 @@ apt clean
 ################################################################################
 
 cd /opt/SIMPLE-MOD
-python3 simple-mod.py
+./simple-mod
 
 ################################################################################
 %environment
