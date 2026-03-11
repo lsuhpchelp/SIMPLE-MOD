@@ -4,8 +4,9 @@
   - [1.1 About SIMPLE-MOD](#11-About-SIMPLE-MOD)
   - [1.2 Who is SIMPLE-MOD for](#12-Who-is-SIMPLE-MOD-for)
 - [2. Installation](#2-Installation)
-  - [2.1 Running with Python (Recommended)](#21-Running-with-Python-Recommended)
-  - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
+  - [2.1 Dependencies](#21-Dependencies)
+  - [2.2 Running with Python](#22-Running-with-Python)
+  - [2.3 Running with Singularity/Apptainer](#23-Running-with-SingularityApptainer)
 - [3. Running SIMPLE-MOD](#3-Running-SIMPLE-MOD)
   - [3.1 GUI Mode (Default)](#31-GUI-Mode-Default)
     - [3.1.1 Menu Bar](#311-Menu-Bar)
@@ -51,7 +52,27 @@ SIMPLE-MOD is primarily designed for HPC administrators; however, interested use
 
 ## 2. Installation
 
-### 2.1 Running directly with Python (Recommended)
+### 2.1 Dependencies
+
+SIMPLE-MOD requires **Python 3**. Additional dependencies depend on the mode you want to use:
+
+| Mode | Dependency | Install |
+|------|-----------|---------|
+| GUI | PyQt6 or PyQt5 | `pip install pyqt6` or `pip install pyqt5` |
+| CLI interactive | prompt_toolkit | `pip install prompt_toolkit` |
+| CLI command | *(none beyond Python 3)* | — |
+
+The GUI automatically detects the available PyQt version, preferring PyQt6. If Qt libraries are not available via pip, you can use Conda:
+
+```bash
+# PyQt6 via conda
+conda install pyqt6 -c conda-forge
+
+# Or PyQt5 via conda
+conda install pyqt -c conda-forge
+```
+
+### 2.2 Running with Python
 
 SIMPLE-MOD is installation-free. The recommended way to launch it is through the unified launcher script `simple-mod`:
 
@@ -76,25 +97,7 @@ python3 simple-mod-cli.py
 python3 simple-mod-cli.py --cmd gen-all --database database/mydb.json
 ```
 
-**Dependencies:**
-
-| Mode | Dependency | Install |
-|------|-----------|---------|
-| GUI | PyQt6 or PyQt5 | `pip install pyqt6` or `pip install pyqt5` |
-| CLI interactive | prompt_toolkit | `pip install prompt_toolkit` |
-| CLI command | *(none beyond Python 3)* | — |
-
-The GUI automatically detects the available PyQt version, preferring PyQt6. If Qt libraries are not installed, you can use Conda:
-
-```bash
-# PyQt6 via conda
-conda install pyqt6 -c conda-forge
-
-# Or PyQt5 via conda
-conda install pyqt -c conda-forge
-```
-
-### 2.2 Running in a Singularity image
+### 2.3 Running with Singularity/Apptainer
 
 If for any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a SIMPLE-MOD container image and run it with Singularity/Apptainer. The recipe is provided in `recipe.def`. To build it with Singularity/Apptainer, please run the below command in terminal:
 
@@ -121,35 +124,41 @@ The GUI mode is the default when running `./simple-mod` on a system with a displ
 
 #### 3.1.1 Menu Bar
 
-The menu bar contains three menus:
-
-- **_File_**: Create, open, and save module database (.json format). Includes **Save Database** (`Ctrl+S`) to overwrite the current file and **Save Database As...** (`Ctrl+Shift+S`) to save to a new path.
-- **_Settings_**: Change preferences (default paths, binding paths, flags, template, etc.).
-- **_Help_**: About information.
+| Menu | Description |
+|------|-------------|
+| **File** | Create, open, and save module database (.json format). **Save Database** (`Ctrl+S`) overwrites the current file; **Save Database As...** (`Ctrl+Shift+S`) saves to a new path. |
+| **Settings** | Change preferences (default paths, binding paths, flags, template, etc.). |
+| **Help** | About information. |
 
 #### 3.1.2 Module List
 
-- Select module name & version to edit.
-- Create a new module or copy the current module.
-- Delete the selected module.
+| Action | Description |
+|--------|-------------|
+| Select | Choose a module name & version to edit. |
+| Create / Copy | Create a new module or copy the current module. |
+| Delete | Delete the selected module. |
 
 #### 3.1.3 Module Details
 
-All changes to the fields below are automatically saved to the in-memory database as you type. Unsaved changes (relative to the last saved file) are indicated by a `*` in the window title.
+All changes are automatically saved to the in-memory database as you type. Unsaved changes (relative to the last saved file) are indicated by a `*` in the window title.
 
-- **_Conflicts_**: Conflicted modules that cannot be loaded together. (Itself is already added by default)
-- **_Software description_**: Software description.
-- **_Singularity image path_**: Path to Singularity image. Can use a remote path if the host system supports it.
-- **_Singularity binding paths_**: Additional binding paths ("-B") appended to the default paths set in Preferences.
-- **_Additional Singularity flags_**: Additional flags to add (e.g., `--nv` for GPU support).
-- **_Commands to map_**: Executables inside the container that need to be mapped as wrappers outside of the container.
-- **_Set up environmental variable_**: Set up additional environmental variables for the module, if needed.
-- **_Module key template_**: Template to generate module keys. Default: `./template/template.tcl`
+| Field | Description |
+|-------|-------------|
+| Conflicts | Conflicted modules that cannot be loaded together. (Itself is already added by default.) |
+| Software description | Software description. |
+| Singularity image path | Path to Singularity image. Can use a remote path if the host system supports it. |
+| Singularity binding paths | Additional binding paths ("-B") appended to the default paths set in Preferences. |
+| Additional Singularity flags | Additional flags to add (e.g., `--nv` for GPU support). |
+| Commands to map | Executables inside the container that need to be mapped as wrappers outside of the container. |
+| Environment variables | Set up additional environment variables for the module, if needed. |
+| Module key template | Template to generate module keys. Default: `./template/template.tcl` |
 
 #### 3.1.4 Generate Module Key(s)
 
-- **_Generate current module key_**: Generate one module key from the currently open module.
-- **_Generate all module keys from current database_**: Generate all module keys from the currently open database.
+| Button | Description |
+|--------|-------------|
+| Generate current module key | Generate one module key from the currently open module. |
+| Generate all module keys from current database | Generate all module keys from the currently open database. |
 
 
 ### 3.2 CLI Interactive Mode
