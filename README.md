@@ -22,6 +22,7 @@
     - [3.3.1 Launching](#331-Launching)
     - [3.3.2 Commands and Options](#332-Commands-and-Options)
     - [3.3.3 Examples](#333-Examples)
+    - [3.3.4 Database Structure](#334-Database-Structure)
 - [4. Contributors](#4-Contributors)
 - [5. Cite this work](#5-Cite-this-work)
 
@@ -263,7 +264,7 @@ The fields available when editing a module are the same as in the GUI:
 
 ### 3.3 CLI Command Mode
 
-CLI command mode is non-interactive and suitable for scripting and automation pipelines.
+CLI command mode is non-interactive and suitable for scripting and automation pipelines. Unlike the GUI and CLI interactive modes, it has **no built-in editor** for the module database. The database JSON file must be created or edited manually (or by first using the GUI / CLI interactive mode) before invoking any `--cmd` commands.
 
 #### 3.3.1 Launching
 
@@ -312,6 +313,60 @@ python3 simple-mod-cli.py \
 ```
 
 Output files are written to `<output>/<name>/<version>` (no extension), matching the convention expected by Environment Modules and Lmod.
+
+#### 3.3.4 Database Structure
+
+The module database is a plain JSON file with a three-level hierarchy:
+
+```
+<database>.json
+└── <module-name>          (string key, e.g. "pytorch")
+    └── <version>          (string key, e.g. "2.6.0")
+        ├── conflict
+        ├── module_whatis
+        ├── singularity_image
+        ├── singularity_bindpaths
+        ├── singularity_flags
+        ├── cmds
+        ├── envs
+        │   ├── <VAR_NAME>: <value>
+        │   └── ...
+        └── template
+```
+
+**Field reference:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `conflict` | string | Space-separated module names that conflict with this module (cannot be loaded together). The module itself is automatically added by the generator. |
+| `module_whatis` | string | Human-readable software description shown by `module whatis`. |
+| `singularity_image` | string | Absolute (or remote) path to the `.sif` container image. |
+| `singularity_bindpaths` | string | Extra paths passed to `-B` (appended to the global defaults from Preferences). |
+| `singularity_flags` | string | Additional Singularity/Apptainer flags (e.g., `--nv` for GPU support). |
+| `cmds` | string | Space-separated executables inside the container to expose as wrappers outside. |
+| `envs` | object | Key-value pairs of additional environment variables to set when the module is loaded (`setenv KEY VALUE`). Use an empty object `{}` if none. |
+| `template` | string | Path to the Tcl template file used to generate the module file. Default: `./template/template.tcl` |
+
+**Minimal example:**
+
+```json
+{
+    "pytorch": {
+        "2.6.0": {
+            "conflict": "tensorflow jax",
+            "module_whatis": "PyTorch deep learning framework with GPU support.",
+            "singularity_image": "/project/containers/pytorch-2.6.0.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "--nv",
+            "cmds": "python python3 pip pip3 torchrun",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
+    }
+}
+```
+
+A database file can contain any number of module names, each with any number of versions. The GUI and CLI interactive modes can be used to create and maintain the database interactively, which is the recommended approach. Manual editing should follow the exact field names and types shown above.
 
 
 ## 4. Contributors
