@@ -3,7 +3,7 @@
 #   (Singularity Integrated Module-key Producer for Loadable
 #    Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
-# Dependency: prompt_toolkit
+# Dependency: prompt_toolkit >= 3.0.52
 # =================================================================##
 
 
@@ -470,7 +470,7 @@ class SimpleModCLI:
 
             # Format environment variables display
             if envs:
-                disp_env_vars = ', '.join(f"{k}={v}" for k, v in envs.items())
+                disp_env_vars = '\n'.join(f"{k}={v}" for k, v in envs.items())
                 disp_env_vars = wrap_value(disp_env_vars)
             else:
                 disp_env_vars = '(none)'

@@ -60,7 +60,7 @@ SIMPLE-MOD requires **Python 3**. Additional dependencies depend on the mode you
 | Mode | Dependency | Install |
 |------|-----------|---------|
 | GUI | PyQt6 or PyQt5 | `pip install pyqt6` or `pip install pyqt5` |
-| CLI interactive | prompt_toolkit | `pip install prompt_toolkit` |
+| CLI interactive | prompt_toolkit | `pip install "prompt_toolkit>=3.0.52"` |
 | CLI command | *(none beyond Python 3)* | — |
 
 The GUI automatically detects the available PyQt version, preferring PyQt6. Note that PyQt requires matching Qt libraries installed on the system to function. If Qt libraries are not available, it is recommended to install both PyQt and Qt libraries use Conda:
@@ -265,16 +265,16 @@ The module database is a plain JSON file with a three-level hierarchy:
 <database>.json
 └── <module-name>          (string key, e.g. "pytorch")
     └── <version>          (string key, e.g. "2.6.0")
-        ├── conflict
-        ├── module_whatis
-        ├── singularity_image
-        ├── singularity_bindpaths
-        ├── singularity_flags
-        ├── cmds
-        ├── envs
+        ├── conflict                    (conflicts)
+        ├── module_whatis               (software description)
+        ├── singularity_image           (Singularity image path)
+        ├── singularity_bindpaths       (Singularity binding paths)
+        ├── singularity_flags           (additional Singularity flags)
+        ├── cmds                        (commands to map)
+        ├── envs                        (environment variables, a dictionary)
         │   ├── <VAR_NAME>: <value>
         │   └── ...
-        └── template
+        └── template                    (module key template)
 ```
 
 **Field reference:**
