@@ -6,22 +6,35 @@
 - [2. Installation](#2-Installation)
   - [2.1 Running with Python (Recommended)](#21-Running-with-Python-Recommended)
   - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
-- [3. User Interface](#3-User-Interface)
+- [3. GUI Mode (Default)](#3-GUI-Mode-Default)
   - [3.1 Menu Bar](#31-Menu-Bar)
   - [3.2 Module List](#32-Module-List)
   - [3.3 Module Details](#33-Module-Details)
   - [3.4 Generate Module Key(s)](#34-Generate-Module-Keys)
-- [4. Contributors](#4-Contributors)
-- [5. Cite this work](#5-Cite-this-work)
+- [4. CLI Interactive Mode](#4-CLI-Interactive-Mode)
+  - [4.1 Launching](#41-Launching)
+  - [4.2 Navigation](#42-Navigation)
+  - [4.3 Menu Tree](#43-Menu-Tree)
+  - [4.4 Module Fields](#44-Module-Fields)
+- [5. CLI Command Mode](#5-CLI-Command-Mode)
+  - [5.1 Launching](#51-Launching)
+  - [5.2 Commands and Options](#52-Commands-and-Options)
+  - [5.3 Examples](#53-Examples)
+- [6. Contributors](#6-Contributors)
+- [7. Cite this work](#7-Cite-this-work)
 
 ## 1. Introduction
 
 ### 1.1 About SIMPLE-MOD
 
-**SIMPLE-MOD** (**S**ingularity **I**ntegrated **M**odule-key **P**roducer for **L**oadable **E**nvironment **MOD**ules) is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
+**SIMPLE-MOD** (**S**ingularity **I**ntegrated **M**odule-key **P**roducer for **L**oadable **E**nvironment **MOD**ules) is a Python tool to automatically generate module keys for easy access of container-based software packages. It supports three operation modes:
 
-Currently, SIMPLE-MOD supports two commonly used module systems through pre-written templates: 
-- ***Environment Modules*** (https://github.com/cea-hpc/modules) 
+- **GUI mode** (default) — a Qt-based graphical interface.
+- **CLI interactive mode** — a full-screen terminal UI powered by `prompt_toolkit`, suitable for headless or remote environments.
+- **CLI command mode** — a non-interactive command-line interface for scripting and automation.
+
+Currently, SIMPLE-MOD supports two commonly used module systems through pre-written templates:
+- ***Environment Modules*** (https://github.com/cea-hpc/modules)
 - ***Lmod*** (https://github.com/TACC/Lmod)
 
 Other support can be added by adding customized templates.
@@ -39,68 +52,83 @@ SIMPLE-MOD is primarily designed for HPC administrators; however, interested use
 
 ### 2.1 Running directly with Python (Recommended)
 
-As a QT-based Python program, SIMPLE-MOD is installation-free. To run SIMPLE-MOD, simply run it with Python:
+SIMPLE-MOD is installation-free. The recommended way to launch it is through the unified launcher script `simple-mod`:
 
-```
-python simple-mod.py
-```
-
-It is tested with Python 3 and PyQt5/PyQt6 module as dependency. The application will automatically detect the PyQt version, preferring PyQt6. If neither is installed on your system, please install one of following with pip (depending on the QT libraries version on your system):
-
-```
-# Install PyQt6
-pip install pyqt6
-
-# Or, install PyQt5
-pip install pyqt5
+```bash
+./simple-mod
 ```
 
-If your system does not have QT libraries installed, you may use Conda to install all dependencies in a virtual environment.
+The launcher automatically selects the best available mode:
+- With **no arguments**: tries the GUI first; falls back to the CLI interactive mode if the GUI cannot start (e.g., no display available). `prompt_toolkit` will be installed automatically if needed.
+- With **arguments**: forces CLI mode and passes all arguments to `simple-mod-cli.py`.
 
+You can also launch each mode directly:
+
+```bash
+# GUI mode
+python3 simple-mod.py
+
+# CLI interactive mode
+python3 simple-mod-cli.py
+
+# CLI command mode (see Section 5 for options)
+python3 simple-mod-cli.py --cmd gen-all --database database/mydb.json
 ```
-# Install PyQt6
+
+**Dependencies:**
+
+| Mode | Dependency | Install |
+|------|-----------|---------|
+| GUI | PyQt6 or PyQt5 | `pip install pyqt6` or `pip install pyqt5` |
+| CLI interactive | prompt_toolkit | `pip install prompt_toolkit` |
+| CLI command | *(none beyond Python 3)* | — |
+
+The GUI automatically detects the available PyQt version, preferring PyQt6. If Qt libraries are not installed, you can use Conda:
+
+```bash
+# PyQt6 via conda
 conda install pyqt6 -c conda-forge
 
-# Or, install PyQt5
+# Or PyQt5 via conda
 conda install pyqt -c conda-forge
 ```
 
 ### 2.2 Running in a Singularity image
 
-If for any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a SIMPLE-MOD container image and run it with Singularity/Apptainer. The recipe is provided in `singularity.def`. To build it with Singularity/Appatainer, please run the below command in terminal:
+If for any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a SIMPLE-MOD container image and run it with Singularity/Apptainer. The recipe is provided in `recipe.def`. To build it with Singularity/Apptainer, please run the below command in terminal:
 
-```
+```bash
 singularity build simple-mod.sif recipe.def
 ```
 
-Once the image is build, you may run it with:
+Once the image is built, you may run it with:
 
-```
+```bash
 singularity run simple-mod.sif
 ```
 
-Additional path binding may be required to save module databases and generate module keys in the desired paths. 
+Additional path binding may be required to save module databases and generate module keys in the desired paths.
 
 
-## 3. User Interface
+## 3. GUI Mode (Default)
 
-The usage of SIMPLE-MOD should be straightforward and self-explanatory. Below is the GUI of SIMPLE-MOD:
+The GUI mode is the default when running `./simple-mod` on a system with a display. Below is the GUI of SIMPLE-MOD:
 
 ![README](https://raw.githubusercontent.com/lsuhpchelp/SIMPLE-MOD/master/README.png)
 
 ### 3.1 Menu Bar
 
-Menu Bar contains 3 menus:
+The menu bar contains three menus:
 
-- **_File_**: Create, open, and save module database (.json format).
-- **_Settings_**: Change preferences.
+- **_File_**: Create, open, and save module database (.json format). Includes **Save Database** (`Ctrl+S`) to overwrite the current file and **Save Database As...** (`Ctrl+Shift+S`) to save to a new path.
+- **_Settings_**: Change preferences (default paths, binding paths, flags, template, etc.).
 - **_Help_**: About information.
 
 ### 3.2 Module List
 
 - Select module name & version to edit.
-- Create a new module or copy current module.
-- Delete selected module.
+- Create a new module or copy the current module.
+- Delete the selected module.
 
 ### 3.3 Module Details
 
@@ -108,24 +136,177 @@ All changes to the fields below are automatically saved to the in-memory databas
 
 - **_Conflicts_**: Conflicted modules that cannot be loaded together. (Itself is already added by default)
 - **_Software description_**: Software description.
-- **_Singularity image path_**: Path to Singularity image. Can use remote path if the host system supports.
-- **_Singularity binding paths_**: Binding paths ("-B"). Bound by default (can be changed in Settings): /home,/tmp,/work,/project,/usr/local/packages,/var/scratch.
-- **_Additional Singularity flags_**: Additional flags to add (e.g., "--nv").
+- **_Singularity image path_**: Path to Singularity image. Can use a remote path if the host system supports it.
+- **_Singularity binding paths_**: Additional binding paths ("-B") appended to the default paths set in Preferences.
+- **_Additional Singularity flags_**: Additional flags to add (e.g., `--nv` for GPU support).
 - **_Commands to map_**: Executables inside the container that need to be mapped as wrappers outside of the container.
 - **_Set up environmental variable_**: Set up additional environmental variables for the module, if needed.
-- **_Module key template_**: Template to generate module keys. Default: ./template/template.tcl
+- **_Module key template_**: Template to generate module keys. Default: `./template/template.tcl`
 
 ### 3.4 Generate Module Key(s)
 
-- **_Generate current module key_**: Generate one module key from the current open module.
-- **_Generate all module keys from current database_**: Generate all module keys from the current open database. Database needs to be saved first.
+- **_Generate current module key_**: Generate one module key from the currently open module.
+- **_Generate all module keys from current database_**: Generate all module keys from the currently open database.
 
 
-## 4. Contributors
+## 4. CLI Interactive Mode
+
+The CLI interactive mode provides a full-screen terminal UI equivalent to the GUI, suitable for headless servers or SSH sessions without X forwarding.
+
+### 4.1 Launching
+
+```bash
+# Via unified launcher (auto-selected when GUI is unavailable)
+./simple-mod
+
+# Directly
+python3 simple-mod-cli.py
+```
+
+Requires `prompt_toolkit`:
+
+```bash
+pip install prompt_toolkit
+```
+
+### 4.2 Navigation
+
+All screens are full-screen radio-list dialogs. Navigation controls:
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` | Move selection |
+| `Enter` | Confirm selection |
+| `Esc` / `Ctrl+C` | Go back / cancel |
+
+Text-input dialogs accept free-form text and are dismissed with `Enter` (confirm) or `Esc` (cancel).
+
+### 4.3 Menu Tree
+
+```
+Main Menu
+├── File
+│   ├── New Database
+│   ├── Open Database          (lists JSON files from default database directory)
+│   ├── Save Database          (overwrites current file; prompts for path if new)
+│   ├── Save Database As...    (always prompts for a new path)
+│   └── Back (Esc)
+│
+├── Module
+│   ├── Select Module          (radio list of all modules in the database)
+│   │   └── → Module Edit Menu
+│   │       ├── Edit Current Module
+│   │       │   ├── Conflicts
+│   │       │   ├── Description
+│   │       │   ├── Image Path
+│   │       │   ├── Bind Paths
+│   │       │   ├── Flags
+│   │       │   ├── Commands
+│   │       │   ├── Template
+│   │       │   ├── Environment Vars
+│   │       │   │   ├── [variable name = value]  (click to edit value)
+│   │       │   │   ├── Add new variable
+│   │       │   │   ├── Delete variable
+│   │       │   │   └── Back (Esc)
+│   │       │   └── Back (Esc)
+│   │       ├── Copy Current Module
+│   │       ├── Delete Current Module
+│   │       ├── Generate Current Module Key
+│   │       └── Back (Esc)
+│   │
+│   ├── Add New Module         (prompts for name + version)
+│   │   └── → Module Edit Menu  (same sub-tree as above)
+│   │
+│   ├── Generate All Module Keys from Database
+│   └── Back (Esc)
+│
+├── Preferences
+│   ├── Default database path
+│   ├── Default Singularity image directory
+│   ├── Default module key output directory
+│   ├── Default module key template
+│   ├── Always bind these paths
+│   ├── Always enable these flags
+│   └── Back (Esc)              (saves preferences to ~/.simple-modrc on exit)
+│
+├── About
+└── Exit (Esc)                  (prompts to save if there are unsaved changes)
+```
+
+### 4.4 Module Fields
+
+The fields available when editing a module are the same as in the GUI:
+
+| Field | Description |
+|-------|-------------|
+| Conflicts | Space-separated list of conflicting module names |
+| Description | Software description (`module whatis`) |
+| Image Path | Path to the Singularity/Apptainer image |
+| Bind Paths | Extra paths to bind (appended to the default bind paths from Preferences) |
+| Flags | Extra Singularity flags (e.g., `--nv`) |
+| Commands | Executables to expose as wrappers (space or newline separated) |
+| Template | Path to the Tcl template file |
+| Environment Vars | Additional environment variables (`setenv KEY VALUE`) |
+
+
+## 5. CLI Command Mode
+
+CLI command mode is non-interactive and suitable for scripting and automation pipelines.
+
+### 5.1 Launching
+
+```bash
+python3 simple-mod-cli.py --cmd <command> [options]
+
+# Or via the unified launcher (any argument forces CLI mode)
+./simple-mod --cmd <command> [options]
+```
+
+### 5.2 Commands and Options
+
+| Option | Description |
+|--------|-------------|
+| `-d`, `--database FILE` | Path to database JSON file to load |
+| `-c`, `--cmd COMMAND` | Command to execute: `gen-key` or `gen-all` |
+| `-o`, `--output DIR` | Output directory for generated module key files |
+| `--name NAME` | Module name (required for `gen-key`) |
+| `--version VERSION` | Module version (required for `gen-key`) |
+| `--nodisplay` | Force terminal mode instead of GUI (used internally by the launcher) |
+
+**Commands:**
+
+- `gen-key` — Generate a single module key for the specified name and version.
+- `gen-all` — Generate module keys for every module in the database.
+
+### 5.3 Examples
+
+```bash
+# Generate a module key for a specific module
+python3 simple-mod-cli.py \
+    --cmd gen-key \
+    --database database/mydb.json \
+    --name python \
+    --version 3.11.0 \
+    --output modulekey/
+
+# Generate all module keys from a database
+python3 simple-mod-cli.py \
+    --cmd gen-all \
+    --database database/mydb.json \
+    --output modulekey/
+
+# Use the unified launcher (same arguments work)
+./simple-mod --cmd gen-all --database database/mydb.json --output modulekey/
+```
+
+Output files are written to `<output>/<name>/<version>` (no extension), matching the convention expected by Environment Modules and Lmod.
+
+
+## 6. Contributors
 
 Main author: Dr. Jason Li ( jasonli3@lsu.edu )
 
-## 5. Cite this work
+## 7. Cite this work
 
 Jianxiong Li. 2024. "_Transforming Container Experience: Turning Singularity Images into Loadable Environment Modules_". In Practice and Experience in Advanced Research Computing 2024: Human Powered Computing (PEARC '24). Association for Computing Machinery, New York, NY, USA, Article 98, 1–2. https://doi.org/10.1145/3626203.3670551
 
