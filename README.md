@@ -6,22 +6,23 @@
 - [2. Installation](#2-Installation)
   - [2.1 Running with Python (Recommended)](#21-Running-with-Python-Recommended)
   - [2.2 Running in a Singularity image](#22-Running-in-a-Singularity-image)
-- [3. GUI Mode (Default)](#3-GUI-Mode-Default)
-  - [3.1 Menu Bar](#31-Menu-Bar)
-  - [3.2 Module List](#32-Module-List)
-  - [3.3 Module Details](#33-Module-Details)
-  - [3.4 Generate Module Key(s)](#34-Generate-Module-Keys)
-- [4. CLI Interactive Mode](#4-CLI-Interactive-Mode)
-  - [4.1 Launching](#41-Launching)
-  - [4.2 Navigation](#42-Navigation)
-  - [4.3 Menu Tree](#43-Menu-Tree)
-  - [4.4 Module Fields](#44-Module-Fields)
-- [5. CLI Command Mode](#5-CLI-Command-Mode)
-  - [5.1 Launching](#51-Launching)
-  - [5.2 Commands and Options](#52-Commands-and-Options)
-  - [5.3 Examples](#53-Examples)
-- [6. Contributors](#6-Contributors)
-- [7. Cite this work](#7-Cite-this-work)
+- [3. Running SIMPLE-MOD](#3-Running-SIMPLE-MOD)
+  - [3.1 GUI Mode (Default)](#31-GUI-Mode-Default)
+    - [3.1.1 Menu Bar](#311-Menu-Bar)
+    - [3.1.2 Module List](#312-Module-List)
+    - [3.1.3 Module Details](#313-Module-Details)
+    - [3.1.4 Generate Module Key(s)](#314-Generate-Module-Keys)
+  - [3.2 CLI Interactive Mode](#32-CLI-Interactive-Mode)
+    - [3.2.1 Launching](#321-Launching)
+    - [3.2.2 Navigation](#322-Navigation)
+    - [3.2.3 Menu Tree](#323-Menu-Tree)
+    - [3.2.4 Module Fields](#324-Module-Fields)
+  - [3.3 CLI Command Mode](#33-CLI-Command-Mode)
+    - [3.3.1 Launching](#331-Launching)
+    - [3.3.2 Commands and Options](#332-Commands-and-Options)
+    - [3.3.3 Examples](#333-Examples)
+- [4. Contributors](#4-Contributors)
+- [5. Cite this work](#5-Cite-this-work)
 
 ## 1. Introduction
 
@@ -71,7 +72,7 @@ python3 simple-mod.py
 # CLI interactive mode
 python3 simple-mod-cli.py
 
-# CLI command mode (see Section 5 for options)
+# CLI command mode (see Section 3.3 for options)
 python3 simple-mod-cli.py --cmd gen-all --database database/mydb.json
 ```
 
@@ -110,13 +111,15 @@ singularity run simple-mod.sif
 Additional path binding may be required to save module databases and generate module keys in the desired paths.
 
 
-## 3. GUI Mode (Default)
+## 3. Running SIMPLE-MOD
+
+### 3.1 GUI Mode (Default)
 
 The GUI mode is the default when running `./simple-mod` on a system with a display. Below is the GUI of SIMPLE-MOD:
 
 ![README](https://raw.githubusercontent.com/lsuhpchelp/SIMPLE-MOD/master/README.png)
 
-### 3.1 Menu Bar
+#### 3.1.1 Menu Bar
 
 The menu bar contains three menus:
 
@@ -124,13 +127,13 @@ The menu bar contains three menus:
 - **_Settings_**: Change preferences (default paths, binding paths, flags, template, etc.).
 - **_Help_**: About information.
 
-### 3.2 Module List
+#### 3.1.2 Module List
 
 - Select module name & version to edit.
 - Create a new module or copy the current module.
 - Delete the selected module.
 
-### 3.3 Module Details
+#### 3.1.3 Module Details
 
 All changes to the fields below are automatically saved to the in-memory database as you type. Unsaved changes (relative to the last saved file) are indicated by a `*` in the window title.
 
@@ -143,17 +146,17 @@ All changes to the fields below are automatically saved to the in-memory databas
 - **_Set up environmental variable_**: Set up additional environmental variables for the module, if needed.
 - **_Module key template_**: Template to generate module keys. Default: `./template/template.tcl`
 
-### 3.4 Generate Module Key(s)
+#### 3.1.4 Generate Module Key(s)
 
 - **_Generate current module key_**: Generate one module key from the currently open module.
 - **_Generate all module keys from current database_**: Generate all module keys from the currently open database.
 
 
-## 4. CLI Interactive Mode
+### 3.2 CLI Interactive Mode
 
 The CLI interactive mode provides a full-screen terminal UI equivalent to the GUI, suitable for headless servers or SSH sessions without X forwarding.
 
-### 4.1 Launching
+#### 3.2.1 Launching
 
 ```bash
 # Via unified launcher (auto-selected when GUI is unavailable)
@@ -169,7 +172,7 @@ Requires `prompt_toolkit`:
 pip install prompt_toolkit
 ```
 
-### 4.2 Navigation
+#### 3.2.2 Navigation
 
 All screens are full-screen radio-list dialogs. Navigation controls:
 
@@ -181,7 +184,7 @@ All screens are full-screen radio-list dialogs. Navigation controls:
 
 Text-input dialogs accept free-form text and are dismissed with `Enter` (confirm) or `Esc` (cancel).
 
-### 4.3 Menu Tree
+#### 3.2.3 Menu Tree
 
 ```
 Main Menu
@@ -233,7 +236,7 @@ Main Menu
 └── Exit (Esc)                  (prompts to save if there are unsaved changes)
 ```
 
-### 4.4 Module Fields
+#### 3.2.4 Module Fields
 
 The fields available when editing a module are the same as in the GUI:
 
@@ -249,11 +252,11 @@ The fields available when editing a module are the same as in the GUI:
 | Environment Vars | Additional environment variables (`setenv KEY VALUE`) |
 
 
-## 5. CLI Command Mode
+### 3.3 CLI Command Mode
 
 CLI command mode is non-interactive and suitable for scripting and automation pipelines.
 
-### 5.1 Launching
+#### 3.3.1 Launching
 
 ```bash
 python3 simple-mod-cli.py --cmd <command> [options]
@@ -262,7 +265,7 @@ python3 simple-mod-cli.py --cmd <command> [options]
 ./simple-mod --cmd <command> [options]
 ```
 
-### 5.2 Commands and Options
+#### 3.3.2 Commands and Options
 
 | Option | Description |
 |--------|-------------|
@@ -278,7 +281,7 @@ python3 simple-mod-cli.py --cmd <command> [options]
 - `gen-key` — Generate a single module key for the specified name and version.
 - `gen-all` — Generate module keys for every module in the database.
 
-### 5.3 Examples
+#### 3.3.3 Examples
 
 ```bash
 # Generate a module key for a specific module
@@ -302,11 +305,11 @@ python3 simple-mod-cli.py \
 Output files are written to `<output>/<name>/<version>` (no extension), matching the convention expected by Environment Modules and Lmod.
 
 
-## 6. Contributors
+## 4. Contributors
 
 Main author: Dr. Jason Li ( jasonli3@lsu.edu )
 
-## 7. Cite this work
+## 5. Cite this work
 
 Jianxiong Li. 2024. "_Transforming Container Experience: Turning Singularity Images into Loadable Environment Modules_". In Practice and Experience in Advanced Research Computing 2024: Human Powered Computing (PEARC '24). Association for Computing Machinery, New York, NY, USA, Article 98, 1–2. https://doi.org/10.1145/3626203.3670551
 
