@@ -1,7 +1,7 @@
 # =====================================================================
 # SIMPLE-MOD 
-#  (Singularity Integrated Module-key Producer for Loadable 
-#   Environment MODules)
+#   (Singularity Integrated Module-key Producer for Loadable 
+#    Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
 # Dependency: PyQt5 or PyQt6
 # =====================================================================
@@ -9,6 +9,9 @@
 
 import sys, json, os, tempfile, copy
 from string import Template
+
+# Import shared utilities
+from utils import *
 
 # QT5/6 dual support (prefer QT6)
 try:
@@ -26,20 +29,6 @@ except ImportError:
                                  QLineEdit, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QPushButton, QLabel, QDialog, QDialogButtonBox, QAction, QFileDialog)
     PYQT_VERSION = 5
     PlaceholderTextColorRole = QtGui.QPalette.PlaceholderText
-    
-# Software Information
-TITLE = "SIMPLE-MOD "   # Window title
-VERSION="1.1.0"         # Version
-ABOUT = f"""{TITLE}
-(Singularity Integrated Module-key Producer for Loadable Environment MODules)
-
-SIMPLE-MOD is a QT-based GUI tool to automatically generate module keys for easy access of container-based software packages.
-            
-Version: \t{VERSION}
-Author: \tJason Li
-Home: \thttps://github.com/lsuhpchelp/SIMPLE-MOD
-License: \tMIT License
-"""
     
 # Main window
 class MainWindow(QMainWindow):
@@ -74,14 +63,15 @@ class MainWindow(QMainWindow):
         
         super().__init__()
         
-        # Load preferences
-        self.loadPreferences()
-        
+        # Load preferences (store in self.config for class methods)
+        self.config = load_preferences()
+
         # Key attributes
         self.db = {}                                # Loaded database dictionary (empty if it's new)
         self.dbOriginal = {}                        # Original copy of database (for unsaved changes detection)
-        self.currentModule = self.retEmptyModule()  # Current opened module
+        self.currentModule = ret_empty_module(self.config)  # Current opened module
         self._updatingForm = False                  # Guard flag to prevent re-entrant saves during form updates
+        self.currentDbPath = None                   # Path of currently open database file
         
         #--------------------------------------------------------
         # Menu bar
@@ -93,20 +83,25 @@ class MainWindow(QMainWindow):
         # Menu 1
         self.fileMenu = self.menubar.addMenu('\n File ')
         
-        self.newDBAct = QAction('New Database', self)
-        self.newDBAct.triggered.connect(self.newDB)
-        self.newDBAct.setShortcut("Ctrl+N")
-        self.fileMenu.addAction(self.newDBAct)
+        self.dbNewAct = QAction('New Database', self)
+        self.dbNewAct.triggered.connect(self.dbNew)
+        self.dbNewAct.setShortcut("Ctrl+N")
+        self.fileMenu.addAction(self.dbNewAct)
         
-        self.openDBAct = QAction('Open Database...', self)
-        self.openDBAct.triggered.connect(self.openDB)
-        self.openDBAct.setShortcut("Ctrl+O")
-        self.fileMenu.addAction(self.openDBAct)
+        self.dbOpenAct = QAction('Open Database...', self)
+        self.dbOpenAct.triggered.connect(self.dbOpen)
+        self.dbOpenAct.setShortcut("Ctrl+O")
+        self.fileMenu.addAction(self.dbOpenAct)
         
-        self.saveDBAct = QAction('Save Database...', self)
-        self.saveDBAct.triggered.connect(self.saveDB)
-        self.saveDBAct.setShortcut("Ctrl+S")
-        self.fileMenu.addAction(self.saveDBAct)
+        self.dbSaveAct = QAction('Save Database...', self)
+        self.dbSaveAct.triggered.connect(lambda: self.dbSave(save_as=False))
+        self.dbSaveAct.setShortcut("Ctrl+S")
+        self.fileMenu.addAction(self.dbSaveAct)
+
+        self.dbSaveAsAct = QAction('Save Database As...', self)
+        self.dbSaveAsAct.triggered.connect(lambda: self.dbSave(save_as=True))
+        self.dbSaveAsAct.setShortcut("Ctrl+Shift+S")
+        self.fileMenu.addAction(self.dbSaveAsAct)
         
         self.fileMenu.addSeparator()
         
@@ -298,7 +293,7 @@ class MainWindow(QMainWindow):
     # Menu methods
     #============================================================
     
-    def newDB(self):
+    def dbNew(self):
         """
         Create a new empty database.
         """
@@ -308,8 +303,9 @@ class MainWindow(QMainWindow):
         
         # Reset database to empty
         self.db = {}
-        self.currentModule = self.retEmptyModule()
-        
+        self.currentModule = ret_empty_module(self.config)
+        self.currentDbPath = None
+
         # Update current form
         self.nameDropUpdateFromDB()
         self.versionDropUpdateFromDB()
@@ -320,93 +316,81 @@ class MainWindow(QMainWindow):
         # Update window title
         self.setTitleForUnsavedChanges()
     
-    def openDB(self):
+    def dbOpen(self):
         """
         Select and open database file.
         """
-        
+
         # Check any unsaved changes
         if (self.cancelForUnsavedChanges()): return
-        
+
         # Pick a database file to open
-        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', "database/", filter="JSON Files (*.json)")
-        
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open Database', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
+
         # If successfully picked a file...
         if fname:
-            
-            # Try if this file is writable:
-            # If writable, continue saving; if not, return False
-            try:
-                f = open(fname)
-            except:
-                QMessageBox.critical(self, 'Error!', 'You cannot read this file!')
-                return(False)
-        
-            # Read to "db" dictionary
-            self.db = json.load(f)
-            f.close()
-                
+            # Load database using utility function
+            self.db = load_database(fname)
+            if not self.db:
+                QMessageBox.critical(self, 'Error!', 'Failed to open database! See standard output for error message!')
+                return False
+
             # Update currrent form
             self.nameDropUpdateFromDB()
             self.versionDropUpdateFromDB()
-            
+
             # Save original copy of database
             self.dbOriginal = copy.deepcopy(self.db)
-        
+
             # Update window title
             self.setTitleForUnsavedChanges()
 
-    def saveDB(self):
+            # Set current database path
+            self.currentDbPath = fname
+
+    def dbSave(self, save_as=False):
         """
-        Save database to file. To avoid data loss, always ask for confirmation.
+        Save database to file.
+        When save_as is True, always prompt for a new file path (Save As behavior).
+        When save_as is False, overwrite the opened file if available.
         Return:
             True:   Successfully saved
             False:  Not saved
         """
-        
+        if not self.db:
+            QMessageBox.critical(self, 'Save Database', 'Error: Database is empty. Nothing to save.')
+            return False
+
         # At least one module (current) must exist, or return error:
-        if (self.nameDrop.currentText() and self.nameDrop.currentText()):
-            
-            # Pick a database file to save
-            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database', "database/", filter="JSON Files (*.json)")
-                
-            # If successfully picked a file...
-            if fname:
-        
-                # Add ".json" extension of not already added
-                if (fname.split(".")[-1] != "json"):
-                    fname += ".json"
-            
-                # Try if this file is writable:
-                # If writable, continue saving; if not, return False
-                try:
-                    fw = open(fname, "w")
-                except:
-                    QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
-                    return(False)
-                
-                # Save currentModule to database
-                self.db[self.nameDrop.currentText()][self.versionDrop.currentText()] = self.currentModule
-                
-                # Save database to file
-                json.dump(self.db, fw, indent=4)
-                fw.close()
-        
-                # Save original copy of database
-                self.dbOriginal = copy.deepcopy(self.db)
-        
-                # Update window title
-                self.setTitleForUnsavedChanges()
-                
-                # Return successful
-                return(True)
-                
-        else:
-        
+        if not (self.nameDrop.currentText() and self.nameDrop.currentText()):
             QMessageBox.critical(self, 'Error!', 'At least one module must exist to save!')
-        
-        # If has not successfully returned at this point, return False
-        return(False)
+            return False
+
+        if save_as or not self.currentDbPath:
+            
+            # Prompt for file path (Save As or first save)
+            fname, _ = QFileDialog.getSaveFileName(self, 'Save Database As', self.config.get('defaultDatabasePath'), filter="JSON Files (*.json)")
+            
+            if not fname:
+                return False
+
+            if not fname.endswith('.json'):
+                fname += '.json'
+            
+            self.currentDbPath = fname
+
+        # Save database to file using utility function
+        if not save_database(self.currentDbPath, self.db):
+            QMessageBox.critical(self, 'Error!', 'Saving failed! You do not have permission to write to this file!')
+            return False
+
+        # Save original copy of database
+        self.dbOriginal = copy.deepcopy(self.db)
+
+        # Update window title
+        self.setTitleForUnsavedChanges()
+
+        return True
 
     def preferencesDialog(self):
         """
@@ -426,7 +410,8 @@ class MainWindow(QMainWindow):
             self.config["defaultImagePath"] = prefDial.defaultImagePathText.text()
             self.config["defaultTemplate"] = prefDial.defaultTemplateText.text()
             self.config["defaultModKeyPath"] = prefDial.defaultModKeyPathText.text()
-        
+            self.config["defaultDatabasePath"] = prefDial.defaultDatabasePathText.text()
+
             # Write to configuration file
             with open(os.path.expanduser('~/.simple-modrc'), "w") as fw:
                 json.dump(self.config, fw, indent=4)
@@ -634,15 +619,15 @@ class MainWindow(QMainWindow):
                     return
                     
                 else:
-                
+
                     # If the module name is found but version is not, add a new version to existing module name
-                    self.db[modName][modVersion] = self.retEmptyModule()
-                    
+                    self.db[modName][modVersion] = ret_empty_module(self.config)
+
             else:
-            
+
                 # If the module name is not found, add a new module name
-                self.db[modName] = { 
-                    modVersion : self.retEmptyModule()
+                self.db[modName] = {
+                    modVersion : ret_empty_module(self.config)
                 }
                 
             # Update dropdown menu
@@ -851,10 +836,12 @@ class MainWindow(QMainWindow):
             dir = os.path.dirname(pathModKey)
             if not os.path.exists(dir):
                 os.makedirs(dir)
-            
+
             # Export module file
-            with open(pathModKey, "w") as fw:
-                fw.write(self.retModKey(dictModule=tmpModule))
+            key_content = generate_module_key(tmpModule, self.nameDrop.currentText(), self.versionDrop.currentText(), self.config)
+            if key_content:
+                with open(pathModKey, "w") as fw:
+                    fw.write(key_content)
             
             # Pop a successful message
             QMessageBox.information(self, 'Success!', 'You have successfully generated the current module key!')
@@ -896,97 +883,19 @@ class MainWindow(QMainWindow):
                         os.makedirs(dir)
             
                     # Export module file
-                    with open(pathModKey, "w") as fw:
-                        fw.write(self.retModKey(modName, modVersion, self.db[modName][modVersion]))
+                    key_content = generate_module_key(self.db[modName][modVersion], modName, modVersion, self.config)
+                    if key_content:
+                        with open(pathModKey, "w") as fw:
+                            fw.write(key_content)
             
             # Pop a successful message
             QMessageBox.information(self, 'Success!', 'You have successfully generated all module keys from the current database!')
         
 
     #============================================================
-    # Module key template
-    #============================================================
-
-    def retModKey(self, modName=None , modVersion=None, dictModule=None):
-        """
-        Return a formatted module key string by substituting module values into a template.
-        
-        Args:
-            modName:     Module name (defaults to currently selected name).
-            modVersion:  Module version (defaults to currently selected version).
-            dictModule:  Module dictionary (defaults to self.currentModule).
-        """
-        
-        # Default module name, version, and module dictionary to current if not given
-        modName = modName or self.nameDrop.currentText()
-        modVersion = modVersion or self.versionDrop.currentText()
-        dictModule = dictModule or self.currentModule
-    
-        # Parse environmental variable dictionary into a single string
-        envsStr = ""
-        for key, value in dictModule["envs"].items():
-            envsStr += f"setenv {key} \"{value}\"\n"
-        
-        # Set up module key template
-        with open(dictModule["template"]) as f:
-            tmpModKey = Template(f.read())
-        
-        # Return formatted module key string based on the template
-        return tmpModKey.safe_substitute(
-            modName = modName,
-            #modNameCap = modName.upper(),
-            conflict = dictModule["conflict"],
-            whatis = dictModule["module_whatis"],
-            modVersion = modVersion,
-            singularity_image = dictModule["singularity_image"],
-            singularity_bindpaths = ",".join((self.config["defaultBindingPath"], dictModule["singularity_bindpaths"])),
-            singularity_flags = " ".join((self.config["defaultFlags"], dictModule["singularity_flags"])),
-            cmds_dummy = dictModule["cmds"],
-            envs = envsStr
-        )
-
-
-    #============================================================
     # Misc
     #============================================================
-    
-    def loadPreferences(self):
-        """
-        Load preferences from "~/.simple-modrc". Create the file if it does not exist.
-        """
-        
-        # Check if "~/.simple-modrc" exist. 
-        #   If exists, open and read preference settings.
-        #   If not, create it with default settings.
-        if os.path.exists(os.path.expanduser('~/.simple-modrc')):
-            with open(os.path.expanduser('~/.simple-modrc')) as f:
-                self.config = json.load(f)
-        else:
-            self.config = {
-                "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
-                "defaultFlags": "",
-                "defaultImagePath": "",
-                "defaultTemplate": "./template/template.tcl",
-                "defaultModKeyPath": "./modulekey"
-            }
-            with open(os.path.expanduser('~/.simple-modrc'), "w") as fw:
-                json.dump(self.config, fw, indent=4)
-                
-    def retEmptyModule(self):
-        """
-        Return an empty module dictionary.
-        """
-        return {
-            "conflict":                 "",
-            "module_whatis":            "",
-            "singularity_image":        "",
-            "singularity_bindpaths":    "",
-            "singularity_flags":        "",
-            "cmds":                     "",
-            "envs":                     {  },
-            "template":                 self.config["defaultTemplate"]
-        }
-    
+
     def closeEvent(self, event):
         """
         Handle window close event. Prompts for unsaved changes before exiting.
@@ -1007,7 +916,8 @@ class MainWindow(QMainWindow):
         """
         Enable/Disable current module form.
         """
-        self.saveDBAct.setEnabled(isEnabled)
+        self.dbSaveAct.setEnabled(isEnabled)
+        self.dbSaveAsAct.setEnabled(isEnabled)
         self.conflictText.setEnabled(isEnabled)
         self.whatisText.setEnabled(isEnabled)
         self.singularityImageText.setEnabled(isEnabled)
@@ -1062,12 +972,12 @@ class MainWindow(QMainWindow):
                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel, QMessageBox.StandardButton.Cancel)
             
             # Depending on the response:
-            #   "Yes":      Run "saveDB" method and continue
+            #   "Yes":      Run "dbSave" method and continue
             #   "No":       Do not save and continue
             #   "Cancel":   Do not save and stay
             if reply == QMessageBox.StandardButton.Yes:
                 # Return False (continue) if successfully saved, otherwise return True to stay
-                if (self.saveDB()):
+                if (self.dbSave()):
                     return(False)
                 else:
                     return(True)
@@ -1134,17 +1044,17 @@ class PreferenceDialog(QDialog):
         
         # Create form layout
         self.formLayout = QFormLayout()
-        
-        # Set default binding paths
-        self.defaultBindingPathText = QLineEdit(self)
-        self.defaultBindingPathText.setText(parent.config["defaultBindingPath"])
-        self.formLayout.addRow("Always bind these paths: ", self.defaultBindingPathText)
-        
-        # Set default flags
-        self.defaultFlagsText = QLineEdit(self)
-        self.defaultFlagsText.setText(parent.config["defaultFlags"])
-        self.formLayout.addRow("Always enable these flags:", self.defaultFlagsText)
-        
+
+        # Set default database directory (editable text field and file picker button)
+        self.defaultDatabasePathText = QLineEdit(self)
+        self.defaultDatabasePathText.setText(parent.config["defaultDatabasePath"])
+        self.defaultDatabasePathPickerBtn = QPushButton("Browse", self)
+        self.defaultDatabasePathPickerBtn.clicked.connect(self.pickDefaultDatabasePath)
+        self.defaultDatabasePathLayout = QHBoxLayout()
+        self.defaultDatabasePathLayout.addWidget(self.defaultDatabasePathText)
+        self.defaultDatabasePathLayout.addWidget(self.defaultDatabasePathPickerBtn)
+        self.formLayout.addRow("Default database directory:", self.defaultDatabasePathLayout)
+
         # Set default image directory (editable text field and file picker button)
         self.defaultImagePathText = QLineEdit(self)
         self.defaultImagePathText.setText(parent.config["defaultImagePath"])
@@ -1154,18 +1064,8 @@ class PreferenceDialog(QDialog):
         self.defaultImagePathLayout.addWidget(self.defaultImagePathText)
         self.defaultImagePathLayout.addWidget(self.defaultImagePathPickerBtn)
         self.formLayout.addRow("Default Singularity images directory:", self.defaultImagePathLayout)
-        
-        # Set default module template (editable text field and file picker button)
-        self.defaultTemplateText = QLineEdit(self)
-        self.defaultTemplateText.setText(parent.config["defaultTemplate"])
-        self.defaultTemplatePickerBtn = QPushButton("Browse", self)
-        self.defaultTemplatePickerBtn.clicked.connect(self.pickDefaultTemplate)
-        self.defaultTemplateLayout = QHBoxLayout()
-        self.defaultTemplateLayout.addWidget(self.defaultTemplateText)
-        self.defaultTemplateLayout.addWidget(self.defaultTemplatePickerBtn)
-        self.formLayout.addRow("Default module template:", self.defaultTemplateLayout)
-        
-        # Set default module key generation path (editable text field and file picker button)
+
+        # Set default module key output directory (editable text field and file picker button)
         self.defaultModKeyPathText = QLineEdit(self)
         self.defaultModKeyPathText.setText(parent.config["defaultModKeyPath"])
         self.defaultModKeyPathPickerBtn = QPushButton("Browse", self)
@@ -1173,7 +1073,27 @@ class PreferenceDialog(QDialog):
         self.defaultModKeyPathLayout = QHBoxLayout()
         self.defaultModKeyPathLayout.addWidget(self.defaultModKeyPathText)
         self.defaultModKeyPathLayout.addWidget(self.defaultModKeyPathPickerBtn)
-        self.formLayout.addRow("Default directory to generate module keys:", self.defaultModKeyPathLayout)
+        self.formLayout.addRow("Default module key output directory:", self.defaultModKeyPathLayout)
+
+        # Set default module key template (editable text field and file picker button)
+        self.defaultTemplateText = QLineEdit(self)
+        self.defaultTemplateText.setText(parent.config["defaultTemplate"])
+        self.defaultTemplatePickerBtn = QPushButton("Browse", self)
+        self.defaultTemplatePickerBtn.clicked.connect(self.pickDefaultTemplate)
+        self.defaultTemplateLayout = QHBoxLayout()
+        self.defaultTemplateLayout.addWidget(self.defaultTemplateText)
+        self.defaultTemplateLayout.addWidget(self.defaultTemplatePickerBtn)
+        self.formLayout.addRow("Default module key template:", self.defaultTemplateLayout)
+
+        # Set default binding paths
+        self.defaultBindingPathText = QLineEdit(self)
+        self.defaultBindingPathText.setText(parent.config["defaultBindingPath"])
+        self.formLayout.addRow("Always bind these paths:", self.defaultBindingPathText)
+
+        # Set default flags
+        self.defaultFlagsText = QLineEdit(self)
+        self.defaultFlagsText.setText(parent.config["defaultFlags"])
+        self.formLayout.addRow("Always enable these flags:", self.defaultFlagsText)
 
         # Create "Save" and "Cancel" buttons
         self.btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
@@ -1213,11 +1133,21 @@ class PreferenceDialog(QDialog):
         """
         Pick default default module key generation path in file browser.
         """
-        
+
         # Pick a directory
         directory = QFileDialog.getExistingDirectory(self, 'Select Default Directory to Generate Module Keys', self.defaultModKeyPathText.text().strip())
         if directory:
             self.defaultModKeyPathText.setText(directory)
+
+    def pickDefaultDatabasePath(self):
+        """
+        Pick default database directory in file browser.
+        """
+
+        # Pick a directory
+        directory = QFileDialog.getExistingDirectory(self, 'Select Default Database Directory', self.defaultDatabasePathText.text().strip())
+        if directory:
+            self.defaultDatabasePathText.setText(directory)
 
 # Main function
 if __name__ == "__main__":

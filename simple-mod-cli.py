@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 # ==================================================================##
 # SIMPLE-MOD CLI
 #   (Singularity Integrated Module-key Producer for Loadable
 #    Environment MODules)
 # Developer: Jason Li (jasonli3@lsu.edu)
-# Dependency: Python 3, prompt_toolkit
+# Dependency: prompt_toolkit >= 3.0.52
 # =================================================================##
 
 
@@ -13,121 +12,94 @@ import os
 import json
 import copy
 import argparse
+import textwrap
 from string import Template
 
+# Import shared utilities
+from utils import *
+
+# CLI-specific imports
 # Check for prompt_toolkit (for interactive CLI)
 try:
     from prompt_toolkit import PromptSession
     from prompt_toolkit.formatted_text import HTML
     from prompt_toolkit.shortcuts import (
-        prompt, button_dialog, input_dialog,
-        progress_dialog, radiolist_dialog, checkboxlist_dialog, message_dialog
+        prompt, button_dialog, input_dialog as input_dialog_origin,
+        progress_dialog, checkboxlist_dialog, message_dialog
     )
+    from prompt_toolkit.application import Application
+    from prompt_toolkit.key_binding import KeyBindings, merge_key_bindings
+    from prompt_toolkit.key_binding.defaults import load_key_bindings
+    from prompt_toolkit.layout import Layout
+    from prompt_toolkit.layout.containers import HSplit
+    from prompt_toolkit.widgets import Dialog, Label, RadioList, TextArea, Button
     CLI_ENABLED = True
+
 except ImportError:
+
     CLI_ENABLED = False
 
-# Constants
-TITLE = "SIMPLE-MOD "
-VERSION = "1.1.0"
-DATABASE_DIR = "database"
-MODULEKEY_DIR = "modulekey"
-TEMPLATE_DIR = "template"
 
+# =============== Customized Fullscreen Choice ============== ##
 
-# =================== Utility Functions ================== ##
-
-def load_preferences():
+def add_esc_to_dialog(app, esc_result):
     """
-    Load preferences from "~/.simple-modrc". Create the file if it does not exist.
+    Helper: attach Esc and Ctrl+C bindings to any dialog Application,
+    exiting with the given esc_result (mimics full_screen_choice behaviour).
     """
-    config_path = os.path.expanduser('~/.simple-modrc')
+    kb = KeyBindings()
+    @kb.add("escape", eager=True)
+    @kb.add("c-c", eager=True)
+    def _cancel(event):
+        event.app.exit(result=esc_result)
+    app.key_bindings = merge_key_bindings([app.key_bindings, kb])
+    return app
 
-    if os.path.exists(config_path):
-        try:
-            with open(config_path) as f:
-                return json.load(f)
-        except (IOError, json.JSONDecodeError):
-            pass
+def input_dialog(*args, **kwargs):
+    """Wrap input_dialog so that Esc and Ctrl+C always trigger Cancel (→ None)"""
+    return add_esc_to_dialog(input_dialog_origin(*args, **kwargs), None)
 
-    # Default configuration
-    config = {
-        "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
-        "defaultFlags": "",
-        "defaultImagePath": "",
-        "defaultTemplate": "./template/template.tcl",
-        "defaultModKeyPath": "./modulekey"
-    }
-    try:
-        with open(config_path, "w") as fw:
-            json.dump(config, fw, indent=4)
-    except IOError:
-        pass
-
-    return config
-
-
-def ret_empty_module(config):
+def full_screen_choice(title, options, body_text=None):
     """
-    Return an empty module dictionary.
+    Full-screen radio list selection consistent with dialog components.
+
+    Uses Dialog with background fill (full_screen=True) and accepts the
+    selection on Enter without requiring a button click.
+    Returns "esc" when Esc or Ctrl+C is pressed.
+
+    Optional body_text is displayed as a label above the radio list.
     """
-    return {
-        "conflict": "",
-        "module_whatis": "",
-        "singularity_image": "",
-        "singularity_bindpaths": "",
-        "singularity_flags": "",
-        "cmds": "",
-        "envs": {},
-        "template": config.get("defaultTemplate", "./template/template.tcl")
-    }
+    radio_list = RadioList(values=options,select_on_focus=True)
 
+    if body_text is not None:
+        body = HSplit([Label(f"\n{body_text}\n"), radio_list])
+    else:
+        body = radio_list
 
-def list_json_files(directory):
-    """List all JSON files in a directory."""
-    try:
-        return sorted([f for f in os.listdir(directory) if f.endswith('.json')])
-    except FileNotFoundError:
-        return []
+    dialog = Dialog(
+        title=title,
+        body=body,
+        with_background=True,
+    )
 
+    kb = KeyBindings()
 
-def load_database(db_path):
-    """Load a database JSON file."""
-    try:
-        with open(db_path, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in {db_path}: {e}")
-        return {}
+    @kb.add("enter", eager=True)
+    def _accept(event):
+        event.app.exit(result=radio_list.current_value)
 
+    @kb.add("escape")
+    @kb.add("c-c")
+    def _cancel(event):
+        event.app.exit(result="esc")
 
-def save_database(db_path, db):
-    """Save database to a JSON file."""
-    try:
-        with open(db_path, 'w') as f:
-            json.dump(db, f, indent=4)
-        return True
-    except IOError as e:
-        print(f"Error saving database: {e}")
-        return False
-
-
-def clear_screen():
-    """Clear the terminal screen."""
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
-def print_header(title=""):
-    """Print a formatted header."""
-    clear_screen()
-    print("=" * 60)
-    if title:
-        print(f"  {title}")
-    print(f"  {TITLE}CLI v{VERSION}")
-    print("=" * 60)
-    print()
+    app = Application(
+        layout=Layout(dialog),
+        key_bindings=merge_key_bindings([load_key_bindings(), kb]),
+        mouse_support=True,
+        full_screen=True,
+    )
+    return app.run()
 
 
 # =================== Main CLI Application ================== ##
@@ -145,10 +117,6 @@ class SimpleModCLI:
         self.current_db_path = None
         self._updating_form = False
 
-        # Ensure default directories exist
-        os.makedirs(DATABASE_DIR, exist_ok=True)
-        os.makedirs(MODULEKEY_DIR, exist_ok=True)
-
     def ret_empty_module(self):
         """Return an empty module dictionary."""
         return ret_empty_module(self.config)
@@ -159,7 +127,7 @@ class SimpleModCLI:
 
     def confirm_save_before_continue(self, action_name="continue"):
         """Show confirmation dialog for unsaved changes with Save/No/Cancel options."""
-        choice = button_dialog(
+        choice = add_esc_to_dialog(button_dialog(
             title="Unsaved Changes",
             text="You have unsaved changes! To avoid data loss, do you want to save before continue?",
             buttons=[
@@ -167,7 +135,7 @@ class SimpleModCLI:
                 ("No", "discard"),
                 ("Cancel", "cancel")
             ]
-        ).run()
+        ), "cancel").run()
         if choice == "cancel":
             return False
         if choice == "save":
@@ -214,56 +182,15 @@ class SimpleModCLI:
         if not module_data or not output_dir:
             return False
 
-        template_path = module_data.get('template', './template/template.tcl')
-        if not os.path.exists(template_path):
-            print(f"Error: Template not found: {template_path}")
-            return False
-
-        # Parse environment variables
-        envs_str = ""
-        for key, value in module_data.get('envs', {}).items():
-            envs_str += f'setenv {key} "{value}"\n'
-
-        # Process bind paths
-        default_bind = self.config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
-        custom_bind = module_data.get('singularity_bindpaths', '')
-        bind_paths = ','.join(filter(None, [default_bind, custom_bind]))
-
-        # Process flags
-        default_flags = self.config.get('defaultFlags', '')
-        custom_flags = module_data.get('singularity_flags', '')
-        flags = ' '.join(filter(None, [default_flags, custom_flags]))
-
-        # Read template
-        try:
-            with open(template_path) as f:
-                template = Template(f.read())
-        except IOError as e:
-            print(f"Error reading template: {e}")
-            return False
-
-        # Substitute values
-        try:
-            key_content = template.safe_substitute(
-                modName=name,
-                modVersion=version,
-                conflict=module_data.get('conflict', ''),
-                whatis=module_data.get('module_whatis', ''),
-                singularity_image=module_data.get('singularity_image', ''),
-                singularity_bindpaths=bind_paths,
-                singularity_flags=flags,
-                cmds_dummy=module_data.get('cmds', ''),
-                envs=envs_str
-            )
-        except Exception as e:
-            print(f"Error substituting template: {e}")
+        key_content = generate_module_key(module_data, name, version, self.config)
+        if not key_content:
+            print(f"Error: Failed to generate module key content")
             return False
 
         # Write output
         output_path = os.path.join(output_dir, name, version)
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
         try:
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
             with open(output_path, 'w') as f:
                 f.write(key_content)
             return True
@@ -277,7 +204,7 @@ class SimpleModCLI:
         """Create a new empty database."""
         if self.has_unsaved_changes():
             if not self.confirm_save_before_continue():
-                return
+                return False
 
         self.db = {}
         self.db_original = {}
@@ -285,34 +212,33 @@ class SimpleModCLI:
         self.current_module_version = None
         self.current_module = self.ret_empty_module()
         self.current_db_path = None
-
-        print_header("New Database")
-        print("New empty database created.")
+        return True
 
     def action_open_database(self):
         """Open an existing database file."""
         if self.has_unsaved_changes():
             if not self.confirm_save_before_continue():
-                return
+                return False
 
-        json_files = list_json_files(DATABASE_DIR)
+        database_path = self.config.get('defaultDatabasePath')
+        json_files = list_json_files(database_path)
         if not json_files:
-            print_header("Open Database")
-            print(f"No JSON files found in {DATABASE_DIR}/")
-            return
+            message_dialog(
+                title="Open Database",
+                text=f"No JSON files found in {database_path}/"
+            ).run()
+            return False
 
-        db_file = radiolist_dialog(
-            title="Open Database",
-            text="Select a database file to open:",
-            values=[(f, f) for f in json_files],
-            ok_text="Open",
-            cancel_text="Back"
-        ).run()
+        options = [(f, f) for f in json_files] + [('esc', 'Back (Esc)')]
+        db_file = full_screen_choice(
+            "Open Database",
+            options=options,
+        )
 
-        if db_file is None:
-            return
+        if db_file == 'esc':
+            return False
 
-        db_path = os.path.join(DATABASE_DIR, db_file)
+        db_path = os.path.join(database_path, db_file)
         self.db = load_database(db_path)
         self.db_original = copy.deepcopy(self.db)
         self.current_db_path = db_path
@@ -323,30 +249,32 @@ class SimpleModCLI:
             first_version = sorted(self.db[first_name].keys(), reverse=True)[0]
             self.load_current_module(first_name, first_version)
 
-        print_header("Database Loaded")
-        print(f"Loaded: {db_path}")
-        print(f"Modules: {len(self.db)}")
+        return True
 
-    def action_save_database(self):
-        """Save the current database to a file."""
+    def action_save_database(self, save_as=False):
+        """Save the current database to a file.
+
+        When save_as is True, always prompt for a new file path (Save As
+        behaviour), pre-filling with the current path when available.
+        When save_as is False, prompt only if no valid path is already set.
+        """
         if not self.db:
-            print_header("Save Database")
-            print("Error: Database is empty. Nothing to save.")
-            return
+            message_dialog(
+                title="Save Database",
+                text="Error: Database is empty. Nothing to save."
+            ).run()
+            return False
 
-        if self.current_db_path and os.path.exists(self.current_db_path):
-            # Auto-save to current path
-            confirm_save = True
-        else:
-            # Let user choose path
+        if save_as or not (self.current_db_path and os.path.exists(self.current_db_path)):
+            # Prompt user for a (new) path
             user_path = input_dialog(
                 title="Save Database As",
                 text="Enter path to save database (must end with .json):",
-                default="database/new-database.json"
+                default=self.current_db_path or "database/new-database.json"
             ).run()
 
             if user_path is None:
-                return
+                return False
 
             if not user_path.endswith('.json'):
                 user_path += '.json'
@@ -355,16 +283,16 @@ class SimpleModCLI:
 
         if save_database(self.current_db_path, self.db):
             self.db_original = copy.deepcopy(self.db)
-            print_header("Database Saved")
-            print(f"Saved to: {self.current_db_path}")
+            return True
         else:
-            print_header("Save Failed")
-            print("Could not save the database.")
+            message_dialog(
+                title="Save Failed",
+                text="Could not save the database."
+            ).run()
+            return False
 
     def action_add_module(self):
         """Add a new module."""
-        print_header("Add New Module")
-
         name = input_dialog(
             title="Add Module",
             text="Enter module name:",
@@ -372,11 +300,11 @@ class SimpleModCLI:
         ).run()
 
         if name is None:
-            return
+            return False
         name = name.strip()
         if not name:
             message_dialog(title="Error", text="Module name cannot be empty.").run()
-            return
+            return False
 
         version = input_dialog(
             title="Add Module",
@@ -385,16 +313,16 @@ class SimpleModCLI:
         ).run()
 
         if version is None:
-            return
+            return False
         version = version.strip()
         if not version:
             message_dialog(title="Error", text="Version cannot be empty.").run()
-            return
+            return False
 
         # Check if module already exists
         if name in self.db and version in self.db[name]:
             message_dialog(title="Error", text=f"Module {name} {version} already exists.").run()
-            return
+            return False
 
         # Create new module
         if name not in self.db:
@@ -403,19 +331,16 @@ class SimpleModCLI:
 
         # Load the new module
         self.load_current_module(name, version)
-
-        print_header("Module Added")
-        print(f"Created: {name} {version}")
-        print("Edit the module details to configure it.")
+        return True
 
     def action_copy_module(self):
         """Copy the current module to a new name/version."""
         if not self.current_module_name:
-            print_header("Copy Module")
-            print("Error: No module selected.")
-            return
-
-        print_header("Copy Module")
+            message_dialog(
+                title="Copy Module",
+                text="Error: No module selected."
+            ).run()
+            return False
 
         name = input_dialog(
             title="Copy Module",
@@ -424,11 +349,11 @@ class SimpleModCLI:
         ).run()
 
         if name is None:
-            return
+            return False
         name = name.strip()
         if not name:
             message_dialog(title="Error", text="Module name cannot be empty.").run()
-            return
+            return False
 
         version = input_dialog(
             title="Copy Module",
@@ -437,16 +362,16 @@ class SimpleModCLI:
         ).run()
 
         if version is None:
-            return
+            return False
         version = version.strip()
         if not version:
             message_dialog(title="Error", text="Version cannot be empty.").run()
-            return
+            return False
 
         # Check if module already exists
         if name in self.db and version in self.db[name]:
             message_dialog(title="Error", text=f"Module {name} {version} already exists.").run()
-            return
+            return False
 
         # Create copy
         if name not in self.db:
@@ -455,32 +380,27 @@ class SimpleModCLI:
 
         # Load the copy
         self.load_current_module(name, version)
-
-        print_header("Module Copied")
-        print(f"Copied {self.current_module_name} {self.current_module_version}")
-        print(f"To: {name} {version}")
+        return True
 
     def action_delete_module(self):
         """Delete the current module."""
         if not self.current_module_name:
-            print_header("Delete Module")
-            print("Error: No module selected.")
-            return
+            message_dialog(
+                title="Delete Module",
+                text="Error: No module selected."
+            ).run()
+            return False
 
-        print_header("Delete Module")
-        print(f"Module: {self.current_module_name} {self.current_module_version}")
-        print()
-
-        choice = button_dialog(
+        choice = add_esc_to_dialog(button_dialog(
             title="Delete Module",
             text="Are you sure you want to delete this module?",
             buttons=[
                 ("Yes", "yes"),
                 ("No", "no")
             ]
-        ).run()
+        ), "no").run()
         if choice != "yes":
-            return
+            return False
 
         # Check for multiple versions
         if len(self.db[self.current_module_name]) > 1:
@@ -503,54 +423,75 @@ class SimpleModCLI:
                 self.current_module_version = None
                 self.current_module = self.ret_empty_module()
 
-        print_header("Module Deleted")
-        print("Module has been deleted.")
+        return True
 
     def action_edit_module(self):
         """Edit the current module's details."""
         if not self.current_module_name:
-            print_header("Edit Module")
-            print("Error: No module selected.")
-            return
+            message_dialog(
+                title="Edit Module",
+                text="Error: No module selected."
+            ).run()
+            return False
+
+        # Format display values with space alignment
+        # Find the longest label for consistent alignment
+        label_width = max(len("Conflicts"), len("Description"), len("Image Path"),
+                        len("Bind Paths"), len("Flags"), len("Commands"),
+                        len("Template"), len("Environment Vars")) + 4
+
+        # Wrap long values for display (limit to 60 chars per line
+        def wrap_value(val):
+            if len(val) > 60:
+                return '\n'.join(textwrap.wrap(val, width=60, replace_whitespace=False))
+            return val
+        
+        # Format each option and its content
+        def format_option(label, value):
+            wrapped = wrap_value(value)
+            # If wrapped has multiple lines, indent them
+            if '\n' in wrapped:
+                lines = [f"{label:<{label_width}}{wrapped.split(chr(10))[0]}"]
+                lines.extend([' ' * (label_width + 4) + line for line in wrapped.split(chr(10))[1:]])
+                return '\n'.join(lines)
+            return f"{label:<{label_width}}{wrapped}"
 
         while True:
-            print_header(f"Edit Module: {self.current_module_name} {self.current_module_version}")
+            envs = self.current_module.get('envs')
 
-            # Display current values
-            print("Current settings:")
-            print(f"  [1] Conflicts:        {self.current_module.get('conflict', '')}")
-            print(f"  [2] Description:      {self.current_module.get('module_whatis', '')}")
-            print(f"  [3] Image Path:       {self.current_module.get('singularity_image', '')}")
-            print(f"  [4] Bind Paths:       {self.current_module.get('singularity_bindpaths', '')}")
-            print(f"  [5] Flags:            {self.current_module.get('singularity_flags', '')}")
-            print(f"  [6] Commands:         {self.current_module.get('cmds', '')}")
-            print(f"  [7] Template:         {self.current_module.get('template', './template/template.tcl')}")
-            envs = self.current_module.get('envs', {})
+            # Get current values for display
+            disp_conflicts = self.current_module.get('conflict')
+            disp_description = self.current_module.get('module_whatis')
+            disp_image_path = self.current_module.get('singularity_image')
+            disp_bind_paths = self.current_module.get('singularity_bindpaths')
+            disp_flags = self.current_module.get('singularity_flags')
+            disp_commands = self.current_module.get('cmds')
+            disp_template = self.current_module.get('template')
+
+            # Format environment variables display
             if envs:
-                print(f"  [8] Environment Vars: {', '.join(envs.keys())}")
+                disp_env_vars = '\n'.join(f"{k}={v}" for k, v in envs.items())
+                disp_env_vars = wrap_value(disp_env_vars)
             else:
-                print(f"  [8] Environment Vars: (none)")
-            print()
+                disp_env_vars = '(none)'
 
-            choice = radiolist_dialog(
-                title="Edit Module",
-                text="Select field to edit (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Conflicts'),
-                    ('2', 'Description'),
-                    ('3', 'Image Path'),
-                    ('4', 'Bind Paths'),
-                    ('5', 'Flags'),
-                    ('6', 'Commands'),
-                    ('7', 'Template'),
-                    ('8', 'Environment Vars'),
-                    ('q', 'Quit / Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
+            choice = full_screen_choice(
+                    "Edit Module:",
+                    options=[
+                        ('1', format_option("Conflicts", disp_conflicts)),
+                        ('2', format_option("Description", disp_description)),
+                        ('3', format_option("Image Path", disp_image_path)),
+                        ('4', format_option("Bind Paths", disp_bind_paths)),
+                        ('5', format_option("Flags", disp_flags)),
+                        ('6', format_option("Commands", disp_commands)),
+                        ('7', format_option("Template", disp_template)),
+                        ('8', format_option("Environment Vars", disp_env_vars)),
+                        ('esc', 'Back (Esc)'),
+                    ],
+                    body_text="Select a field to edit:",
+                )
 
-            if choice is None or choice == 'q':
+            if choice == 'esc':
                 break
 
             if choice == '1':
@@ -558,7 +499,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Conflicts",
                     text="Enter conflict modules (space-separated):",
-                    default=self.current_module.get('conflict', '')
+                    default=self.current_module.get('conflict')
                 ).run()
                 if value is not None:
                     self.current_module['conflict'] = value.strip()
@@ -568,7 +509,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Description",
                     text="Enter software description:",
-                    default=self.current_module.get('module_whatis', '')
+                    default=self.current_module.get('module_whatis')
                 ).run()
                 if value is not None:
                     self.current_module['module_whatis'] = value.strip()
@@ -578,29 +519,29 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Image Path",
                     text="Enter Singularity image path:",
-                    default=self.current_module.get('singularity_image', '')
+                    default=self.current_module.get('singularity_image')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_image'] = value.strip()
 
             elif choice == '4':
                 # Bind Paths
-                default_bind = self.config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
+                default_bind = self.config.get('defaultBindingPath')
                 value = input_dialog(
                     title="Edit Bind Paths",
                     text=f"Enter additional paths to bind (default: {default_bind}):",
-                    default=self.current_module.get('singularity_bindpaths', '')
+                    default=self.current_module.get('singularity_bindpaths')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_bindpaths'] = value.strip()
 
             elif choice == '5':
                 # Flags
-                default_flags = self.config.get('defaultFlags', '')
+                default_flags = self.config.get('defaultFlags')
                 value = input_dialog(
                     title="Edit Flags",
                     text=f"Enter additional flags (default: {default_flags}):",
-                    default=self.current_module.get('singularity_flags', '')
+                    default=self.current_module.get('singularity_flags')
                 ).run()
                 if value is not None:
                     self.current_module['singularity_flags'] = value.strip()
@@ -610,7 +551,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Commands",
                     text="Enter commands to map (space or newline separated):",
-                    default=self.current_module.get('cmds', '')
+                    default=self.current_module.get('cmds')
                 ).run()
                 if value is not None:
                     self.current_module['cmds'] = value.strip()
@@ -620,7 +561,7 @@ class SimpleModCLI:
                 value = input_dialog(
                     title="Edit Template",
                     text="Enter template file path:",
-                    default=self.current_module.get('template', './template/template.tcl')
+                    default=self.current_module.get('template')
                 ).run()
                 if value is not None:
                     self.current_module['template'] = value.strip()
@@ -631,50 +572,33 @@ class SimpleModCLI:
 
         # Save to database
         self.update_db_from_form()
+        return True
 
     def edit_environment_variables(self):
         """Edit environment variables for the current module."""
-        envs = copy.deepcopy(self.current_module.get('envs', {}))
+        envs = copy.deepcopy(self.current_module.get('envs'))
 
         while True:
-            clear_screen()
-            print_header(f"Edit Environment Variables: {self.current_module_name} {self.current_module_version}")
-            print()
-
-            if envs:
-                print("Current environment variables:")
-                for i, (key, value) in enumerate(envs.items(), 1):
-                    print(f"  [{i}] {key} = {value}")
-                print()
-            else:
-                print("No environment variables set.")
-                print()
-
-            print()
-
             if envs:
                 # Show available variables for selection
                 value_choices = [(str(i), f"{key} = {value}") for i, (key, value) in enumerate(envs.items(), 1)]
                 value_choices.extend([
                     ('A', 'Add new variable'),
                     ('D', 'Delete variable'),
-                    ('Q', 'Return to edit module')
+                    ('esc', 'Back (Esc)')
                 ])
             else:
                 value_choices = [
                     ('A', 'Add new variable'),
-                    ('Q', 'Return to edit module')
+                    ('esc', 'Back (Esc)')
                 ]
 
-            choice = radiolist_dialog(
-                title="Edit Environment Variables",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=value_choices,
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
+            choice = full_screen_choice(
+                    "Edit Environment Variables:",
+                    options=value_choices,
+                )
 
-            if choice is None or choice == 'Q':
+            if choice == 'esc':
                 self.current_module['envs'] = envs
                 break
             elif choice == 'A':
@@ -691,14 +615,12 @@ class SimpleModCLI:
                         envs[key] = value
             elif choice == 'D':
                 if envs:
-                    key = radiolist_dialog(
-                        title="Delete Environment Variable",
-                        text="Select a variable to delete:",
-                        values=[(k, k) for k in envs.keys()],
-                        ok_text="Delete",
-                        cancel_text="Cancel"
-                    ).run()
-                    if key in envs:
+                    del_options = [(k, k) for k in envs.keys()] + [('esc', 'Back (Esc)')]
+                    key = full_screen_choice(
+                            "Delete Environment Variable:",
+                            options=del_options,
+                        )
+                    if key != 'esc':
                         del envs[key]
                 else:
                     message_dialog(
@@ -715,7 +637,7 @@ class SimpleModCLI:
                         value = input_dialog(
                             title="Edit Environment Variable",
                             text=f"New value for {key}:",
-                            default=envs.get(key, '')
+                            default=envs.get(key)
                         ).run()
                         if value:
                             envs[key] = value
@@ -731,48 +653,46 @@ class SimpleModCLI:
         name_list, version_list = self.refresh_module_list()
 
         if not name_list:
-            print_header("Select Module")
-            print("No modules in database.")
-            return
+            message_dialog(
+                title="Select Module",
+                text="No modules in database."
+            ).run()
+            return False
 
         # Name selection
-        name = radiolist_dialog(
-            title="Select Module",
-            text="Choose a module to work with:",
-            values=[(n, n) for n in name_list],
-            ok_text="Select",
-            cancel_text="Back"
-        ).run()
+        name_options = [(n, n) for n in sorted(name_list)] + [('esc', 'Back (Esc)')]
+        name = full_screen_choice(
+            "Select Module:",
+            options=name_options,
+        )
 
-        if name is None:
-            return
+        if name == 'esc':
+            return False
 
         # Version selection
         versions = sorted(self.db[name].keys(), reverse=True)
-        if len(versions) == 1:
-            version = versions[0]
-        else:
-            version = radiolist_dialog(
-                title=f"Select Version for {name}",
-                text="Choose a version:",
-                values=[(v, v) for v in versions],
-                ok_text="Select",
-                cancel_text="Back"
-            ).run()
+        ver_options = [(v, v) for v in versions] + [('esc', 'Back (Esc)')]
+        version = full_screen_choice(
+                f"Select Version for {name}:",
+                options=ver_options,
+            )
 
-        if version is None:
-            return
+        if version == 'esc':
+            return False
 
         self.load_current_module(name, version)
+        return True
 
     def action_generate_key(self):
         """Generate a module key for the current module."""
         if not self.current_module_name:
-            print_header("Generate Module Key")
-            print("Error: No module selected.")
-            return
+            message_dialog(
+                title="Generate Module Key",
+                text="Error: No module selected."
+            ).run()
+            return False
 
-        output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
+        output_dir = self.config.get('defaultModKeyPath')
 
         # Ask for output directory
         custom_dir = input_dialog(
@@ -806,15 +726,17 @@ class SimpleModCLI:
     def action_generate_all_keys(self):
         """Generate module keys for all modules in the database."""
         if not self.db:
-            print_header("Generate All Module Keys")
-            print("Error: Database is empty.")
+            message_dialog(
+                title="Generate All Module Keys",
+                text="Error: Database is empty."
+            ).run()
             return
 
         if self.has_unsaved_changes():
             if not self.confirm_save_before_continue():
                 return
 
-        output_dir = self.config.get('defaultModKeyPath', MODULEKEY_DIR)
+        output_dir = self.config.get('defaultModKeyPath')
 
         custom_dir = input_dialog(
             title="Generate All Module Keys",
@@ -842,90 +764,86 @@ class SimpleModCLI:
                 else:
                     fail_count += 1
 
-        print_header("Generation Complete")
-        print(f"Successfully generated: {success_count} keys")
-        print(f"Failed: {fail_count} keys")
-        print(f"Output directory: {output_dir}")
+        message_dialog(
+            title="Generation Complete",
+            text=f"Successfully generated: {success_count} keys\nFailed: {fail_count} keys\nOutput directory: {output_dir}"
+        ).run()
+        return fail_count == 0
 
     def action_preferences(self):
         """Edit preferences."""
         config = self.config
 
         while True:
-            clear_screen()
-            print_header("Preferences")
-            print()
+            choice = full_screen_choice(
+                    "Preferences",
+                    options=[
+                        ('1', 'Default database path'),
+                        ('2', 'Default Singularity image directory'),
+                        ('3', 'Default module key output directory'),
+                        ('4', 'Default module key template'),
+                        ('5', 'Always bind these paths'),
+                        ('6', 'Always enable these flags'),
+                        ('esc', 'Back (Esc)'),
+                    ],
+                )
 
-            print("Current preferences:")
-            print(f"  [1] Default binding paths:   {config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')}")
-            print(f"  [2] Default flags:           {config.get('defaultFlags', '')}")
-            print(f"  [3] Default image directory: {config.get('defaultImagePath', '')}")
-            print(f"  [4] Default template:        {config.get('defaultTemplate', './template/template.tcl')}")
-            print(f"  [5] Default modkey path:     {config.get('defaultModKeyPath', MODULEKEY_DIR)}")
-            print()
-
-            choice = radiolist_dialog(
-                title="Preferences",
-                text="Select setting to change (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Default binding paths'),
-                    ('2', 'Default flags'),
-                    ('3', 'Default image directory'),
-                    ('4', 'Default template'),
-                    ('5', 'Default modkey path'),
-                    ('q', 'Quit / Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None or choice == 'q':
+            if choice == 'esc':
                 break
 
             if choice == '1':
                 value = input_dialog(
-                    title="Edit Default Binding Paths",
-                    text="Enter default paths to bind (comma-separated):",
-                    default=config.get('defaultBindingPath', '/work,/project,/usr/local/packages,/var/scratch')
+                    title="Edit Default Database Path",
+                    text="Enter default directory for database files:",
+                    default=config.get('defaultDatabasePath')
                 ).run()
                 if value is not None:
-                    config['defaultBindingPath'] = value.strip()
+                    config['defaultDatabasePath'] = value.strip()
 
             elif choice == '2':
                 value = input_dialog(
-                    title="Edit Default Flags",
-                    text="Enter default Singularity flags:",
-                    default=config.get('defaultFlags', '')
-                ).run()
-                if value is not None:
-                    config['defaultFlags'] = value.strip()
-
-            elif choice == '3':
-                value = input_dialog(
-                    title="Edit Default Image Directory",
+                    title="Edit Default Singularity Image Directory",
                     text="Enter default directory for Singularity images:",
-                    default=config.get('defaultImagePath', '')
+                    default=config.get('defaultImagePath')
                 ).run()
                 if value is not None:
                     config['defaultImagePath'] = value.strip()
 
+            elif choice == '3':
+                value = input_dialog(
+                    title="Edit Default Module Key Output Directory",
+                    text="Enter default directory for generated module keys:",
+                    default=config.get('defaultModKeyPath')
+                ).run()
+                if value is not None:
+                    config['defaultModKeyPath'] = value.strip()
+
             elif choice == '4':
                 value = input_dialog(
-                    title="Edit Default Template",
-                    text="Enter default template file path:",
-                    default=config.get('defaultTemplate', './template/template.tcl')
+                    title="Edit Default Module Key Template",
+                    text="Enter default module key template file path:",
+                    default=config.get('defaultTemplate')
                 ).run()
                 if value is not None:
                     config['defaultTemplate'] = value.strip()
 
             elif choice == '5':
                 value = input_dialog(
-                    title="Edit Default Module Key Path",
-                    text="Enter default directory for generated module keys:",
-                    default=config.get('defaultModKeyPath', MODULEKEY_DIR)
+                    title="Always Bind These Paths",
+                    text="Always bind these paths (comma-separated):",
+                    default=config.get('defaultBindingPath')
                 ).run()
                 if value is not None:
-                    config['defaultModKeyPath'] = value.strip()
+                    config['defaultBindingPath'] = value.strip()
+
+            elif choice == '6':
+                value = input_dialog(
+                    title="Always Enable These Flags",
+                    text="Always enable these Singularity flags:",
+                    default=config.get('defaultFlags')
+                ).run()
+                if value is not None:
+                    config['defaultFlags'] = value.strip()
 
         # Save preferences
         try:
@@ -933,53 +851,43 @@ class SimpleModCLI:
                 json.dump(config, f, indent=4)
             self.config = config
         except IOError as e:
-            print(f"Error saving preferences: {e}")
+            message_dialog(
+                title="Error",
+                text=f"Error saving preferences: {e}"
+            ).run()
+
+    def action_about(self):
+        """Display the About dialog."""
+        message_dialog(
+            title="About",
+            text=ABOUT
+        ).run()
 
     # =================== Main Menu ================== ##
 
-    def main_menu(self):
+    def menu_main(self):
         """Display the main menu."""
         while True:
-            clear_screen()
-            print_header("SIMPLE-MOD CLI Main Menu")
-            print()
-
-            if self.current_module_name:
-                print(f"Current: {self.current_module_name} {self.current_module_version}")
-            else:
-                print("No module selected")
-            print()
-
-            if self.has_unsaved_changes():
-                print("[!] Unsaved changes detected")
-            print()
-
-            choice = radiolist_dialog(
-                title="Main Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'File'),
-                    ('2', 'Module'),
-                    ('3', 'Generate'),
-                    ('4', 'Preferences'),
-                    ('5', 'Exit'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
-                continue
+            choice = full_screen_choice(
+                    "Main Menu",
+                    options=[
+                        ('1', 'File'),
+                        ('2', 'Module'),
+                        ('3', 'Preferences'),
+                        ('4', 'About'),
+                        ('esc', 'Exit (Esc)'),
+                    ],
+                )
 
             if choice == '1':
-                self.file_menu()
+                self.menu_file()
             elif choice == '2':
-                self.module_menu()
+                self.menu_module()
             elif choice == '3':
-                self.generate_menu()
-            elif choice == '4':
                 self.action_preferences()
-            elif choice == '5':
+            elif choice == '4':
+                self.action_about()
+            elif choice == 'esc':
                 if self.has_unsaved_changes():
                     if not self.confirm_save_before_continue():
                         continue
@@ -987,205 +895,107 @@ class SimpleModCLI:
                 else:
                     return True
 
-    def file_menu(self):
+    def menu_file(self):
         """Display the file menu."""
         while True:
-            clear_screen()
-            print_header("File Menu")
-            print()
-
-            choice = radiolist_dialog(
-                title="File Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'New Database'),
-                    ('2', 'Open Database'),
-                    ('3', 'Save Database'),
-                    ('4', 'Save Database As...'),
-                    ('5', 'Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
-                continue
+            choice = full_screen_choice(
+                    "File Menu",
+                    options=[
+                        ('1', 'New Database'),
+                        ('2', 'Open Database'),
+                        ('3', 'Save Database'),
+                        ('4', 'Save Database As...'),
+                        ('esc', 'Back (Esc)'),
+                    ],
+                )
 
             if choice == '1':
-                self.action_new_database()
+                if self.action_new_database():
+                    self.menu_module()
+                    break
             elif choice == '2':
-                self.action_open_database()
+                if self.action_open_database():
+                    self.menu_module()
+                    break
             elif choice == '3':
-                self.action_save_database()
+                if self.action_save_database():
+                    self.menu_module()
+                    break
             elif choice == '4':
-                custom_path = input_dialog(
-                    title="Save Database As",
-                    text="Enter path to save database (must end with .json):",
-                    default="database/new-database.json"
-                ).run()
-                if custom_path:
-                    if not custom_path.endswith('.json'):
-                        custom_path += '.json'
-                    self.current_db_path = custom_path
-                    self.action_save_database()
-            elif choice == '5':
+                if self.action_save_database(save_as=True):
+                    self.menu_module()
+                    break
+            elif choice == 'esc':
                 break
 
-    def module_menu(self):
-        """Display the module menu."""
+    def menu_module(self):
+        """Display the module database menu (first level)."""
         while True:
-            clear_screen()
-            print_header("Module Menu")
-            print()
-
-            if self.db:
-                print(f"Database contains {len(self.db)} module(s)")
-                print()
-
-            choice = radiolist_dialog(
-                title="Module Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Select Module'),
-                    ('2', 'Add New Module'),
-                    ('3', 'Copy Current Module'),
-                    ('4', 'Delete Current Module'),
-                    ('5', 'Edit Current Module'),
-                    ('6', 'Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
-                continue
+            current_db_display = self.current_db_path if self.current_db_path else "(None)"
+            choice = full_screen_choice(
+                    "Module Menu",
+                    options=[
+                        ('1', 'Select Module'),
+                        ('2', 'Add New Module'),
+                        ('3', 'Generate All Module Keys from Database'),
+                        ('esc', 'Back (Esc)'),
+                    ],
+                    body_text=f"Current database: {current_db_display}"
+                )
 
             if choice == '1':
-                self.action_select_module()
+                if self.action_select_module():
+                    self.menu_module_edit()
             elif choice == '2':
-                self.action_add_module()
+                if self.action_add_module():
+                    self.menu_module_edit()
             elif choice == '3':
-                self.action_copy_module()
-            elif choice == '4':
-                self.action_delete_module()
-            elif choice == '5':
-                self.action_edit_module()
-            elif choice == '6':
-                break
-
-    def generate_menu(self):
-        """Display the generate menu."""
-        while True:
-            clear_screen()
-            print_header("Generate Menu")
-            print()
-
-            if self.current_module_name:
-                print(f"Current module: {self.current_module_name} {self.current_module_version}")
-            else:
-                print("No module selected")
-            print()
-
-            choice = radiolist_dialog(
-                title="Generate Menu",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'Generate Current Module Key'),
-                    ('2', 'Generate All Module Keys'),
-                    ('3', 'Back'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
-                continue
-
-            if choice == '1':
-                self.action_generate_key()
-            elif choice == '2':
                 self.action_generate_all_keys()
-            elif choice == '3':
+            elif choice == 'esc':
                 break
+
+    def menu_module_edit(self):
+        """Display the module edit menu (second level, shown after selecting/adding a module)."""
+        if not self.current_module_name:
+            return False
+
+        while True:
+            module_display = f"{self.current_module_name} ({self.current_module_version})"
+            choice = full_screen_choice(
+                    "Module Edit Menu",
+                    options=[
+                        ('1', 'Edit Current Module'),
+                        ('2', 'Copy Current Module'),
+                        ('3', 'Delete Current Module'),
+                        ('4', 'Generate Current Module Key'),
+                        ('esc', 'Back (Esc)'),
+                    ],
+                    body_text=f"Current module: {module_display}"
+                )
+
+            if choice == '1':
+                self.action_edit_module()
+            elif choice == '2':
+                self.action_copy_module()
+            elif choice == '3':
+                self.action_delete_module()
+                # After deletion, return to module database menu
+                return False
+            elif choice == '4':
+                self.action_generate_key()
+            elif choice == 'esc':
+                return False
+        return True
 
     def run(self):
-        """Run the CLI application."""
-        print_header("Welcome to SIMPLE-MOD CLI")
-        print()
-        print("Loading configuration...")
-        print()
-
-        # Check for prompt_toolkit
+        """Run the CLI application. Requires prompt_toolkit (CLI_ENABLED)."""
         if not CLI_ENABLED:
-            print("ERROR: prompt_toolkit is not installed!")
-            print("Please install it with: pip install prompt_toolkit")
-            print()
-            print("To use basic input mode, run:")
-            print("  python simple-mod-cli.py")
-            print()
             return
-
         # Main menu loop
         while True:
-            exit_app = self.main_menu()
+            exit_app = self.menu_main()
             if exit_app:
                 break
-
-        print_header("Goodbye!")
-
-    def run_basic_mode(self):
-        """Run the CLI in basic input mode (without prompt_toolkit)."""
-        print_header("SIMPLE-MOD CLI - Basic Mode")
-        print()
-        print("Note: This is basic input mode without interactive selection.")
-        print()
-
-        while True:
-            clear_screen()
-            print_header("SIMPLE-MOD CLI - Basic Mode")
-            print()
-
-            choice = radiolist_dialog(
-                title="SIMPLE-MOD CLI - Basic Mode",
-                text="Select an option (use arrow keys, Enter to select, Esc to cancel):",
-                values=[
-                    ('1', 'New Database'),
-                    ('2', 'Open Database'),
-                    ('3', 'Save Database'),
-                    ('4', 'Add Module'),
-                    ('5', 'Edit Module'),
-                    ('6', 'Generate Key'),
-                    ('7', 'Generate All Keys'),
-                    ('8', 'Exit'),
-                ],
-                ok_text="Select",
-                cancel_text="Cancel"
-            ).run()
-
-            if choice is None:
-                continue
-
-            if choice == '1':
-                self.action_new_database()
-            elif choice == '2':
-                self.action_open_database()
-            elif choice == '3':
-                self.action_save_database()
-            elif choice == '4':
-                self.action_add_module()
-            elif choice == '5' and self.current_module_name:
-                self.action_edit_module()
-            elif choice == '6' and self.current_module_name:
-                self.action_generate_key()
-            elif choice == '7':
-                self.action_generate_all_keys()
-            elif choice == '8':
-                if self.has_unsaved_changes():
-                    if not self.confirm_save_before_continue():
-                        continue
-                    break
-                else:
-                    break
 
 
 # =================== Command Line Interface ================== ##
@@ -1206,7 +1016,7 @@ def run_command_mode(cli, args):
         # Get module
         if args.name in cli.db and args.version in cli.db[args.name]:
             module = cli.db[args.name][args.version]
-            output = args.output or cli.config.get('defaultModKeyPath', MODULEKEY_DIR)
+            output = args.output or cli.config.get('defaultModKeyPath')
 
             if cli.generate_module_key(module, args.name, args.version, output):
                 print(f"Generated: {os.path.join(output, args.name, args.version)}")
@@ -1224,7 +1034,7 @@ def run_command_mode(cli, args):
             cli.db = load_database(db_path)
             cli.db_original = copy.deepcopy(cli.db)
 
-        output = args.output or cli.config.get('defaultModKeyPath', MODULEKEY_DIR)
+        output = args.output or cli.config.get('defaultModKeyPath')
 
         success = 0
         fail = 0
@@ -1244,7 +1054,7 @@ def run_command_mode(cli, args):
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="SIMPLE-MOD CLI - Singularity Module Key Generator"
+        description=f"{TITLE} (Singularity Integrated Module-key Producer for Loadable Environment MODules)"
     )
     parser.add_argument(
         '-d', '--database',
@@ -1267,6 +1077,11 @@ def main():
         '--version',
         help='Module version for command mode'
     )
+    parser.add_argument(
+        '--nodisplay',
+        action='store_true',
+        help='Force to run in terminal instead of GUI.'
+    )
 
     args = parser.parse_args()
 
@@ -1281,9 +1096,7 @@ def main():
         if not CLI_ENABLED:
             print("ERROR: prompt_toolkit is not installed!")
             print("Please install it with: pip install prompt_toolkit")
-            print()
-            print("To use basic input mode without prompt_toolkit:")
-            print("  python -c \"import simple_mod_cli; cli = simple_mod_cli.SimpleModCLI(); cli.run_basic_mode()\"")
+            print("The application requires prompt_toolkit and cannot run without it.")
             sys.exit(1)
 
         try:
