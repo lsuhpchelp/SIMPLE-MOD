@@ -67,7 +67,7 @@ conda install pyqt -c conda-forge
 
 ### 2.2 Running in a Singularity image
 
-If for any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a SIMPLE-MOD container image and run it with Singularity/Apptainer. The recipe is provided in `singularity.def`. To build it with Singularity/Appatainer, please run the below command in terminal:
+If for any reason you cannot run it with Python on your system (e.g., lack of dependencies and you do not have the permission to install), you may also build a SIMPLE-MOD container image and run it with Singularity/Apptainer. The recipe is provided in `singularity.def`. To build it with Singularity/Apptainer, please run the below command in terminal:
 
 ```
 singularity build simple-mod.sif recipe.def
