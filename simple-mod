@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# SIMPLE-MOD Launcher
+# If arguments are passed, force run simple-mod-cli.py
+# If no arguments, try simple-mod.py first, fall back to simple-mod-cli.py
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ $# -gt 0 ]; then
+    # Arguments passed - force CLI mode
+    # Check and install prompt_toolkit if needed
+    if ! python3 -c "import prompt_toolkit" 2>/dev/null; then
+        echo "Installing prompt_toolkit..."
+        pip3 install prompt_toolkit
+    fi
+    python3 "$SCRIPT_DIR/simple-mod-cli.py" "$@"
+else
+    # No arguments - try GUI first, then CLI
+    if python3 "$SCRIPT_DIR/simple-mod.py" 2>/dev/null; then
+        exit $?
+    else
+        # GUI failed, fall back to CLI
+        # Check and install prompt_toolkit if needed
+        if ! python3 -c "import prompt_toolkit" 2>/dev/null; then
+            echo "Installing prompt_toolkit..."
+            pip3 install prompt_toolkit
+        fi
+        python3 "$SCRIPT_DIR/simple-mod-cli.py"
+    fi
+fi
