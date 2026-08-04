@@ -129,28 +129,6 @@
             "template": "./template/template.tcl"
         }
     },
-    "snakemake": {
-        "7.32.4": {
-            "conflict": "",
-            "module_whatis": "The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.",
-            "singularity_image": "/project/containers/images/snakemake-7.32.4.sif",
-            "singularity_bindpaths": "",
-            "singularity_flags": "",
-            "cmds": "snakemake",
-            "envs": {},
-            "template": "./template/template.tcl"
-        },
-        "8.1.0": {
-            "conflict": "",
-            "module_whatis": "The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.",
-            "singularity_image": "/project/containers/images/snakemake-8.1.0.sif",
-            "singularity_bindpaths": "",
-            "singularity_flags": "",
-            "cmds": "snakemake",
-            "envs": {},
-            "template": "./template/template.tcl"
-        }
-    },
     "hisat2": {
         "2.2.1": {
             "conflict": "",
@@ -286,20 +264,6 @@
             "singularity_flags": "",
             "cmds": "braker.pl braker_cleanup.pl\ncompute_accuracies.sh downsample_traingenes.pl ensure_n_training_genes.py filterGenemark.pl filterIntronsFindStrand.pl filter_augustus_gff.pl findGenesInIntrons.pl gatech_pmp2hints.pl get_etp_hints.py get_gc_content.py log_reg_prothints.pl sortGeneMark.py stringtie2utr.py ",
             "envs": {},
-            "template": "./template/template.tcl"
-        }
-    },
-    "nextflow": {
-        "23.10.1": {
-            "conflict": "",
-            "module_whatis": "A DSL for data-driven computational pipelines.",
-            "singularity_image": "/project/containers/images/nextflow-23.10.1.sif",
-            "singularity_bindpaths": "",
-            "singularity_flags": "",
-            "cmds": "nextflow",
-            "envs": {
-                "NXF_HOME": "/work/$env(USER)/.nextflow"
-            },
             "template": "./template/template.tcl"
         }
     },
@@ -446,6 +410,20 @@
             "singularity_flags": "",
             "cmds": "fastp",
             "envs": {},
+            "template": "./template/template.tcl"
+        }
+    },
+    "alphafold": {
+        "3.0.4": {
+            "conflict": "",
+            "module_whatis": "AlphaFold 3 inference pipeline.",
+            "singularity_image": "/work/jasonli3/containers/alphafold3-3.0.4.sif",
+            "singularity_bindpaths": "\\$AF_DB_DIR/mgy_clusters_2022_05.fa:/opt/afdata/mgy_clusters_2022_05.fa,\\$AF_DB_DIR/bfd-first_non_consensus_sequences.fasta:/opt/afdata/bfd-first_non_consensus_sequences.fasta,\\$AF_DB_DIR/uniref90_2022_05.fa:/opt/afdata/uniref90_2022_05.fa,\\$AF_DB_DIR/uniprot_all_2021_04.fa:/opt/afdata/uniprot_all_2021_04.fa,\\$AF_DB_DIR/pdb_seqres_2022_09_28.fasta:/opt/afdata/pdb_seqres_2022_09_28.fasta,\\$AF_DB_DIR/rnacentral_active_seq_id_90_cov_80_linclust.fasta:/opt/afdata/rnacentral_active_seq_id_90_cov_80_linclust.fasta,\\$AF_DB_DIR/nt_rna_2023_02_23_clust_seq_id_90_cov_80_rep_seq.fasta:/opt/afdata/nt_rna_2023_02_23_clust_seq_id_90_cov_80_rep_seq.fasta,\\$AF_DB_DIR/rfam_14_9_clust_seq_id_90_cov_80_rep_seq.fasta:/opt/afdata/rfam_14_9_clust_seq_id_90_cov_80_rep_seq.fasta",
+            "singularity_flags": "--nv",
+            "cmds": "run_alphafold.sh",
+            "envs": {
+                "AF_DB_DIR": "/project/containers/images/.afdata/"
+            },
             "template": "./template/template.tcl"
         }
     }

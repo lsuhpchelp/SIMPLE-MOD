@@ -25,24 +25,25 @@ set WRAPPER_PATH /home/$env(USER)/.local/bin/modules
 # ---------------------------------------------------------------------
 
 # Module information
-module-whatis Name: snakemake
-module-whatis Version: 8.1.0
-module-whatis Description: The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.
+module-whatis Name: alphafold
+module-whatis Version: 3.0.4
+module-whatis Description: AlphaFold 3 inference pipeline.
 
 # Singularity options
-set SINGULARITY_IMAGE "/project/containers/images/snakemake-8.1.0.sif"
-set SINGULARITY_BINDPATHS "/work,/project,/usr/local/packages,/var/scratch,"
-set SINGULARITY_FLAGS " "
+set SINGULARITY_IMAGE "/work/jasonli3/containers/alphafold3-3.0.4.sif"
+set SINGULARITY_BINDPATHS "/work,/project,/scratch,/usr/local/packages,/var/scratch,\$AF_DB_DIR/mgy_clusters_2022_05.fa:/opt/afdata/mgy_clusters_2022_05.fa,\$AF_DB_DIR/bfd-first_non_consensus_sequences.fasta:/opt/afdata/bfd-first_non_consensus_sequences.fasta,\$AF_DB_DIR/uniref90_2022_05.fa:/opt/afdata/uniref90_2022_05.fa,\$AF_DB_DIR/uniprot_all_2021_04.fa:/opt/afdata/uniprot_all_2021_04.fa,\$AF_DB_DIR/pdb_seqres_2022_09_28.fasta:/opt/afdata/pdb_seqres_2022_09_28.fasta,\$AF_DB_DIR/rnacentral_active_seq_id_90_cov_80_linclust.fasta:/opt/afdata/rnacentral_active_seq_id_90_cov_80_linclust.fasta,\$AF_DB_DIR/nt_rna_2023_02_23_clust_seq_id_90_cov_80_rep_seq.fasta:/opt/afdata/nt_rna_2023_02_23_clust_seq_id_90_cov_80_rep_seq.fasta,\$AF_DB_DIR/rfam_14_9_clust_seq_id_90_cov_80_rep_seq.fasta:/opt/afdata/rfam_14_9_clust_seq_id_90_cov_80_rep_seq.fasta"
+set SINGULARITY_FLAGS "--nv"
 
 # Conflicts
-conflict snakemake 
+conflict alphafold 
 
 # List of commands to overwrite
 set CMDS {
-snakemake
+run_alphafold.sh
 }
 
 # Set environment varialbles
+setenv AF_DB_DIR "/project/containers/images/.afdata/"
 
 
 # ---------------------------------------------------------------------
@@ -53,8 +54,8 @@ snakemake
 set SINGULARITY_EXEC "singularity exec -B $SINGULARITY_BINDPATHS $SINGULARITY_FLAGS --pwd \$PWD $SINGULARITY_IMAGE"
 
 # Set wrapper directory
-file mkdir $WRAPPER_PATH/snakemake/8.1.0
-prepend-path PATH $WRAPPER_PATH/snakemake/8.1.0
+file mkdir $WRAPPER_PATH/alphafold/3.0.4
+prepend-path PATH $WRAPPER_PATH/alphafold/3.0.4
 
 # Create wrappers when the module is loaded
 if { [ module-info mode load ] } {
@@ -64,9 +65,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/snakemake/8.1.0/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/snakemake/8.1.0/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/snakemake/8.1.0/$cmd;"
+            puts "echo '#\\!/bin/bash' > $WRAPPER_PATH/alphafold/3.0.4/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/alphafold/3.0.4/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/alphafold/3.0.4/$cmd;"
         }
         
         # Refresh cache (only for csh type shell)
@@ -77,9 +78,9 @@ if { [ module-info mode load ] } {
     
         # Create wrappers for each command
         foreach cmd $CMDS {
-            puts "echo '#!/bin/bash' > $WRAPPER_PATH/snakemake/8.1.0/$cmd;"
-            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/snakemake/8.1.0/$cmd;"
-            puts "chmod u+x $WRAPPER_PATH/snakemake/8.1.0/$cmd;"
+            puts "echo '#!/bin/bash' > $WRAPPER_PATH/alphafold/3.0.4/$cmd;"
+            puts "echo '$SINGULARITY_EXEC $cmd \"$@\"' >> $WRAPPER_PATH/alphafold/3.0.4/$cmd;"
+            puts "chmod u+x $WRAPPER_PATH/alphafold/3.0.4/$cmd;"
         }
         
     }

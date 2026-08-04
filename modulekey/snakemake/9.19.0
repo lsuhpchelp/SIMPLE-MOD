@@ -1,0 +1,18 @@
+#%Module
+# =====================================================================
+# Author: Jason Li (jasonli3@lsu.edu)
+# =====================================================================
+
+
+module-whatis {The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.}
+
+proc ModulesHelp { } {
+    puts stderr {Name   : Snakemake}
+    puts stderr {Version: 9.19.0}
+    puts stderr {The Snakemake workflow management system is a tool to create reproducible and scalable data analyses.}
+}
+
+conflict conda python
+
+prepend-path PATH {/project/containers/software/snakemake/9.19.0/bin}
+unsetenv conda

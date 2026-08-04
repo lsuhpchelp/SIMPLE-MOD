@@ -1,0 +1,24 @@
+#%Module
+# =====================================================================
+# Author: Jason Li (jasonli3@lsu.edu)
+# =====================================================================
+
+
+module-whatis {A DSL for data-driven computational pipelines.}
+
+proc ModulesHelp { } {
+    puts stderr {Name   : Nextflow}
+    puts stderr {Version: 25.10.4}
+    puts stderr {A DSL for data-driven computational pipelines.}
+}
+
+if {![info exists ::env(LMOD_VERSION_MAJOR)]} {
+    module load openjdk
+} else {
+    depends-on openjdk
+}
+
+conflict nextflow
+
+prepend-path PATH {/project/containers/software/nextflow/25.10.4/bin}
+setenv NXF_HOME "/work/$env(USER)/.nextflow"
