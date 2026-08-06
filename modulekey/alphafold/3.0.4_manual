@@ -97,8 +97,18 @@ proc ModulesHelp {} {
 
 1. This module only works on computing nodes (not available on head nodes). Make sure you start a job!
 
-2. Below executables are available:
-$CMDS"
+2. By continue using AlphaFold 3, you agree that you have read and will comply with AlphaFold 3 Model Parameters Terms of Use (https://github.com/google-deepmind/alphafold3/blob/main/WEIGHTS_TERMS_OF_USE.md).
+
+3. Please do not use the Python script offered on the official website https://github.com/google-deepmind/alphafold3. Instead, please use wrapper command 'run_alphafold.sh':
+
+    run_alphafold.sh \[options\]
+
+For example:
+
+    run_alphafold.sh --json_path=/path/to/input.json --output_dir=/path/to/output/folder
+
+4. You do not need to pass '--model_dir' and '--db_dir', as model weight and database are already configured.
+"
 }
 if { [ module-info mode load ] } {
     ModulesHelp
