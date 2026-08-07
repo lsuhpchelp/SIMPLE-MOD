@@ -109,7 +109,7 @@ For example:
 
 4. You do not need to pass '--model_dir' and '--db_dir', as model weight and database are already configured.
 
-5. AlphaFold 3 module has been tested with CPUs and A100 GPUs. Older GPUs like V100 and V100S may not work properly.
+5. AlphaFold 3 module has only been tested on A100 GPUs. Older GPUs and CPU-only mode do not work properly.
 "
 }
 if { [ module-info mode load ] } {
