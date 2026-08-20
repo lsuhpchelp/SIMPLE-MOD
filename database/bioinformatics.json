@@ -337,6 +337,16 @@
             "cmds": "rb rb-mpi",
             "envs": {},
             "template": "./template/template.tcl"
+        },
+        "1.4.1": {
+            "conflict": "",
+            "module_whatis": "Bayesian Phylogenetic Inference Using Graphical Models and an Interactive Model-Specification Language.",
+            "singularity_image": "/project/containers/images/revbayes-1.4.1.sif",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "rb rb-mpi",
+            "envs": {},
+            "template": "./template/template.tcl"
         }
     },
     "trinotate": {

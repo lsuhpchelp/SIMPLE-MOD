@@ -49,7 +49,7 @@ def load_preferences():
         "defaultImagePath": "",
         "defaultModKeyPath": "./modulekey",
         "defaultTemplate": "./template/template.tcl",
-        "defaultBindingPath": "/work,/project,/usr/local/packages,/var/scratch",
+        "defaultBindingPath": "/work,/project,/scratch,/usr/local/packages,/var/scratch",
         "defaultFlags": "",
     }
 
