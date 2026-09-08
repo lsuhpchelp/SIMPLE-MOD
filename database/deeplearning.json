@@ -128,10 +128,10 @@
         }
     },
     "ollama": {
-        "0.9.5": {
+        "0.22.0": {
             "conflict": "",
             "module_whatis": "",
-            "singularity_image": "/project/containers/images/ollamaondemand-1.0.0.sif",
+            "singularity_image": "/project/containers/images/ollama-0.22.0.sif",
             "singularity_bindpaths": "",
             "singularity_flags": "--nv --env OLLAMA_HOST=\\$OLLAMA_HOST",
             "cmds": "ollama",
