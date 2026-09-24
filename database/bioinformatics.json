@@ -436,5 +436,17 @@
             },
             "template": "./template/template.tcl"
         }
+    },
+    "sratools": {
+        "3.4.1": {
+            "conflict": "",
+            "module_whatis": "The SRA Toolkit and SDK from NCBI is a collection of tools and libraries for using data in the INSDC Sequence Read Archives.",
+            "singularity_image": "docker://ncbi/sra-tools:3.4.1",
+            "singularity_bindpaths": "",
+            "singularity_flags": "",
+            "cmds": "abi-dump\nabi-load\nalign-info\nbam-load\ncg-load\nfasterq-dump\nfastq-dump\nfastq-load\nhelicos-load\nillumina-dump\nillumina-load\nkar\nkdbmeta\nlatf-load\npacbio-load\nprefetch\nrcexplain\nsam-dump\nsff-dump\nsff-load\nsra-pileup\nsra-search\nsra-sort\nsra-sort-cg\nsra-stat\nsrapath\nsratools\nsrf-load\ntest-sra\nvdb-config\nvdb-copy\nvdb-decrypt\nvdb-dump\nvdb-encrypt\nvdb-lock\nvdb-unlock\nvdb-validate",
+            "envs": {},
+            "template": "./template/template.tcl"
+        }
     }
 }
